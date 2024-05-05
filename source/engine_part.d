@@ -10,27 +10,34 @@ import std.conv;
 
 import script;
 import dialog_system;
-
+import navigator;
 int ver = 1;
 
+
+import std.typecons : Nullable;
 
 struct Cube {
     string name;
     string text;
     int emotion;
+    BoundingBox boundingBox;
+}
+
+Cube[] cubes; // Массив для хранения кубов
+
+// Функция для добавления кубов в массив
+void addCube(Vector3 position, string name, string text, int emotion) {
+    Cube cube;
+    cube.name = name;
+    cube.text = text;
+    cube.emotion = emotion;
+    cube.boundingBox = BoundingBox(position, Vector3Add(position, Vector3(2.0f, 2.0f, 2.0f)));
+    cubes ~= cube; // Добавляем куб в массив
 }
 
 void engine_loader(string window_name, int screenWidth, int screenHeight)
 {
-    auto cube_one = new Cube;
     string name;
-    cube_one.name = "tatsuya";
-    cube_one.text = "Hi there! its debug";
-    cube_one.emotion = 1;
-    auto cube_sec = new Cube;
-    cube_sec.name = "maya";
-    cube_sec.text = "Hi there! its debug sec";
-    cube_sec.emotion = 1;
     char rgt = parse_conf("conf/layout.conf", "right");
     char lft = parse_conf("conf/layout.conf", "left");
     char bkd = parse_conf("conf/layout.conf", "backward");
@@ -62,8 +69,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
     float rotationStep = 45.0f;
     SetTargetFPS(60);
     BoundingBox cubeBoundingBox = {cubePosition, Vector3Add(cubePosition, Vector3(2.0f, 2.0f, 2.0f))};
-    BoundingBox secondCubeBoundingBox = {secondCubePosition, Vector3Add(secondCubePosition, Vector3(2.0f, 2.0f, 2.0f))};
-    BoundingBox thirdCubeBoundingBox = {secondCubePosition, Vector3Add(thirdCubePosition, Vector3(2.0f, 2.0f, 2.0f))};
+    addCube(thirdCubePosition, "tatsuya", "Hi there! its debug", 1);
+    addCube(secondCubePosition, "maya", "Hi there! its debug sec", 1);
     // Main game loop(moving,script)
     while (!WindowShouldClose())
     {
@@ -109,40 +116,25 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
         ClearBackground(Colors.RAYWHITE);
         cubeBoundingBox.min = cubePosition;
         cubeBoundingBox.max = Vector3Add(cubePosition, Vector3(2.0f, 2.0f, 2.0f));
-        secondCubeBoundingBox.min = secondCubePosition;
-        secondCubeBoundingBox.max = Vector3Add(secondCubePosition, Vector3(2.0f, 2.0f, 2.0f));
-        thirdCubeBoundingBox.min = thirdCubePosition;
-        thirdCubeBoundingBox.max = Vector3Add(thirdCubePosition, Vector3(2.0f, 2.0f, 2.0f));
-        if (CheckCollisionBoxes(cubeBoundingBox, secondCubeBoundingBox)) {
-            if (showDialog == false) {
-                DrawText(cast(char*)("Press "~dlg~" for dialog"), 0, 0, 20, Colors.BLACK);
-            }
-            if (IsKeyPressed(dlg)) {
-                if (showDialog) {
-                    // Hide dialog if it is currently shown
-                    showDialog = false;
-                    allowControl = true;
-                } else {
-                    // Show dialog if it is currently hidden
-                    allowControl = false;
-                    name = cube_one.name; // Assuming cube_sec.name is defined elsewhere
-                    showDialog = true;
-                }
+        Nullable!Cube collidedCube;
+        foreach (cube; cubes) {
+            if (CheckCollisionBoxes(cubeBoundingBox, cube.boundingBox)) {
+                collidedCube = cube;
+                break;
             }
         }
-        if (CheckCollisionBoxes(cubeBoundingBox,  thirdCubeBoundingBox)) {
+
+        if (!collidedCube.isNull) {
             if (showDialog == false) {
                 DrawText(cast(char*)("Press "~dlg~" for dialog"), 0, 0, 20, Colors.BLACK);
             }
             if (IsKeyPressed(dlg)) {
                 if (showDialog) {
-                    // Hide dialog if it is currently shown
                     showDialog = false;
                     allowControl = true;
                 } else {
-                    // Show dialog if it is currently hidden
                     allowControl = false;
-                    name = cube_sec.name; // Assuming cube_sec.name is defined elsewhere
+                    name = collidedCube.get.name;
                     showDialog = true;
                 }
             }
@@ -154,10 +146,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
         DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, Colors.MAROON);
         DrawGrid(40, 1.0f);
         EndMode3D();
-        if (showDialog && name == cube_one.name) {
-            display_dialog(cube_one.name, cube_one.emotion, cube_one.text);
-        } else if (showDialog && name == cube_sec.name) {
-            display_dialog(cube_sec.name, cube_sec.emotion, cube_sec.text);
+        draw_navigation(cameraAngle);
+        if (showDialog && !collidedCube.isNull) {
+            display_dialog(collidedCube.get.name, collidedCube.get.emotion, collidedCube.get.text);
         }
         EndDrawing();
     }
