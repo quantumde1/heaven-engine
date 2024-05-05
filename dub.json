@@ -1,0 +1,16 @@
+{
+	"authors": [
+		"quantumde1"
+	],
+	"copyright": "Copyright © 2024, quantumde1",
+	"dependencies": {
+		"raylib-d": "~>5.0.1"
+	},
+	"description": "Engine with Raylib in D, for Sky game",
+	"license": "MIT",
+	"name": "heaven-engine",
+	"libs": [ "raylib" ],
+	"lflags-posix" : ["-L/usr/lib"],
+	"lflags-osx" : ["-rpath", "./"],
+	"lflags-linux" : ["-rpath=/usr/lib"]
+}
