@@ -26,4 +26,5 @@ void display_dialog(string character, int emotion, string text) {
     int charPaddingY = charRectHeight / 2;
     DrawText(cast(char*)character, rectX + charRectWidth / 8, rectY - charRectHeight / 6, 20, Colors.WHITE);
     DrawText(cast(char*)text, rectX+charPaddingX, rectY+charPaddingY, 30, Colors.WHITE);
+    
 }

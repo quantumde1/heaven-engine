@@ -14,8 +14,23 @@ import dialog_system;
 int ver = 1;
 
 
+struct Cube {
+    string name;
+    string text;
+    int emotion;
+}
+
 void engine_loader(string window_name, int screenWidth, int screenHeight)
 {
+    auto cube_one = new Cube;
+    string name;
+    cube_one.name = "tatsuya";
+    cube_one.text = "Hi there! its debug";
+    cube_one.emotion = 1;
+    auto cube_sec = new Cube;
+    cube_sec.name = "maya";
+    cube_sec.text = "Hi there! its debug sec";
+    cube_sec.emotion = 1;
     char rgt = parse_conf("conf/layout.conf", "right");
     char lft = parse_conf("conf/layout.conf", "left");
     char bkd = parse_conf("conf/layout.conf", "backward");
@@ -41,12 +56,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
     bool allowControl = true;
     Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
     Vector3 secondCubePosition = { 4.0f, 0.0f, 2.0f };
+    Vector3 thirdCubePosition = { 3.0f, 0.0f, 5.0f };
     float radius = Vector3Distance(camera.position, camera.target);
     float cameraAngle = 90.0f;
     float rotationStep = 45.0f;
     SetTargetFPS(60);
     BoundingBox cubeBoundingBox = {cubePosition, Vector3Add(cubePosition, Vector3(2.0f, 2.0f, 2.0f))};
     BoundingBox secondCubeBoundingBox = {secondCubePosition, Vector3Add(secondCubePosition, Vector3(2.0f, 2.0f, 2.0f))};
+    BoundingBox thirdCubeBoundingBox = {secondCubePosition, Vector3Add(thirdCubePosition, Vector3(2.0f, 2.0f, 2.0f))};
     // Main game loop(moving,script)
     while (!WindowShouldClose())
     {
@@ -94,28 +111,53 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
         cubeBoundingBox.max = Vector3Add(cubePosition, Vector3(2.0f, 2.0f, 2.0f));
         secondCubeBoundingBox.min = secondCubePosition;
         secondCubeBoundingBox.max = Vector3Add(secondCubePosition, Vector3(2.0f, 2.0f, 2.0f));
-
+        thirdCubeBoundingBox.min = thirdCubePosition;
+        thirdCubeBoundingBox.max = Vector3Add(thirdCubePosition, Vector3(2.0f, 2.0f, 2.0f));
         if (CheckCollisionBoxes(cubeBoundingBox, secondCubeBoundingBox)) {
             if (showDialog == false) {
                 DrawText(cast(char*)("Press "~dlg~" for dialog"), 0, 0, 20, Colors.BLACK);
             }
             if (IsKeyPressed(dlg)) {
-                allowControl = false;
-                showDialog = true;
+                if (showDialog) {
+                    // Hide dialog if it is currently shown
+                    showDialog = false;
+                    allowControl = true;
+                } else {
+                    // Show dialog if it is currently hidden
+                    allowControl = false;
+                    name = cube_one.name; // Assuming cube_sec.name is defined elsewhere
+                    showDialog = true;
+                }
             }
-            if (IsKeyPressed(KeyboardKey.KEY_T)) {
-                showDialog = false;
-                allowControl = true;
+        }
+        if (CheckCollisionBoxes(cubeBoundingBox,  thirdCubeBoundingBox)) {
+            if (showDialog == false) {
+                DrawText(cast(char*)("Press "~dlg~" for dialog"), 0, 0, 20, Colors.BLACK);
+            }
+            if (IsKeyPressed(dlg)) {
+                if (showDialog) {
+                    // Hide dialog if it is currently shown
+                    showDialog = false;
+                    allowControl = true;
+                } else {
+                    // Show dialog if it is currently hidden
+                    allowControl = false;
+                    name = cube_sec.name; // Assuming cube_sec.name is defined elsewhere
+                    showDialog = true;
+                }
             }
         }
         BeginMode3D(camera);   
         DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, Colors.RED);
         DrawCube(secondCubePosition, 2.0f, 2.0f, 2.0f, Colors.BLUE);
+        DrawCube(thirdCubePosition, 2.0f, 2.0f, 2.0f, Colors.ORANGE);
         DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, Colors.MAROON);
         DrawGrid(40, 1.0f);
         EndMode3D();
-        if (showDialog) {
-            display_dialog("Tatsuya", 1, "debug purpose");
+        if (showDialog && name == cube_one.name) {
+            display_dialog(cube_one.name, cube_one.emotion, cube_one.text);
+        } else if (showDialog && name == cube_sec.name) {
+            display_dialog(cube_sec.name, cube_sec.emotion, cube_sec.text);
         }
         EndDrawing();
     }
