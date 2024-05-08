@@ -2,7 +2,7 @@ import raylib;
 
 import std.stdio;
 //local imports
-import engine_part;
+import graphics.main_cycle;
 
 void main() {
 	int screenWidth = GetScreenWidth();

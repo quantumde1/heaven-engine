@@ -1,1 +1,31 @@
-{"libs" : ["raylib"], "lflags-posix" : ["-L/usr/lib", "-L."], "lflags-osx" : ["-rpath", "./", "-rpath", "@executable_path/"], "lflags-linux" : ["-rpath=/usr/lib", "-rpath=$$ORIGIN"], "description" : "Engine with Raylib in D, for Sky game", "name" : "heaven-engine", "dependencies" : {"raylib-d" : "~>5.0.1"}, "authors" : ["quantumde1"], "copyright" : "Copyright © 2024, quantumde1", "license" : "MIT"}
+{
+	"authors": [
+		"quantumde1"
+	],
+	"copyright": "Copyright © 2024, quantumde1",
+	"dependencies": {
+		"bindbc-lua": "~>0.6.1",
+		"raylib-d": "~>5.0.1"
+	},
+	"versions": ["LUA_52"],
+	"description": "Engine with Raylib in D, for Sky game",
+	"lflags-linux": [
+		"-rpath=/usr/lib",
+		"-rpath=$$ORIGIN"
+	],
+	"lflags-osx": [
+		"-rpath",
+		"./",
+		"-rpath",
+		"@executable_path/"
+	],
+	"lflags-posix": [
+		"-L/usr/lib",
+		"-L."
+	],
+	"libs": [
+		"raylib"
+	],
+	"license": "MIT",
+	"name": "heaven-engine"
+}
