@@ -18,6 +18,10 @@ int ver = 1;
 import scripts.lua_engine;
 import graphics.cubes;
 
+bool allowControl = true;
+bool showDialog = false;
+bool allow_exit_dialog = true;
+
 void engine_loader(string window_name, int screenWidth, int screenHeight)
 {
         //setting layout
@@ -41,8 +45,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
     camera.up = Vector3(0.0f, 1.0f, 0.0f); 
     camera.fovy = 45.0f;                                
     camera.projection = CameraProjection.CAMERA_PERSPECTIVE;             
-    bool showDialog = false;
-    bool allowControl = true;
     Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
     float radius = Vector3Distance(camera.position, camera.target);
     float cameraAngle = 90.0f;
@@ -51,14 +53,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
     BoundingBox cubeBoundingBox = {cubePosition, Vector3Add(cubePosition, Vector3(2.0f, 2.0f, 2.0f))};
     // Main game loop(moving,script)
     LuaSupport ret = loadLua();
-    lua_State* L = luaL_newstate();
-    luaL_openlibs(L);
-    luaL_opendrawinglib(L);
-    luaL_openaudiolib(L);
-    if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
-        writeln("Lua error: ", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    lua_loader();
     while (!WindowShouldClose())
     {
         UpdateMusicStream(music);
@@ -112,16 +107,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
             }
         }
         if (!collidedCube.isNull) {
-            if (showDialog == false) {
+            if (showDialog == false && allow_exit_dialog == true) {
                 int fontSize = 20;
                 int posY = GetScreenHeight() - fontSize - 40;
                 DrawText(cast(char*)("Press "~dlg~" for dialog"), 40, posY, fontSize, Colors.BLACK);
             }
             if (IsKeyPressed(dlg)) {
-                if (showDialog) {
-                    showDialog = false;
-                    allowControl = true;
-                } else {
+                if (allow_exit_dialog == true) {
+                    allow_exit_dialog = false;
                     allowControl = false;
                     name = collidedCube.get.name;
                     showDialog = true;
@@ -133,13 +126,15 @@ void engine_loader(string window_name, int screenWidth, int screenHeight)
             DrawCube(cube.boundingBox.min, 2.0f, 2.0f, 2.0f, Colors.ORANGE);
             DrawCubeWires(cube.boundingBox.min, 2.0f, 2.0f, 2.0f, Colors.ORANGE);
         }
-        DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, Colors.RED);
-        DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, Colors.MAROON);
+        DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, Colors.GREEN);
+        DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, Colors.GREEN);
         DrawGrid(40, 1.0f);
         EndMode3D();
         draw_navigation(cameraAngle);
         if (showDialog && !collidedCube.isNull) {
+            int posY = GetScreenHeight() - 20 - 40;
             display_dialog(collidedCube.get.name, collidedCube.get.emotion, collidedCube.get.text);
+            DrawText(cast(char*)("Press enter for continue"), 40, posY, 20, Colors.BLACK);
         }
         EndDrawing();
     }

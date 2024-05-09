@@ -3,9 +3,35 @@ module dialogs.dialog_system;
 import raylib;
 
 import std.conv;
+import graphics.main_cycle;
+import std.range;
 
-void display_dialog(string character, int emotion, string text) {
-    int currentPage = 0; // Начинаем с первой страницы
+string[] wrapText(string text, Font font, float maxWidth, int fontSize) {
+    string[] lines;
+    string[] words = text.split(' ');
+    string currentLine;
+    foreach (word; words) {
+        string testLine = currentLine.length > 0 ? currentLine ~ " " ~ word : word;
+        Vector2 size = MeasureTextEx(font, testLine.ptr, fontSize, 1);
+        if (size.x <= maxWidth) {
+            currentLine = testLine;
+        } else {
+            if (currentLine.length > 0) {
+                lines ~= currentLine;
+                currentLine = word; 
+            } else {
+                lines ~= word;
+                currentLine = "";
+            }
+        }
+    }
+    if (currentLine.length > 0) {
+        lines ~= currentLine; 
+    }
+    return lines;
+}
+
+void display_dialog(string character, int emotion, string[] pages) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     int paddingWidth = screenWidth / 9;
@@ -18,14 +44,32 @@ void display_dialog(string character, int emotion, string text) {
     int charRectWidth = rectWidth / 7;
     int charRectHeight = rectHeight / 5;
     DrawRectangle(rectX - 30, rectY - 30, charRectWidth, charRectHeight, Colors.BLACK);
-    int centerX = rectX + rectWidth / 2;
-    int centerY = rectY + rectHeight / 2;
-    Vector2 textSize = MeasureTextEx(GetFontDefault(), cast(char*)text, 30, 1);
-    int textX = cast(int)(centerX - textSize.x / 2.0f);
-    int textY = cast(int)(centerY - textSize.y / 2.0f);
     int charPaddingX = charRectWidth / 6;
     int charPaddingY = charRectHeight / 2;
     DrawText(cast(char*)character, rectX + charRectWidth / 8, rectY - charRectHeight / 6, 20, Colors.WHITE);
-    DrawText(cast(char*)text, rectX+charPaddingX+10, rectY+charPaddingY+10, 30, Colors.WHITE);
-    
+    static int currentPage = 0;
+    static int currentLine = 0;
+    string currentPageText = pages[currentPage];
+    string[] wrappedText = wrapText(currentPageText, GetFontDefault(), rectWidth - 2 * charPaddingX, 30);
+    int lineY = rectY + charPaddingY + 10;
+    foreach (line; wrappedText) {
+        DrawText(line.ptr, rectX + charPaddingX + 10, lineY, 30, Colors.WHITE);
+        lineY += cast(int)(MeasureTextEx(GetFontDefault(), " ", 30, 1).y) + 5;
+        if (lineY > rectY + rectHeight - charPaddingY) {
+            break;
+        }
+    }
+    if (IsKeyPressed(KeyboardKey.KEY_ENTER)) {
+        currentLine++;
+        if (currentLine >= wrappedText.length) {
+            currentPage++;
+            currentLine = 0;
+            if (currentPage >= pages.length) {
+                showDialog = false;
+                allowControl = true;
+                allow_exit_dialog = true;
+                currentPage = 0;
+            }
+        }
+    }
 }
