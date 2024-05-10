@@ -1,3 +1,4 @@
 loadMusic("res/2test.mp3")
 playMusic()
-addCube(0.0, 0.0, 0.0, "adolfy hitlery", {"im an adolf hitler", "commander of third reich", "little known fact also dope on the mic"}, 1)
+addCube(0.0, 0.0, 0.0, "stepan", {"меня зовут степа", "мне три годика", "живу в городе москва"}, 1)
+addCube(2.0, 0.0, 4.0, "alexey", {"а меня леша", "мне 33 годика", "живу в мухосранске в однокомнатной квартире с бабушкой"}, 1)

@@ -2,6 +2,7 @@ module graphics.cubes;
 
 import raylib;
 import std.typecons : Nullable;
+import graphics.main_cycle;
 
 struct Cube {
     string name;
@@ -9,9 +10,6 @@ struct Cube {
     int emotion;
     BoundingBox boundingBox;
 }
-
-
-Cube[] cubes;
 
 nothrow addCube(Vector3 position, string name, string[] text, int emotion) {
     Cube cube;
