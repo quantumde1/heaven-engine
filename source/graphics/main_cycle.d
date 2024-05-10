@@ -22,7 +22,9 @@ bool allowControl = true;
 bool showDialog = false;
 bool allow_exit_dialog = true;
 Cube[] cubes;
-
+Cube* trackingCube = null;
+bool isCubeMoving = false;
+float desiredDistance = 10.0f;
 struct ControlConfig {
     immutable char right_button;
     immutable char left_button;
@@ -65,7 +67,7 @@ char fwd, char bkd, char lft, char rgt, bool allowControl) {
     float speedMultiplier = IsKeyDown(KeyboardKey.KEY_RIGHT_SHIFT) ? 2.0f : 1.0f;
 
     Vector3 movement;
-    if (allowControl) {
+    if (allowControl && !isCubeMoving) {
         if (IsKeyDown(fwd)) {
             movement = Vector3Scale(forward, cameraSpeed * deltaTime * speedMultiplier);
             camera.position = Vector3Add(camera.position, movement);
@@ -90,13 +92,24 @@ char fwd, char bkd, char lft, char rgt, bool allowControl) {
             camera.target = Vector3Add(camera.target, movement);
             cubePosition = Vector3Add(cubePosition, movement);
         }
+        if (trackingCube !is null) {
+        Vector3 targetPosition = trackingCube.boundingBox.min + (trackingCube.boundingBox.max -
+        trackingCube.boundingBox.min) / 2.0f;
+        Vector3 direction = Vector3Subtract(targetPosition, camera.position);
+        float distance = Vector3Length(direction);
+        direction = Vector3Normalize(direction);
+
+        camera.target = Vector3Lerp(camera.target, targetPosition, deltaTime * cameraSpeed);
+        Vector3 desiredPosition = Vector3Subtract(camera.target, Vector3Scale(direction, desiredDistance));
+        camera.position = Vector3Lerp(camera.position, desiredPosition, deltaTime * cameraSpeed);
+    }
     }
 }
 
 void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl, ref bool showDialog, 
 ref bool allow_exit_dialog, ref string name) {
     bool isCubeNotNull = !collidedCube.isNull;
-    if (isCubeNotNull) {
+    if (isCubeNotNull ) {
         if (showDialog == false && allow_exit_dialog == true) {
             int fontSize = 20;
             int posY = GetScreenHeight() - fontSize - 40;
@@ -120,12 +133,12 @@ ref bool allow_exit_dialog, ref string name) {
 
 void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, float rotationStep, 
 float radius) {
-    if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+    if (IsKeyPressed(KeyboardKey.KEY_LEFT) && allowControl == true) {
         cameraAngle -= rotationStep;
         if (cameraAngle < 0.0f) {
             cameraAngle += 360.0f;
         }
-    } else if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+    } else if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && allowControl == true) {
         cameraAngle += rotationStep;
         if (cameraAngle >= 360.0f) {
             cameraAngle -= 360.0f;
@@ -189,6 +202,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         ClearBackground(Colors.RAYWHITE);
         drawScene(camera, cubePosition, cameraAngle, cubes);
         displayDialogs(collidedCube, controlConfig.dialog_button, allowControl, showDialog, allow_exit_dialog, name);
+        foreach (ref cube; cubes) {
+            if (cube.isMoving) {
+                float elapsedTime = GetTime() - cube.moveStartTime;
+                if (elapsedTime >= cube.moveDuration) {
+                    cube.boundingBox.min = cube.endPosition;
+                    cube.isMoving = false;
+                    isCubeMoving = false;
+                } else {
+                    float t = elapsedTime / cube.moveDuration;
+                    cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);
+                    cube.boundingBox.max = Vector3Add(cube.boundingBox.min, Vector3(2.0f, 2.0f, 2.0f));
+                }
+            }
+        }
 
         EndDrawing();
 

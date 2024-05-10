@@ -16,6 +16,27 @@ extern (C) nothrow int lua_LoadMusic(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_startCubeMove(lua_State *L) {
+    int cubeIndex = cast(int)luaL_checkinteger(L, 1) - 1;
+    Vector3 endPosition = {
+        cast(float) luaL_checknumber(L, 2),
+        cast(float) luaL_checknumber(L, 3),
+        cast(float) luaL_checknumber(L, 4)
+    };
+    float duration = cast(float) luaL_checknumber(L, 5);
+
+    if (cubeIndex >= 0 && cubeIndex < cubes.length) {
+        startCubeMove(cubes[cubeIndex], endPosition, duration);
+    } else {
+        luaL_error(L, "Invalid cube index");
+    }
+    return 0;
+}
+
+extern (C) nothrow void luaL_openmovelib(lua_State* L) {
+    lua_register(L, "startCubeMove", &lua_startCubeMove);
+}
+
 extern (C) nothrow int lua_PlayMusic(lua_State *L) {
     PlayMusicStream(music);
     return 0;
@@ -35,20 +56,16 @@ extern (C) nothrow int lua_addCube(lua_State *L) {
         cast(float) luaL_checknumber(L, 2),
         cast(float) luaL_checknumber(L, 3)
     };
-
-    // Проверяем, что 5-й аргумент - это таблица
     luaL_checktype(L, 5, LUA_TTABLE);
     int textTableLength = luaL_len(L, 5);
-    string[] textPages = new string[](textTableLength); // Создаем массив строк для страниц
-
-    // Извлекаем строки из таблицы и добавляем их в массив
+    string[] textPages = new string[](textTableLength); 
     for (int i = 1; i <= textTableLength; i++) {
-        lua_rawgeti(L, 5, i); // Получаем i-й элемент таблицы
-        textPages[i - 1] = luaL_checkstring(L, -1).to!string; // Добавляем строку в массив
-        lua_pop(L, 1); // Убираем строку из стека
+        lua_rawgeti(L, 5, i);
+        textPages[i - 1] = luaL_checkstring(L, -1).to!string;
+        lua_pop(L, 1);
     }
 
-    addCube(position, name.to!string, textPages, emotion); // Вызываем функцию addCube с массивом страниц
+    addCube(position, name.to!string, textPages, emotion);
     return 0;
 }
 
@@ -78,6 +95,7 @@ void lua_loader() {
     luaL_openlibs(L);
     luaL_opendrawinglib(L);
     luaL_openaudiolib(L);
+    luaL_openmovelib(L);
     if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
         writeln("Lua error: ", lua_tostring(L, -1));
         lua_pop(L, 1);
