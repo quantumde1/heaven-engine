@@ -97,8 +97,8 @@ char fwd, char bkd, char lft, char rgt, bool allowControl) {
             camera.target = Vector3Add(camera.target, movement);
             cubePosition = Vector3Add(cubePosition, movement);
         }
-        if (cubes.length > 0) {
-            trackingCube = cubes[0]; // Получаем адрес первого куба в массиве
+        if (cubes.length < 0) {
+            writeln("error");
         }
         if (!trackingCube.isNull) {
             Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max -
@@ -201,6 +201,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     LuaSupport ret = loadLua();
     lua_loader();
     while (!WindowShouldClose()) {
+        UpdateMusicStream(music);
         float deltaTime = GetFrameTime();
         updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime, controlConfig.forward_button,
         controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
@@ -226,12 +227,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         }
 
         EndDrawing();
-
-        UpdateMusicStream(music);
     }
-    InitAudioDevice();
-    scope(exit) CloseAudioDevice();
-
-    InitWindow(screenWidth, screenHeight, toStringz(window_name));
-    scope(exit) CloseWindow();
+    scope(exit) closeAudio();
 }
