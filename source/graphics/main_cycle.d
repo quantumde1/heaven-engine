@@ -22,7 +22,7 @@ bool allowControl = true;
 bool showDialog = false;
 bool allow_exit_dialog = true;
 Cube[] cubes;
-Cube* trackingCube = null;
+Nullable!Cube trackingCube;
 bool isCubeMoving = false;
 float desiredDistance = 10.0f;
 struct ControlConfig {
@@ -48,7 +48,12 @@ void closeAudio() {
 }
 
 void initWindowAndCamera(string window_name, int screenWidth, int screenHeight, ref Camera3D camera) {
-    InitWindow(screenWidth, screenHeight, cast(char*)window_name);
+    InitWindow(screenWidth, screenHeight, toStringz(window_name));
+    if (WindowShouldClose()) {
+        writeln("window init error");
+        return;
+    }
+
     camera.position = Vector3(0.0f, 12.0f, 10.0f);
     camera.target = Vector3(0.0f, 0.0f, 0.0f);
     camera.up = Vector3(0.0f, 1.0f, 0.0f); 
@@ -92,16 +97,18 @@ char fwd, char bkd, char lft, char rgt, bool allowControl) {
             camera.target = Vector3Add(camera.target, movement);
             cubePosition = Vector3Add(cubePosition, movement);
         }
-        if (trackingCube !is null) {
-        Vector3 targetPosition = trackingCube.boundingBox.min + (trackingCube.boundingBox.max -
-        trackingCube.boundingBox.min) / 2.0f;
-        Vector3 direction = Vector3Subtract(targetPosition, camera.position);
-        float distance = Vector3Length(direction);
-        direction = Vector3Normalize(direction);
+        if (cubes.length > 0) {
+            trackingCube = cubes[0]; // Получаем адрес первого куба в массиве
+        }
+        if (!trackingCube.isNull) {
+            Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max -
+            trackingCube.get.boundingBox.min) / 2.0f;
+            Vector3 direction = Vector3Subtract(targetPosition, camera.position);
+            direction = Vector3Normalize(direction);
 
-        camera.target = Vector3Lerp(camera.target, targetPosition, deltaTime * cameraSpeed);
-        Vector3 desiredPosition = Vector3Subtract(camera.target, Vector3Scale(direction, desiredDistance));
-        camera.position = Vector3Lerp(camera.position, desiredPosition, deltaTime * cameraSpeed);
+            camera.target = Vector3Lerp(camera.target, targetPosition, deltaTime * cameraSpeed);
+            Vector3 desiredPosition = Vector3Subtract(camera.target, Vector3Scale(direction, desiredDistance));
+            camera.position = Vector3Lerp(camera.position, desiredPosition, deltaTime * cameraSpeed);
     }
     }
 }
@@ -152,11 +159,12 @@ float radius) {
 
 void drawScene(Camera3D camera, Vector3 cubePosition, float cameraAngle, Cube[] cubes) {
     BeginMode3D(camera);
+    const int CubeSize = 2;
     foreach (cube; cubes) {
-        DrawCube(cube.boundingBox.min, 2.0f, 2.0f, 2.0f, Colors.ORANGE);
+        DrawCube(cube.boundingBox.min, CubeSize, CubeSize, CubeSize, Colors.ORANGE);
         DrawCubeWires(cube.boundingBox.min, 2.0f, 2.0f, 2.0f, Colors.ORANGE);
     }
-    DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, Colors.GREEN);
+    DrawCube(cubePosition, CubeSize, CubeSize, CubeSize, Colors.GREEN);
     DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, Colors.GREEN);
     DrawGrid(40, 1.0f);
     EndMode3D();
@@ -221,7 +229,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
 
         UpdateMusicStream(music);
     }
+    InitAudioDevice();
+    scope(exit) CloseAudioDevice();
 
-    closeAudio(); 
-    CloseWindow();
+    InitWindow(screenWidth, screenHeight, toStringz(window_name));
+    scope(exit) CloseWindow();
 }
