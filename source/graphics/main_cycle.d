@@ -198,6 +198,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     SetTargetFPS(60);
     BoundingBox cubeBoundingBox;
     string name;
+    version(Windows) loadLua("libs/lua52.dll");
     LuaSupport ret = loadLua();
     lua_loader();
     while (!WindowShouldClose()) {
