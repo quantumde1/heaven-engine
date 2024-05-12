@@ -25,6 +25,7 @@ Cube[] cubes;
 Nullable!Cube trackingCube;
 bool isCubeMoving = false;
 float desiredDistance = 10.0f;
+
 struct ControlConfig {
     immutable char right_button;
     immutable char left_button;
@@ -159,7 +160,7 @@ float radius) {
 
 void drawScene(Camera3D camera, Vector3 cubePosition, float cameraAngle, Cube[] cubes) {
     BeginMode3D(camera);
-    const int CubeSize = 2;
+    immutable int CubeSize = 2;
     foreach (cube; cubes) {
         DrawCube(cube.boundingBox.min, CubeSize, CubeSize, CubeSize, Colors.ORANGE);
         DrawCubeWires(cube.boundingBox.min, 2.0f, 2.0f, 2.0f, Colors.ORANGE);
@@ -198,7 +199,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     SetTargetFPS(60);
     BoundingBox cubeBoundingBox;
     string name;
-    version(Windows) loadLua("libs/lua52.dll");
+    version(Windows) {
+        loadLua("libs/lua54.dll");
+    }
     LuaSupport ret = loadLua();
     lua_loader();
     while (!WindowShouldClose()) {
@@ -218,7 +221,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                 if (elapsedTime >= cube.moveDuration) {
                     cube.boundingBox.min = cube.endPosition;
                     cube.isMoving = false;
-                    isCubeMoving = false;
+                    beginNextMove(cube);
                 } else {
                     float t = elapsedTime / cube.moveDuration;
                     cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);

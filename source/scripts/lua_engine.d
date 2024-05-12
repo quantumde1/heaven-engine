@@ -47,7 +47,6 @@ extern (C) nothrow int lua_StopMusic(lua_State *L) {
     return 0;
 }
 
-
 extern (C) nothrow int lua_addCube(lua_State *L) {
     auto name = luaL_checkstring(L, 4);
     int emotion = cast(int) luaL_checkinteger(L, 6);

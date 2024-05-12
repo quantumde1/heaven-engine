@@ -7,7 +7,7 @@
 		"bindbc-lua": "~>0.6.1",
 		"raylib-d": "~>5.0.1"
 	},
-	"versions": ["LUA_52"],
+	"versions": ["LUA_54"],
 	"description": "Engine with Raylib in D, for Sky game",
 	"lflags-linux": [
 		"-rpath=/usr/lib",
