@@ -7,12 +7,15 @@
 		"bindbc-lua": "~>0.6.1",
 		"raylib-d": "~>5.0.1"
 	},
-	"versions": ["LUA_54"],
+	"subConfigurations": {
+		"bindbc-lua": "static"
+	},
+	"versions": ["BindLua_Static","LUA_54"],
 	"description": "Engine with Raylib in D, for Sky game",
 	"lflags-linux": [
-		"-rpath=/usr/lib",
-		"-rpath=$$ORIGIN"
-	],
+        "-rpath=/usr/lib",
+        "-rpath=$$ORIGIN"
+    ],
 	"lflags-osx": [
 		"-rpath",
 		"./",
@@ -24,7 +27,8 @@
 		"-L."
 	],
 	"libs": [
-		"raylib"
+		"raylib",
+		"lua54"
 	],
 	"license": "MIT",
 	"name": "heaven-engine"

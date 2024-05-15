@@ -202,7 +202,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     version(Windows) {
         loadLua("libs/lua54.dll");
     }
-    LuaSupport ret = loadLua();
+    //LuaSupport ret = loadLua();
     lua_loader();
     while (!WindowShouldClose()) {
         UpdateMusicStream(music);
