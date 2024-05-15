@@ -1,3 +1,4 @@
+//quantumde1 developed software, licensed under BSD-0-Clause license.
 module scripts.lua_engine;
 
 import bindbc.lua;
@@ -10,12 +11,14 @@ import graphics.cubes;
 
 Music music;
 
+/* All functions here are built on top of engine built-in functions, for their execution from script.
+Not all engine usable for scripting functions are yet implemented.*/
+
 extern (C) nothrow int lua_LoadMusic(lua_State *L) {
     auto musicPath = luaL_checkstring(L, 1);
     music = LoadMusicStream(musicPath);
     return 0;
 }
-
 extern (C) nothrow int lua_startCubeMove(lua_State *L) {
     int cubeIndex = cast(int)luaL_checkinteger(L, 1) - 1;
     Vector3 endPosition = {
@@ -77,7 +80,7 @@ extern (C) nothrow int lua_drawCube(lua_State *L) {
     };
     return 0;
 }
-
+//register functions in lua
 extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "loadMusic", &lua_LoadMusic);
     lua_register(L, "playMusic", &lua_PlayMusic);
@@ -89,6 +92,7 @@ extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "drawCube", &lua_drawCube);
 }
 
+//load lua
 void lua_loader() {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);

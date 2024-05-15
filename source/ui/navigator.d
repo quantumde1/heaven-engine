@@ -1,9 +1,11 @@
+//quantumde1 developed software, licensed under BSD-0-Clause license.
 module ui.navigator;
 
 import raylib;
 import std.math;
 import std.conv;
 
+//drawing non-working arrow for compass
 void draw_arrow(Vector2 start, Vector2 end, float size, Color color) {
     Vector2 direction = Vector2Subtract(end, start);
     Vector2 norm = Vector2Normalize(direction);
@@ -29,10 +31,12 @@ void draw_navigation(float cameraAngle) {
     directions[2] = Vector2(sin(cameraAngle * DEG2RAD), -cos(cameraAngle * DEG2RAD));
     directions[3] = Vector2(-cos(cameraAngle * DEG2RAD), -sin(cameraAngle * DEG2RAD));
     char*[4] labels;
+    // setting names(NESW is North, East, South, West)
     labels[0] = cast(char*)"N";
     labels[1] = cast(char*)"E";
     labels[2] = cast(char*)"S";
     labels[3] = cast(char*)"W";
+    //render all of this
     for (int i = 0; i < 4; ++i) {
         Vector2 dirPos = Vector2(centerX + directions[i].x * (compassSize / 2 - 20), centerY - directions[i].y *
         (compassSize / 2 - 20));

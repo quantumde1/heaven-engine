@@ -1,3 +1,4 @@
+//quantumde1 developed software, licensed under BSD-0-Clause license.
 module dialogs.dialog_system;
 
 import raylib;
@@ -6,6 +7,7 @@ import std.conv;
 import graphics.main_cycle;
 import std.range;
 
+//function for showing text in rectangles
 string[] wrapText(string text, Font font, float maxWidth, int fontSize) {
     string[] lines;
     string[] words = text.split(' ');
