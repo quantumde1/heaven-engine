@@ -9,11 +9,11 @@ Features, available now:
 - [x] Control configuration file
 - [x] Static build on Linux, for Windows must be used dynamic
 - [x] Audio playing
-- [] Battle system
-- [] Main menu
-- [] Pause menu
-- [] Personas, skills, load, etc menus
-- [] Loading models and sprites
+- [ ] Battle system
+- [ ] Main menu
+- [ ] Pause menu
+- [ ] Personas, skills, load, etc menus
+- [ ] Loading models and sprites
 
 ## Simple docs!
 
