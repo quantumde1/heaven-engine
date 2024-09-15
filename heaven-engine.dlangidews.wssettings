@@ -1,0 +1,57 @@
+{
+    "startupProject": "heaven-engine",
+    "breakpoints": [
+    ],
+    "bookmarks": [
+    ],
+    "files": [
+        {
+            "file": "/home/user/heaven-engine/source/app.d",
+            "column": 0,
+            "row": 0
+        },
+        {
+            "file": "/home/user/heaven-engine/source/ui/battle_ui.d",
+            "column": 236,
+            "row": 49
+        },
+        {
+            "file": "/home/user/heaven-engine/source/graphics/main_loop.d",
+            "column": 191,
+            "row": 4
+        },
+        {
+            "file": "/home/user/heaven-engine/dub.json",
+            "column": 35,
+            "row": 22
+        },
+        {
+            "file": "/home/user/heaven-engine/source/scripts/lua_engine.d",
+            "column": 40,
+            "row": 42
+        },
+        {
+            "file": "/home/user/heaven-engine/source/graphics/ui_drawing.d",
+            "column": 127,
+            "row": 1
+        },
+        {
+            "file": "/home/user/heaven-engine/conf/build_type.conf",
+            "column": 1,
+            "row": 16
+        },
+        {
+            "file": "/home/user/test/heaven-engine/source/graphics/ui_drawing.d",
+            "column": 235,
+            "row": 53
+        }
+    ],
+    "expandedItems": [
+        "/home/user/heaven-engine/source/graphics",
+        "/home/user/heaven-engine/source/ui",
+        "/home/user/heaven-engine/dub.json",
+        "/home/user/heaven-engine/source",
+        "/home/user/heaven-engine/source/scripts"
+    ],
+    "selectedWorkspaceItem": "/home/user/heaven-engine/source/graphics/ui_drawing.d"
+}

@@ -1,0 +1,129 @@
+INFO: Initializing raylib 5.0
+INFO: Platform backend: DESKTOP (GLFW)
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... loaded (optional)
+INFO:     > raudio:.... loaded (optional)
+WARNING: GLFW: Error: 65539 Description: Invalid window hint 0x0002000D
+INFO: DISPLAY: Device initialized successfully
+INFO:     > Display size: 1920 x 1080
+INFO:     > Screen size:  1920 x 1080
+INFO:     > Render size:  1920 x 1080
+INFO:     > Viewport offsets: 0, 0
+INFO: GLAD: OpenGL extensions loaded successfully
+INFO: GL: Supported extensions count: 229
+INFO: GL: OpenGL device information:
+INFO:     > Vendor:   Intel
+INFO:     > Renderer: Mesa Intel(R) UHD Graphics 630 (CFL GT2)
+INFO:     > Version:  4.6 (Core Profile) Mesa 24.0.9
+INFO:     > GLSL:     4.60
+INFO: GL: VAO extension detected, VAO functions loaded successfully
+INFO: GL: NPOT textures extension detected, full NPOT textures supported
+INFO: GL: DXT compressed textures supported
+INFO: GL: ETC2/EAC compressed textures supported
+INFO: PLATFORM: DESKTOP (GLFW): Initialized successfully
+INFO: TEXTURE: [ID 1] Texture loaded successfully (1x1 | R8G8B8A8 | 1 mipmaps)
+INFO: TEXTURE: [ID 1] Default texture loaded successfully
+INFO: SHADER: [ID 1] Vertex shader compiled successfully
+INFO: SHADER: [ID 2] Fragment shader compiled successfully
+INFO: SHADER: [ID 3] Program shader loaded successfully
+INFO: SHADER: [ID 3] Default shader loaded successfully
+INFO: RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)
+INFO: RLGL: Render batch vertex buffers loaded successfully in VRAM (GPU)
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: TEXTURE: [ID 2] Texture loaded successfully (128x128 | GRAY_ALPHA | 1 mipmaps)
+INFO: FONT: Default font loaded successfully (224 glyphs)
+INFO: TIMER: Target time per frame: 16.667 milliseconds
+Video started playing
+INFO: TEXTURE: [ID 3] Texture loaded successfully (514x360 | R8G8B8 | 1 mipmaps)
+Video texture initialized
+INFO: TEXTURE: [ID 3] Unloaded texture data from VRAM (GPU)
+DEBUG:: D
+DEBUG:: A
+DEBUG:: S
+DEBUG:: W
+DEBUG:: K
+INFO: AUDIO: Device initialized successfully
+INFO:     > Backend:       miniaudio / PulseAudio
+INFO:     > Format:        32-bit IEEE Floating Point -> 16-bit Signed Integer
+INFO:     > Channels:      2 -> 2
+INFO:     > Sample rate:   48000 -> 48000
+INFO:     > Periods size:  3600
+INFO: STREAM: Initialized successfully (44100 Hz, 32 bit, Stereo)
+INFO: FILEIO: [res/menu_music.mp3] Music file loaded successfully
+INFO:     > Sample rate:   44100 Hz
+INFO:     > Sample size:   32 bits
+INFO:     > Channels:      2 (Stereo)
+INFO:     > Total frames:  4637952
+INFO: STREAM: Initialized successfully (44100 Hz, 32 bit, Stereo)
+INFO: FILEIO: [res/menu_btn_sfx.wav] Music file loaded successfully
+INFO:     > Sample rate:   44100 Hz
+INFO:     > Sample size:   32 bits
+INFO:     > Channels:      2 (Stereo)
+INFO:     > Total frames:  15727
+INFO: FILEIO: [res/menu_background.png] File loaded successfully
+INFO: IMAGE: Data loaded successfully (1280x720 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 4] Texture loaded successfully (1280x720 | R8G8B8 | 1 mipmaps)
+INFO: STREAM: Unloaded audio stream data from RAM
+INFO: TEXTURE: [ID 4] Unloaded texture data from VRAM (GPU)
+INFO: FILEIO: [res/mc.glb] File loaded successfully
+INFO: MODEL: [res/mc.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 1 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 1
+DEBUG:     > Textures count: 1
+INFO: IMAGE: Data loaded successfully (1024x512 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 5] Texture loaded successfully (1024x512 | R8G8B8 | 1 mipmaps)
+WARNING: MODEL: [res/mc.glb] Indices data converted from u32 to u16, possible loss of data
+WARNING: MODEL: [res/mc.glb] Joint attribute data format not supported, use vec4 u8
+INFO: VAO: [ID 2] Mesh uploaded successfully to VRAM (GPU)
+INFO: FILEIO: [res/test.png] File loaded successfully
+INFO: IMAGE: Data loaded successfully (64x64 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 6] Texture loaded successfully (64x64 | R8G8B8 | 1 mipmaps)
+INFO: FILEIO: [res/mc.glb] File loaded successfully
+INFO: MODEL: [res/mc.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 1 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 1
+DEBUG:     > Textures count: 1
+INFO: IMAGE: Data loaded successfully (1024x512 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 7] Texture loaded successfully (1024x512 | R8G8B8 | 1 mipmaps)
+WARNING: MODEL: [res/mc.glb] Indices data converted from u32 to u16, possible loss of data
+WARNING: MODEL: [res/mc.glb] Joint attribute data format not supported, use vec4 u8
+INFO: VAO: [ID 3] Mesh uploaded successfully to VRAM (GPU)
+INFO: FILEIO: [res/mc.glb] File loaded successfully
+INFO: MODEL: [res/mc.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 1 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 1
+DEBUG:     > Textures count: 1
+INFO: IMAGE: Data loaded successfully (1024x512 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 8] Texture loaded successfully (1024x512 | R8G8B8 | 1 mipmaps)
+WARNING: MODEL: [res/mc.glb] Indices data converted from u32 to u16, possible loss of data
+WARNING: MODEL: [res/mc.glb] Joint attribute data format not supported, use vec4 u8
+INFO: VAO: [ID 4] Mesh uploaded successfully to VRAM (GPU)
+INFO: FILEIO: [res/test.png] File loaded successfully
+INFO: IMAGE: Data loaded successfully (64x64 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 9] Texture loaded successfully (64x64 | R8G8B8 | 1 mipmaps)
+INFO: FILEIO: [res/test.png] File loaded successfully
+INFO: IMAGE: Data loaded successfully (64x64 | R8G8B8 | 1 mipmaps)
+INFO: TEXTURE: [ID 10] Texture loaded successfully (64x64 | R8G8B8 | 1 mipmaps)
+loading lua)
+INFO: STREAM: Unloaded audio stream data from RAM
+INFO: STREAM: Initialized successfully (44100 Hz, 32 bit, Stereo)
+INFO: FILEIO: [res/default.mp3] Music file loaded successfully
+INFO:     > Sample rate:   44100 Hz
+INFO:     > Sample size:   32 bits
+INFO:     > Channels:      2 (Stereo)
+INFO:     > Total frames:  6671232
+0
+iShowSpeed: 80 neededDegree: 180
+INFO: FILEIO: [res/area1.obj] Text file loaded successfully
+INFO: MODEL: [res/area1.obj] OBJ data loaded successfully: 262 meshes/11 materials

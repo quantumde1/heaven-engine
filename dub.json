@@ -1,0 +1,44 @@
+{
+	"authors": [
+		"quantumde1"
+	],
+	"copyright": "Copyright © 2024, quantumde1",
+	"dependencies": {
+		"bindbc-lua": "~>0.6.1",
+		"raylib-d": "~>5.0.1"
+	},
+	"description": "Engine with Raylib in D, for Sky game",
+	"lflags-linux": [
+		"-rpath=/usr/lib",
+		"-rpath=$$ORIGIN"
+	],
+	"lflags-osx": [
+		"-rpath",
+		"./",
+		"-rpath",
+		"/opt/local/lib"
+	],
+	"lflags-posix": [
+		"-L/usr/lib",
+		"-L.",
+		"-L/opt/local/lib"
+	],
+	"libs-posix": [
+		"raylib",
+		"lua5.3",
+		"vlc"
+	],
+    "libs-windows": [
+		"raylib",
+		"lua53",
+		"vlc"
+	],
+    "subConfigurations": {
+		"bindbc-lua": "static"
+	},
+	"license": "BSD 0-clause",
+	"name": "heaven-engine",
+	"versions": [
+		"LUA_53"
+	]
+}

@@ -1,0 +1,338 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
+module graphics.main_loop;
+
+import raylib;
+import bindbc.lua;
+import graphics.video_playback;
+import std.stdio;
+import std.math;
+import std.file;
+import std.string;
+import std.conv;
+import ui.flicker;
+import ui.battle_ui;
+import graphics.ui_drawing;
+import graphics.scene;
+import variables;
+import std.random;
+import std.datetime;
+import std.typecons;
+import script;
+import dialogs.dialog_system;
+import ui.navigator;
+import scripts.lua_engine;
+import graphics.cubes;
+import graphics.map;
+import std.array;
+
+enum FontSize = 20;
+enum FadeIncrement = 0.02f;
+enum ScreenPadding = 10;
+enum TextSpacing = 30;
+enum FPS = 60;
+
+nothrow void loadLocation(const(char)* first, const(char)* sec) {
+    model_location_path = cast(char*)first;
+    texture_model_location_path = cast(char*)sec;
+}
+
+void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
+int playerStepCounter, int encounterThreshold, bool inBattle) {
+    const string debugText = q{
+    Player Position: %s
+    
+    Battle State: %s
+    
+    Player Health: %d
+    
+    Camera Angle: %.2f
+    
+    PlayerStepCounter: %d
+    
+    EncounterThreshold: %d
+    
+    Release/debug Build: %s
+    
+    SoundState: %s
+    
+    FriendlyZone: %s
+}.format(cubePosition, inBattle ? "In Battle" : "Exploring", playerHealth, cameraAngle, 
+        playerStepCounter, encounterThreshold, rel, isAudioEnabled(), friendlyZone);
+
+    DrawText(debugText.toStringz, 10, 10, FontSize, Colors.BLACK);
+    DrawFPS(GetScreenWidth() - 100, GetScreenHeight - 50);
+}
+
+void drawWeatherDateTime(string weather, string time, string date) {
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    
+    int rightCathetus = screenHeight / 4;
+    int topCathetus = rightCathetus * 3;
+    
+    DrawTriangle(
+        Vector2(screenWidth, 0),
+        Vector2(screenWidth - topCathetus, 0),
+        Vector2(screenWidth, rightCathetus),
+        Colors.BLUE
+    );
+    
+    int textX = screenWidth - screenHeight / 10;
+    int textY = rightCathetus / 4;
+    
+    DrawText(cast(char*)weather, textX, textY, FontSize, Colors.WHITE);
+    DrawText(cast(char*)time, textX, textY + TextSpacing, FontSize, Colors.WHITE);
+    DrawText(cast(char*)date, textX, textY + TextSpacing * 2, FontSize, Colors.WHITE);
+}
+
+ControlConfig loadControlConfig() {
+    return ControlConfig(
+        parse_conf("conf/layout.conf", "right"),
+        parse_conf("conf/layout.conf", "left"),
+        parse_conf("conf/layout.conf", "backward"),
+        parse_conf("conf/layout.conf", "forward"),
+        parse_conf("conf/layout.conf", "dialog")
+    );
+}
+
+void closeAudio() {
+    UnloadMusicStream(music);
+    CloseAudioDevice();
+}
+
+void fadeEffect(float alpha, bool fadeIn) {
+    if (rel) {
+        while (fadeIn ? alpha < 2.0f : alpha > 0.0f) {
+            alpha += fadeIn ? FadeIncrement : -FadeIncrement;
+            BeginDrawing();
+            ClearBackground(Colors.BLACK);
+            DrawTextEx(GetFontDefault(), "powered by\n\n\nHeaven Engine", 
+                Vector2(GetScreenWidth() / 2 - MeasureText("powered by\n\n\nHeaven Engine", 40) / 2, 
+                GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
+            );
+            EndDrawing();
+        }
+    }
+}
+
+void engine_loader(string window_name, int screenWidth, int screenHeight) {
+   /* LuaSupport ret;
+    version (Posix) ret = loadLua();
+    version(Windows) ret = loadLua("lua53.dll");
+    if(ret != luaSupport) {
+        // Handle error. For most use cases, its reasonable to use the the error handling API in
+        // bindbc-loader to retrieve error messages for logging and then abort. If necessary, it's
+        // possible to determine the root cause via the return value:
+        if(ret == luaSupport.noLibrary) {
+            writeln("no library");
+            return;
+        }
+        else if(luaSupport.badLibrary) {
+            writeln("broken library");
+            return;
+        } else {
+            writeln("LUA LOADED!!! POBEDA");
+        }
+    }*/
+    bool isGamepadConnected = IsGamepadAvailable(0);
+    Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
+    SetExitKey(KeyboardKey.KEY_NULL);
+    float fadeAlpha = 2.0f;
+    uint seed = cast(uint)Clock.currTime().toUnixTime();
+    auto rnd = Random(seed);
+    auto rnd_sec = Random(seed);
+    int encounterThreshold = uniform(900, 3000, rnd);
+    int randomNumber = uniform(1, 3, rnd_sec);
+    InitWindow(screenWidth, screenHeight, cast(char*)window_name);
+    ToggleFullscreen();
+    SetTargetFPS(FPS);
+    initWindowAndCamera(window_name, screenWidth, screenHeight, camera);
+    rel = isReleaseBuild();
+    fadeEffect(0.0f, true);
+    fadeEffect(fadeAlpha, false);
+    BeginDrawing();
+    playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
+    ClearBackground(Colors.BLACK);
+    EndDrawing();
+    immutable ControlConfig controlConfig = loadControlConfig();
+    InitAudioDevice();
+    showMainMenu(currentGameState);
+    float cameraSpeed = 5.0f;
+
+    // Load player model and texture
+    Model playerModel = LoadModel("res/mc.glb");
+    Texture2D playerTexture = LoadTexture("res/test.png");
+    playerModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = playerTexture;
+
+    // Load models and textures for other cubes
+    Model[] cubeModels = [ LoadModel("res/mc.glb"), LoadModel("res/mc.glb")];
+    Texture2D[] cubeTextures = [LoadTexture("res/test.png"), LoadTexture("res/test.png")];
+
+    foreach (i, ref cubeModel; cubeModels) {
+        cubeModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = cubeTextures[i];
+    }
+    float rotationStep = 1.3f;
+    radius = Vector3Distance(camera.position, camera.target);
+    BoundingBox cubeBoundingBox;
+    string name;
+    if(!rel) { writeln("loading lua)"); }
+    lua_State* L = luaL_newstate();
+    luaL_openlibs(L);
+    luaL_opendrawinglib(L);
+    luaL_openaudiolib(L);
+    luaL_openmovelib(L);
+    luaL_opendialoglib(L);
+    if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
+        writeln("Lua error: ", lua_tostring(L, -1));
+        lua_pop(L, 1);
+    }
+    SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:a4,righttrigger:a5; \\\\
+        030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
+
+    Model floorModel = LoadModel(model_location_path);
+    Texture2D floorTexture = LoadTexture(texture_model_location_path);
+    while (!WindowShouldClose()) {
+        if (videoFinished) {
+            switch (currentGameState) {
+                
+                case GameState.MainMenu:
+                    showMainMenu(currentGameState);
+                    break;
+                case GameState.InGame:
+                    deltaTime = GetFrameTime();
+                    if (isAudioEnabled()) {
+                        UpdateMusicStream(music);
+                    }
+                    // Update camera and player positions
+                    updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
+                        controlConfig.forward_button,
+                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
+
+                    rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
+
+                    Nullable!Cube collidedCube = handleCollisions(cubePosition, cubes, cubeBoundingBox);
+                    BeginDrawing();
+                    ClearBackground(Colors.RAYWHITE);
+                    if (!isNaN(iShowSpeed) && !isNaN(neededDegree)) {
+                        rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
+                    }
+                    drawScene(floorModel, floorTexture, camera, cubePosition, cameraAngle, cubeModels, playerModel, playerTexture);
+                    if (show_sec_dialog && showDialog) {
+                        allow_exit_dialog = allowControl = false;
+                        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
+                    } else {
+                        displayDialogs(collidedCube, controlConfig.dialog_button, allowControl, showDialog, 
+                        allow_exit_dialog, name);
+                    }
+                    float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
+                        1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
+
+                    if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
+                        originalCubePosition = cubePosition;
+                        originalCameraPosition = camera.position;
+                        originalCameraTarget = camera.target;
+                        StopMusicStream(music);
+                        allowControl = false;
+                        playerStepCounter = 0;
+                        encounterThreshold = uniform(900, 3000, rnd);
+                        inBattle = true;
+                        initBattle(camera, cubePosition, cameraAngle, randomNumber);
+                    }
+
+                    if (inBattle) {
+                        cameraAngle = 90.0f;
+                        drawBattleUI(camera, cubePosition);
+                        if (!selectingEnemy) {
+                            drawHPAboveCubes(camera);
+                        }
+                    }
+
+                    if (Vector3Distance(cubePosition, targetPosition) < 4.0f) {
+                        showMapPrompt = true;
+                    } 
+                    else {
+                        showMapPrompt = false;
+                    }
+
+                    if (showMapPrompt) {
+                        const int posY = GetScreenHeight() - FontSize - 40;
+                        if (isGamepadConnected) {
+                            const int buttonSize = 30;
+                            const int circleCenterX = 40 + buttonSize / 2;
+                            const int circleCenterY = posY + buttonSize / 2;
+                            const int textYOffset = 7;
+                            DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.GREEN);
+                            DrawText(("A"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
+                            DrawText((" to open map"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
+                        } else {
+                            DrawText(toStringz("Press "~(controlConfig.dialog_button)~" to open map"), 40, posY, 20, Colors.BLACK);
+                        }
+
+                        if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+                            StopMusicStream(music);
+                            openMap(camera, cubePosition, cameraAngle, cubes, location_name);
+                        }
+                    }
+
+                    int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
+                    if (!inBattle && !friendlyZone) {
+                        draw_flickering_rhombus(colorChoice, colorIntensity);
+                    }
+
+                    foreach (ref cube; cubes) {
+                        if (cube.isMoving) {
+                            float elapsedTime = GetTime() - cube.moveStartTime;
+                            if (elapsedTime >= cube.moveDuration) {
+                                cube.boundingBox.min = cube.endPosition;
+                                cube.isMoving = false;
+                                beginNextMove(cube);
+                            } else {
+                                float t = elapsedTime / cube.moveDuration;
+                                cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);
+                                cube.boundingBox.max = Vector3Add(cube.boundingBox.min, Vector3(2.0f, 2.0f, 2.0f));
+                            }
+                        }
+                    }
+
+                    if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame && !rel) {
+                        showDebug = !showDebug;
+                    }
+                    lua_getglobal(L, "checkDialogStatus");
+                    if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
+                        lua_pop(L, 2);
+                    } else {
+                        writeln("Unable to check dialog status or cannot rotate camera: ", to!string(lua_tostring(L, -1)));
+                        lua_pop(L, 1);
+                    }
+
+                    if (showDebug) {
+                        drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, 
+                        encounterThreshold, inBattle);
+                    }
+
+                    EndDrawing();
+                    break;
+
+                case GameState.Options:
+                    // inOptions();
+                    break;
+
+                case GameState.Exit:
+                    StopMusicStream(music);
+                    EndDrawing();
+                    CloseWindow();
+                    closeAudio();
+                    lua_close(L);
+                    return;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    EndDrawing();
+    scope(exit) closeAudio();
+    scope(exit) CloseWindow();
+    lua_close(L);
+}
