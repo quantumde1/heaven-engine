@@ -24,6 +24,7 @@ import scripts.lua_engine;
 import graphics.cubes;
 import graphics.map;
 import std.array;
+import ui.inventory;
 
 enum FontSize = 20;
 enum FadeIncrement = 0.02f;
@@ -31,9 +32,9 @@ enum ScreenPadding = 10;
 enum TextSpacing = 30;
 enum FPS = 60;
 
-nothrow void loadLocation(const(char)* first, const(char)* sec) {
-    model_location_path = cast(char*)first;
-    texture_model_location_path = cast(char*)sec;
+nothrow void loadLocation(char* first, const(char)* sec) {
+    model_location_path = first;
+    if (!rel){ try {writeln("loading loc ", model_location_path); } catch (Exception e) {}}
 }
 
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
@@ -115,6 +116,8 @@ void fadeEffect(float alpha, bool fadeIn) {
     }
 }
 
+import raylib_lights;
+
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
    /* LuaSupport ret;
     version (Posix) ret = loadLua();
@@ -161,19 +164,16 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
 
     // Load player model and texture
     Model playerModel = LoadModel("res/mc.glb");
-    Texture2D playerTexture = LoadTexture("res/test.png");
-    playerModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = playerTexture;
+    Texture2D playerTexture;// = LoadTexture("res/test.png");
+    //playerModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = playerTexture;
 
     // Load models and textures for other cubes
     Model[] cubeModels = [ LoadModel("res/mc.glb"), LoadModel("res/mc.glb")];
-    Texture2D[] cubeTextures = [LoadTexture("res/test.png"), LoadTexture("res/test.png")];
-
-    foreach (i, ref cubeModel; cubeModels) {
-        cubeModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = cubeTextures[i];
-    }
     float rotationStep = 1.3f;
     radius = Vector3Distance(camera.position, camera.target);
+    //writeln(camera.position);
     BoundingBox cubeBoundingBox;
+    Texture2D floorTexture;// = LoadTexture(texture_model_location_path);
     string name;
     if(!rel) { writeln("loading lua)"); }
     lua_State* L = luaL_newstate();
@@ -186,11 +186,31 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         writeln("Lua error: ", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
+    Model floorModel = LoadModel(model_location_path);
+    auto fs = toStringz("shaders/lighting.fs");
+    auto vs = toStringz("shaders/lighting.vs");
+    shader = LoadShader(vs,fs);
+    shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
+    shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    float[4] values = [ 0.1f, 0.1f, 0.1f, 1.0f ];
+    SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
+    // Iterate over materials
+    for (int i = 0; i < playerModel.materialCount; i++)
+    {
+        playerModel.materials[i].shader = shader;
+    }
+    for (int i = 0; i < cubeModels.length; i++) {
+        for (int k = 0; k < cubeModels[i].materialCount; k++) { 
+            cubeModels[i].materials[k].shader = shader;
+        }
+    }
+    for (int i = 0; i < floorModel.materialCount; i++) {
+        floorModel.materials[i].shader = shader;
+    }
+    lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3( 0, 9, 0 ), Vector3Zero(), Colors.LIGHTGRAY, shader);
     SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:a4,righttrigger:a5; \\\\
         030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
-
-    Model floorModel = LoadModel(model_location_path);
-    Texture2D floorTexture = LoadTexture(texture_model_location_path);
     while (!WindowShouldClose()) {
         if (videoFinished) {
             switch (currentGameState) {
@@ -203,6 +223,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     if (isAudioEnabled()) {
                         UpdateMusicStream(music);
                     }
+                        UpdateLightValues(shader, lights[0]);
+                    
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
                         controlConfig.forward_button,
@@ -215,6 +237,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     ClearBackground(Colors.RAYWHITE);
                     if (!isNaN(iShowSpeed) && !isNaN(neededDegree)) {
                         rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
+                    }
+                    if (isNewLocationNeeded == false) {
+
+                    } else if (isNewLocationNeeded == true) {
+                        playerStepCounter = 0;
+                        cubePosition = Vector3(0,0,0);
+                        camera.position = Vector3(0, 10, 10);
+                        camera.target = Vector3(0,4,0);
+                        UnloadModel(floorModel);
+                        floorModel = LoadModel(model_location_path);
+                        isNewLocationNeeded = false;
+                        for (int i = 0; i < floorModel.materialCount; i++) {
+                            floorModel.materials[i].shader = shader;
+                        }
                     }
                     drawScene(floorModel, floorTexture, camera, cubePosition, cameraAngle, cubeModels, playerModel, playerTexture);
                     if (show_sec_dialog && showDialog) {
@@ -309,7 +345,12 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, 
                         encounterThreshold, inBattle);
                     }
-
+                    if (IsKeyPressed(KeyboardKey.KEY_I)) {
+                        showInventory = true;
+                    }
+                    if (showInventory == true) {
+                        drawInventory();
+                    }
                     EndDrawing();
                     break;
 
@@ -332,6 +373,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     }
 
     EndDrawing();
+    UnloadShader(shader); 
     scope(exit) closeAudio();
     scope(exit) CloseWindow();
     lua_close(L);

@@ -44,12 +44,18 @@ void showMainMenu(ref GameState currentGameState) {
     int loadingBarY = screenHeight - loadingBarHeight - 10; // Position the bar 10 pixels from the bottom
     float loadingProgress = 0.0f;
     float loadingBarAlpha = 1.0f;
-
+    version (Posix) {
     auto loadGifThread = new Thread({
         imScarfyAnim = LoadImageAnim("res/menu_background.gif", &animFrames);
         isGifLoaded = true;
     });
-
+    }
+    version (Windows) {
+         auto loadGifThread = new Thread({
+        imScarfyAnim = LoadImageAnim("hui.siegheil", &animFrames);
+        isGifLoaded = true;
+    });
+    }
     loadGifThread.start();
 
     Texture2D texScarfyAnim = {0};

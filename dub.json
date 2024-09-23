@@ -25,19 +25,19 @@
 	],
 	"libs-posix": [
 		"raylib",
-		"lua5.3",
+		"lua-5.3",
 		"vlc"
 	],
-    "libs-windows": [
+	"libs-windows": [
 		"raylib",
 		"lua53",
 		"vlc"
 	],
-    "subConfigurations": {
-		"bindbc-lua": "static"
-	},
 	"license": "BSD 0-clause",
 	"name": "heaven-engine",
+	"subConfigurations": {
+		"bindbc-lua": "static"
+	},
 	"versions": [
 		"LUA_53"
 	]

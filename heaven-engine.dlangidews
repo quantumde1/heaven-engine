@@ -1,9 +1,0 @@
-{
-    "includePath": {
-    },
-    "name": "heaven-engine",
-    "description": "Engine with Raylib in D, for Sky game",
-    "projects": {
-        "heaven-engine": "dub.json"
-    }
-}

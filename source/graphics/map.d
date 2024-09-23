@@ -127,20 +127,28 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
             switch (selectedMenuIndex) {
                 case 0:
-                    loadLocation("res/area1.glb", "res/test.png");
                     location_name = "area1";
+                    if (!rel) { writeln("goin to "~location_name);}
+                    loadLocation(cast(char*)"res/area1.glb", "res/test.png");
+                    isNewLocationNeeded = true;
                     break;
                 case 1:
-                    loadLocation("res/area2.glb", "res/test.png");
                     location_name = "area2";
+                    if (!rel) { writeln("goin to "~location_name);}
+                    loadLocation(cast(char*)"res/area2.glb", "res/test.png");
+                    isNewLocationNeeded = true;
                     break;
                 case 2:
-                    loadLocation("res/school.glb", "res/test.png");
                     location_name = "schl";
+                    if (!rel) { writeln("goin to "~location_name);}
+                    loadLocation(cast(char*)"res/school.glb", "res/test.png");
+                    isNewLocationNeeded = true;
                     break;
                 case 3:
-                    loadLocation("res/home.glb", "res/test.png");
                     location_name = "home";
+                    if (!rel) { writeln("goin to "~location_name);}
+                    loadLocation(cast(char*)"res/home.glb", "res/test.png");
+                    isNewLocationNeeded = true;
                     break;
                 default:
                     break;

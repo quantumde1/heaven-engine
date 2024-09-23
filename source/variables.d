@@ -24,6 +24,7 @@ bool selectingEnemy = false; // Флаг выбора вражеского ку�
 float flicker = 0.0;
 bool increasing = true;
 int ver = 1;
+bool showInventory  =false;
 //global vars for code
 bool allowControl = true; //for checking is control allowed at this moment
 bool showDialog = false; //is dialog must be shown now
@@ -40,6 +41,7 @@ Vector3 originalCameraPosition;
 Vector3 originalCameraTarget;
 enum CubeSize = 2;
 enum SpeedMultiplier = 2.0f;
+import raylib_lights;
 // Двумерный массив текста кнопок для каждой вкладки
 string[][] buttonTexts = [
     ["Physical attack", "Gun attack", "Pass"], // Для вкладки "Attack"
@@ -48,8 +50,17 @@ string[][] buttonTexts = [
     ["Seduce", "Pester", "Default"],
     ["Rethreat"]
 ];
-string[8][] availablePersonas = ["Izanagi-no-Okami", "Agi", "Dia"];
+string[][] buttonTextsInventory = [
+    ["Rasputin"], // Для вкладки "Summon"
+    ["Rasputin"],  // Для вкладки "Return"
+    ["Dia 6MP", "Agi 4MP", "Bufu 4MP"], // skill
+    ["Revival Bead"], // item
+    ["Save", "Exit game"] // system
+];
 string[10] availableItems;
+string[12] inventory;
+string[5] myDemons;
+string name = "Sasha";
 int selectedButtonIndex = 0;
 int selectedSubmenuButtonIndex = 0;
 struct ControlConfig {
@@ -94,3 +105,6 @@ int selectedChoice = 0;
 int pageChoice_glob;
 int answer_num;
 char* musicpath;
+Shader shader;
+bool isNewLocationNeeded = false;
+Light[4] lights;

@@ -243,7 +243,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         enemyTurn();
     }
 
-    drawPlayerHealthBar(playerHealth, 80);
+    drawPlayerHealthBar(playerHealth, 120);
     checkForVictory(camera, cubePosition);
 }
 

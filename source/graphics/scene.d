@@ -138,14 +138,14 @@ float radius) {
 
 void drawScene(Model floorModel, Texture2D floorTexture, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel, Texture2D playerTexture) {
- 
+    float[3] cameraPos = [ camera.position.x, camera.position.y, camera.position.z ];
+    SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0], ShaderUniformDataType.SHADER_UNIFORM_VEC3);    
     // Apply textures
-    floorModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = floorTexture;
-    playerModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = playerTexture;
+    //playerModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = playerTexture;
 
     // Scale factors
-    float playerScale = 3.6f; // Make the player model twice as large
-    float cubeScale = 3.6f; // Make other models twice as large
+    float playerScale = 5.0f; // Make the player model twice as large
+    float cubeScale = 5.0f; // Make other models twice as large
 
     BeginMode3D(camera);
 
@@ -156,20 +156,16 @@ void drawScene(Model floorModel, Texture2D floorTexture, Camera3D camera, Vector
             DrawModel(cubeModel, position, cubeScale, Colors.WHITE);
         }
     }
-
     // Draw player model with rotation
     Vector3 playerPosition = cubePosition;
 
     // Calculate the rotation in radians based on the camera angle plus an additional fixed 45 degrees
     float additionalRotation = 270.0f * std.math.PI / 180.0f; // Convert 45 degrees to radians
     float playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation; // Convert degrees to radians and add the 45-degree offset
-    Matrix rotationMatrix = MatrixRotate(Vector3(0.0f, 1.0f, 0.0f), playerRotation);
 
     DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
-
     // Draw floor model
-    DrawModel(floorModel, Vector3(0.0f, -1.0f, 0.0f), 40.0f, Colors.WHITE);
-    
+    DrawModel(floorModel, Vector3(0.0f, 0.0f, 0.0f), 19.0f, Colors.WHITE);
     EndMode3D();
 
     if (!inBattle && !friendlyZone) {

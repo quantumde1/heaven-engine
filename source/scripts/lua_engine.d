@@ -26,7 +26,7 @@ extern (C) nothrow int lua_getDialogName(lua_State *L) {
 }
 
 extern (C) nothrow int luaL_loadlocation(lua_State* L) {
-    loadLocation(luaL_checkstring(L, 1), luaL_checkstring(L, 2));
+    loadLocation(cast(char*)luaL_checkstring(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
