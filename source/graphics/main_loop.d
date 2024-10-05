@@ -1,4 +1,3 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
 module graphics.main_loop;
 
 import raylib;
@@ -34,11 +33,15 @@ enum FPS = 60;
 
 nothrow void loadLocation(char* first, const(char)* sec) {
     model_location_path = first;
-    if (!rel){ try {writeln("loading loc ", model_location_path); } catch (Exception e) {}}
+    if (!rel) { 
+        try { 
+            writeln("loading loc ", model_location_path); 
+        } catch (Exception e) {} 
+    }
 }
 
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
-int playerStepCounter, int encounterThreshold, bool inBattle) {
+                   int playerStepCounter, int encounterThreshold, bool inBattle) {
     const string debugText = q{
     Player Position: %s
     
@@ -61,7 +64,7 @@ int playerStepCounter, int encounterThreshold, bool inBattle) {
         playerStepCounter, encounterThreshold, rel, isAudioEnabled(), friendlyZone);
 
     DrawText(debugText.toStringz, 10, 10, FontSize, Colors.BLACK);
-    DrawFPS(GetScreenWidth() - 100, GetScreenHeight - 50);
+    DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
 }
 
 void drawWeatherDateTime(string weather, string time, string date) {
@@ -119,24 +122,6 @@ void fadeEffect(float alpha, bool fadeIn) {
 import raylib_lights;
 
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
-   /* LuaSupport ret;
-    version (Posix) ret = loadLua();
-    version(Windows) ret = loadLua("lua53.dll");
-    if(ret != luaSupport) {
-        // Handle error. For most use cases, its reasonable to use the the error handling API in
-        // bindbc-loader to retrieve error messages for logging and then abort. If necessary, it's
-        // possible to determine the root cause via the return value:
-        if(ret == luaSupport.noLibrary) {
-            writeln("no library");
-            return;
-        }
-        else if(luaSupport.badLibrary) {
-            writeln("broken library");
-            return;
-        } else {
-            writeln("LUA LOADED!!! POBEDA");
-        }
-    }*/
     bool isGamepadConnected = IsGamepadAvailable(0);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
@@ -146,75 +131,82 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     auto rnd_sec = Random(seed);
     int encounterThreshold = uniform(900, 3000, rnd);
     int randomNumber = uniform(1, 3, rnd_sec);
+    
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
     ToggleFullscreen();
     SetTargetFPS(FPS);
     initWindowAndCamera(window_name, screenWidth, screenHeight, camera);
     rel = isReleaseBuild();
+    
     fadeEffect(0.0f, true);
     fadeEffect(fadeAlpha, false);
+    
     BeginDrawing();
     playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
     ClearBackground(Colors.BLACK);
     EndDrawing();
+    
     immutable ControlConfig controlConfig = loadControlConfig();
     InitAudioDevice();
     showMainMenu(currentGameState);
+    
     float cameraSpeed = 5.0f;
-
-    // Load player model and texture
     Model playerModel = LoadModel("res/mc.glb");
-    Texture2D playerTexture;// = LoadTexture("res/test.png");
-    //playerModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = playerTexture;
-
-    // Load models and textures for other cubes
     Model[] cubeModels = [ LoadModel("res/mc.glb"), LoadModel("res/mc.glb")];
     float rotationStep = 1.3f;
-    radius = Vector3Distance(camera.position, camera.target);
-    //writeln(camera.position);
+    float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
-    Texture2D floorTexture;// = LoadTexture(texture_model_location_path);
-    string name;
-    if(!rel) { writeln("loading lua)"); }
+    
+    if (!rel) { writeln("loading lua"); }
+    
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     luaL_opendrawinglib(L);
     luaL_openaudiolib(L);
     luaL_openmovelib(L);
     luaL_opendialoglib(L);
+    
     if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
         writeln("Lua error: ", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
+    
     Model floorModel = LoadModel(model_location_path);
     auto fs = toStringz("shaders/lighting.fs");
     auto vs = toStringz("shaders/lighting.vs");
-    shader = LoadShader(vs,fs);
+    shader = LoadShader(vs, fs);
+    
+    // Set shader locations
     shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
     shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     int ambientLoc = GetShaderLocation(shader, "ambient");
     float[4] values = [ 0.1f, 0.1f, 0.1f, 1.0f ];
     SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
-    // Iterate over materials
-    for (int i = 0; i < playerModel.materialCount; i++)
-    {
-        playerModel.materials[i].shader = shader;
-    }
-    for (int i = 0; i < cubeModels.length; i++) {
-        for (int k = 0; k < cubeModels[i].materialCount; k++) { 
-            cubeModels[i].materials[k].shader = shader;
+    
+    // Assign shader to models
+    void assignShaderToModel(Model model) {
+        for (int i = 0; i < model.materialCount; i++) {
+            model.materials[i].shader = shader;
         }
     }
-    for (int i = 0; i < floorModel.materialCount; i++) {
-        floorModel.materials[i].shader = shader;
+    
+    assignShaderToModel(playerModel);
+    foreach (ref cubeModel; cubeModels) {
+        assignShaderToModel(cubeModel);
     }
-    lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3( 0, 9, 0 ), Vector3Zero(), Colors.LIGHTGRAY, shader);
-    SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:a4,righttrigger:a5; \\\\
-        030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
+    assignShaderToModel(floorModel);
+    
+    modelCharacterSize = 5.0f;
+    modelLocationSize = 19.0f;
+    lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
+    
+    SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2; \\\\
+        030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpr
+ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
+
     while (!WindowShouldClose()) {
         if (videoFinished) {
             switch (currentGameState) {
-                
                 case GameState.MainMenu:
                     showMainMenu(currentGameState);
                     break;
@@ -223,7 +215,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     if (isAudioEnabled()) {
                         UpdateMusicStream(music);
                     }
-                        UpdateLightValues(shader, lights[0]);
+                    UpdateLightValues(shader, lights[0]);    
                     
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
@@ -235,24 +227,24 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     Nullable!Cube collidedCube = handleCollisions(cubePosition, cubes, cubeBoundingBox);
                     BeginDrawing();
                     ClearBackground(Colors.RAYWHITE);
-                    if (!isNaN(iShowSpeed) && !isNaN(neededDegree)) {
+                    
+                    if (!isNaN(iShowSpeed) && !isNaN(neededDegree) && !isNewLocationNeeded) {
                         rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
                     }
-                    if (isNewLocationNeeded == false) {
 
-                    } else if (isNewLocationNeeded == true) {
+                    if (isNewLocationNeeded) {
                         playerStepCounter = 0;
-                        cubePosition = Vector3(0,0,0);
+                        cubePosition = Vector3(0, 0, 0);
                         camera.position = Vector3(0, 10, 10);
-                        camera.target = Vector3(0,4,0);
+                        camera.target = Vector3(0, 4, 0);
                         UnloadModel(floorModel);
                         floorModel = LoadModel(model_location_path);
                         isNewLocationNeeded = false;
-                        for (int i = 0; i < floorModel.materialCount; i++) {
-                            floorModel.materials[i].shader = shader;
-                        }
+                        assignShaderToModel(floorModel);
                     }
-                    drawScene(floorModel, floorTexture, camera, cubePosition, cameraAngle, cubeModels, playerModel, playerTexture);
+
+                    drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                    
                     if (show_sec_dialog && showDialog) {
                         allow_exit_dialog = allowControl = false;
                         display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
@@ -260,6 +252,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         displayDialogs(collidedCube, controlConfig.dialog_button, allowControl, showDialog, 
                         allow_exit_dialog, name);
                     }
+
                     float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
                         1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
 
@@ -283,12 +276,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         }
                     }
 
-                    if (Vector3Distance(cubePosition, targetPosition) < 4.0f) {
-                        showMapPrompt = true;
-                    } 
-                    else {
-                        showMapPrompt = false;
-                    }
+                    showMapPrompt = Vector3Distance(cubePosition, targetPosition) < 4.0f;
 
                     if (showMapPrompt) {
                         const int posY = GetScreenHeight() - FontSize - 40;
@@ -333,6 +321,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame && !rel) {
                         showDebug = !showDebug;
                     }
+                    
                     lua_getglobal(L, "checkDialogStatus");
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
                         lua_pop(L, 2);
@@ -348,14 +337,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     if (IsKeyPressed(KeyboardKey.KEY_I)) {
                         showInventory = true;
                     }
-                    if (showInventory == true) {
+                    if (showInventory) {
                         drawInventory();
                     }
                     EndDrawing();
                     break;
 
                 case GameState.Options:
-                    // inOptions();
+                    // Handle options menu here
                     break;
 
                 case GameState.Exit:

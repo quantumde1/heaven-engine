@@ -108,3 +108,5 @@ char* musicpath;
 Shader shader;
 bool isNewLocationNeeded = false;
 Light[4] lights;
+float modelLocationSize;
+float modelCharacterSize;

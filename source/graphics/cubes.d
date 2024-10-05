@@ -88,7 +88,7 @@ nothrow addCube(Vector3 position, string name, string[] text, int emotion, int c
     cube.choicePage = choicePage;
     //setting collision
     cube.boundingBox = BoundingBox(Vector3Subtract(position, Vector3(0.0f, 0.0f, 0.0f)), 
-                                   Vector3Add(position, Vector3(2.0f, 2.0f, 2.0f)));
+                                   Vector3Add(position, Vector3(4.0f, 4.0f, 4.0f)));
     //adding to massive
     cubes ~= cube;
 }

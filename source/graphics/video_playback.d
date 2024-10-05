@@ -9,6 +9,7 @@ import core.thread;
 import vlc;
 import variables;
 import core.sync.mutex;
+import std.array;
 
 struct Video {
     uint texW, texH;
@@ -102,23 +103,18 @@ void cleanup_video(Video* video) {
 }
 
 extern (C) int playVideo(char* argv) {
-    const(char)*[] vlcArgs;
-    if (!rel) {
-        vlcArgs = ["--verbose=2", "--no-xlib", "--drop-late-frames", "--live-caching=0", "--no-lua"];
-    } else {
-        vlcArgs = ["--verbose=-1", "--no-xlib", "--drop-late-frames", "--live-caching=0", "--no-lua"];
-    }
+    const(char)*[] vlcArgs = rel ? ["--verbose=-1", "--no-xlib", "--drop-late-frames", "--live-caching=0", "--no-lua"] :
+                                   ["--verbose=2", "--no-xlib", "--drop-late-frames", "--live-caching=0", "--no-lua"];
+    
     auto libvlc = libvlc_new(cast(int)vlcArgs.length, cast(const(char)**)vlcArgs.ptr);
-
     if (libvlc is null) {
-        writeln("Something went wrong with libvlc init.\nif you think you can fix it, turn on DEBUG mode in gamefolder/conf/build_type.conf at string BUILD_TYPE to check all available logs");
+        writeln("Something went wrong with libvlc init.");
         videoFinished = true;
         return 0;
     }
 
     Video*[] video_list;
     auto new_video = add_new_video(libvlc, argv, "file");
-
     if (new_video is null) {
         libvlc_release(libvlc);
         return 0;
@@ -147,25 +143,29 @@ extern (C) int playVideo(char* argv) {
                         float videoAspectRatio = cast(float)video.texW / cast(float)video.texH;
                         float screenAspectRatio = screenWidth / screenHeight;
 
-                        if (videoAspectRatio < screenAspectRatio) {
-                            video.scale = screenHeight / cast(float)video.texH;
-                        } else {
-                            video.scale = screenWidth / cast(float)video.texW;
+                        // Calculate scale based on aspect ratio
+                        video.scale = (videoAspectRatio < screenAspectRatio) ? 
+                                      (screenHeight / cast(float)video.texH) : 
+                                      (screenWidth / cast(float)video.texW);
+
+                        // Set video format only once
+                        if (video.texture.id == 0) {
+                            libvlc_video_set_format(video.player, "RV24", video.texW, video.texH, video.texW * 3);
+                            video.mutex.lock();
+                            
+                            // Load the texture and assign the ID to the texture struct
+                            video.texture.id = rlLoadTexture(null, video.texW, video.texH, PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8, 1);
+                            video.texture.width = video.texW;
+                            video.texture.height = video.texH;
+                            video.texture.format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+                            video.texture.mipmaps = 1;
+
+                            // Allocate buffer for video frame
+                            video.buffer = cast(ubyte*)MemAlloc(video.texW * video.texH * 3);
+                            video.needUpdate = false;
+                            video.mutex.unlock();
+                            if (!rel) writeln("Video texture initialized");
                         }
-
-                        libvlc_video_set_format(video.player, "RV24", video.texW, video.texH, video.texW * 3);
-
-                        video.mutex.lock();
-                        video.texture.id = rlLoadTexture(null, video.texW, video.texH, PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8, 1);
-                        video.texture.width = video.texW;
-                        video.texture.height = video.texH;
-                        video.texture.format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8;
-                        video.texture.mipmaps = 1;
-                        video.buffer = cast(ubyte*)MemAlloc(video.texW * video.texH * 3);
-                        video.needUpdate = false;
-                        video.mutex.unlock();
-
-                        if (!rel) writeln("Video texture initialized");
                     }
                 }
             } else {

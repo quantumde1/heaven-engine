@@ -9,53 +9,50 @@ import graphics.main_loop;
 import script;
 import variables;
 import std.conv;
+import std.algorithm;
+import std.uni: isWhite;
 
 void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cubes, string location) {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-    int selectedMenuIndex;
-    int rectWidth = 100;
-    int rectHeight = 100;
+    const int screenWidth = GetScreenWidth();
+    const int screenHeight = GetScreenHeight();
+    const int rectWidth = 100;
+    const int rectHeight = 100;
+    int selectedMenuIndex = 0;
     int rectX, rectY;
 
-    // Set initial rectangle position and selected menu index based on location
-    switch (location) {
-        case "schl":
-            rectX = screenWidth * 2 / 3;
-            rectY = screenHeight * 3 / 4;
-            selectedMenuIndex = 2;
-            break;
-        case "home":
-            rectX = screenHeight / 7;
-            rectY = screenWidth / 8;
-            selectedMenuIndex = 3;
-            break;
-        case "area1":
-            rectX = (screenWidth - screenHeight) / 2;
-            rectY = screenWidth / 8;
-            selectedMenuIndex = 0;
-            break;
-        case "area2":
-            rectX = screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3;
-            rectY = screenWidth / 5 + screenHeight / 25;
-            selectedMenuIndex = 1;
-            break;
-        default:
-            break;
-    }
-
-    SetTargetFPS(60);
-    int menuWidth = screenWidth / 5;
-    int menuHeight = screenHeight / 10;
-    int buttonPadding = 10;
-    int menuX = screenWidth - menuWidth - 10;
-    int menuY = screenHeight - (menuHeight + buttonPadding) * 4 - 10;
+    // Define menu options and their corresponding positions
     string[] menuOptions = ["Area 1", "Area 2", "School", "Home"];
 
+    string[] locationNames = ["area1", "area2", "schl", "home"];
+    int[][] menuPositions = [
+        [(screenWidth - screenHeight) / 2, screenWidth / 8], // Area 1
+        [screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3, screenWidth / 5 + screenHeight / 25], // Area 2
+        [screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3, screenWidth / 4 + screenHeight / 4], // School
+        [screenHeight / 7, screenWidth / 8] // Home
+    ];
+
+    // Set initial rectangle position based on location
+    switch (location) {
+        case "area1": selectedMenuIndex = 0; break;
+        case "area2": selectedMenuIndex = 1; break;
+        case "schl": selectedMenuIndex = 2; break;
+        case "home": selectedMenuIndex = 3; break;
+        default: break;
+    }
+    rectX = menuPositions[selectedMenuIndex][0];
+    rectY = menuPositions[selectedMenuIndex][1];
+
+    SetTargetFPS(60);
+    const int menuWidth = screenWidth / 5;
+    const int menuHeight = screenHeight / 10;
+    const int buttonPadding = 10;
+    const int menuX = screenWidth - menuWidth - 10;
+    const int menuY = screenHeight - (menuHeight + buttonPadding) * 4 - 10;
+
     // Load textures for animation
-    Texture2D[] arrowTextures = new Texture2D[15];
-    for (int i = 0; i < 15; i++) {
-        arrowTextures[i] = LoadTexture(toStringz("res/MC*-" ~ (i + 1).to!string() ~ ".png"));
+    Texture2D[] arrowTextures = new Texture2D[16];
+    foreach (i; 0 .. 16) {
+        arrowTextures[i] = LoadTexture(toStringz("res/MC*-" ~ i.to!string() ~ ".png"));
     }
     
     Texture2D mapTexture = LoadTexture("res/map_back.png");
@@ -68,7 +65,7 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
     
     int posY = GetScreenHeight() - 20 - 40;
     int currentFrame = 0;
-    float animationSpeed = 0.09f; // Adjust this value to change the speed of the animation
+    float animationSpeed = 0.07f;
     float timeElapsed = 0.0f;
 
     // Main game loop
@@ -78,82 +75,36 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
         // Update animation frame
         timeElapsed += GetFrameTime();
         if (timeElapsed >= animationSpeed) {
-            currentFrame = (currentFrame + 1) % cast(int)arrowTextures.length;
-            timeElapsed -= animationSpeed; // Subtract the animation speed to allow for continuous updates
+            currentFrame = cast(int)((currentFrame + 1) % arrowTextures.length);
+            timeElapsed = 0.0f;
         }
 
+        // Handle input
         if (IsGamepadAvailable(0)) {
-            int buttonSize = 30;
-            int circleCenterX = 40 + buttonSize / 2;
-            int circleCenterY = posY + buttonSize / 2;
-            int textYOffset = 7; // Adjust this offset based on your font and text size
-            DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.RED);
-            DrawText(("B"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
-            DrawText((" go to location"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
+            DrawCircle(40 + 15, posY + 15, 15, Colors.RED);
+            DrawText("B", 40 + 15 - 5, posY + 15 - 7, 20, Colors.BLACK);
+            DrawText(" go to location", 40 + 30 + 5, posY, 20, Colors.BLACK);
         } else {
-            int fontSize = 20;
-            DrawText(("Press enter to go to location"), 40, posY, fontSize, Colors.BLACK);
+            DrawText("Press enter to go to location", 40, posY, 20, Colors.BLACK);
         }
-        
+
         if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
-            selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
+                        selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
         }
         if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
             selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
         }
 
         // Update rectangle position based on selected menu index
-        switch (selectedMenuIndex) {
-            case 0:
-                rectX = (screenWidth - screenHeight) / 2;
-                rectY = screenWidth / 8;
-                break;
-            case 1:
-                rectX = screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3;
-                rectY = screenWidth / 5 + screenHeight / 25;
-                break;
-            case 2:
-                rectX = screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3;
-                rectY = screenWidth / 4 + screenHeight / 4;
-                break;
-            case 3:
-                rectX = screenHeight / 7;
-                rectY = screenWidth / 8;
-                break;
-            default:
-                break;
-        }
+        rectX = menuPositions[selectedMenuIndex][0];
+        rectY = menuPositions[selectedMenuIndex][1];
 
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
-            switch (selectedMenuIndex) {
-                case 0:
-                    location_name = "area1";
-                    if (!rel) { writeln("goin to "~location_name);}
-                    loadLocation(cast(char*)"res/area1.glb", "res/test.png");
-                    isNewLocationNeeded = true;
-                    break;
-                case 1:
-                    location_name = "area2";
-                    if (!rel) { writeln("goin to "~location_name);}
-                    loadLocation(cast(char*)"res/area2.glb", "res/test.png");
-                    isNewLocationNeeded = true;
-                    break;
-                case 2:
-                    location_name = "schl";
-                    if (!rel) { writeln("goin to "~location_name);}
-                    loadLocation(cast(char*)"res/school.glb", "res/test.png");
-                    isNewLocationNeeded = true;
-                    break;
-                case 3:
-                    location_name = "home";
-                    if (!rel) { writeln("goin to "~location_name);}
-                    loadLocation(cast(char*)"res/home.glb", "res/test.png");
-                    isNewLocationNeeded = true;
-                    break;
-                default:
-                    break;
-            }
-            break;
+            string location_name = locationNames[selectedMenuIndex]; // Convert to lowercase and remove whitespace for location name
+            if (!rel) { writeln("Going to " ~ location_name); }
+            loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"), "res/test.png");
+            isNewLocationNeeded = true;
+            break; // Exit the loop after loading the location
         }
 
         BeginDrawing();
@@ -167,19 +118,19 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
             Colors.WHITE
         );
 
+        // Draw menu options
         for (int i = 0; i < menuOptions.length; i++) {
             Color buttonColor = (i == selectedMenuIndex) ? Colors.DARKGRAY : Colors.LIGHTGRAY;
-            DrawRectangleRounded(Rectangle(menuX, menuY + (menuHeight + buttonPadding) * i, menuWidth, menuHeight),
-                0.2f, 10, buttonColor);
-            DrawText(cast(char*)menuOptions[i], menuX + 10, menuY + 10 + (menuHeight + buttonPadding) * i, 20,
-                Colors.WHITE);
+            DrawRectangleRounded(Rectangle(menuX, menuY + (menuHeight + buttonPadding) * i, menuWidth, menuHeight), 0.2f, 10, buttonColor);
+            DrawText(cast(char*)menuOptions[i], menuX + 10, menuY + 10 + (menuHeight + buttonPadding) * i, 20, Colors.WHITE);
         }
 
+        // Draw animated arrow
         float scaleFactor = 0.7f; // Scale factor
         DrawTexturePro(
-            arrowTextures[currentFrame], // Use the current frame for animation
+            arrowTextures[currentFrame],
             Rectangle(0, 0, cast(float)arrowTextures[currentFrame].width, cast(float)arrowTextures[currentFrame].height),
-            Rectangle(rectX, rectY, rectWidth * scaleFactor, rectHeight * scaleFactor), // Scale the width and height
+            Rectangle(rectX, rectY, rectWidth * scaleFactor, rectHeight * scaleFactor),
             Vector2(0, 0),
             0.0,
             Colors.WHITE
@@ -187,13 +138,13 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
         EndDrawing();
     }
 
-    // Unload textures
-    for (int i = 0; i < arrowTextures.length; i++) {
-        UnloadTexture(arrowTextures[i]);
+    // Unload textures and music
+    foreach (texture; arrowTextures) {
+        UnloadTexture(texture);
     }
     UnloadTexture(mapTexture);
     if (isAudioEnabled()) {
         UnloadMusicStream(musicMenu);
     }
-    PlayMusicStream(music);
+    PlayMusicStream(music); // Play the main music again if needed
 }

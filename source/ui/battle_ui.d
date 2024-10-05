@@ -11,19 +11,25 @@ import std.algorithm;
 import script;
 import std.string;
 
+const float CUBE_DRAW_HEIGHT = 2.5f;
+const float PLAYER_HEALTH_BAR_WIDTH = 200.0f;
+const float PLAYER_HEALTH_BAR_HEIGHT = 20.0f;
+const int PLAYER_HEALTH_BAR_X = 10;
+const int PLAYER_HEALTH_BAR_Y_OFFSET = 10;
+const int ATTACK_DAMAGE = 10;
+
 void drawEnemyCubes() {
     foreach (enemyCube; enemyCubes) {
-        // Draw the enemy model at the given position
         DrawModel(enemyCube.model, enemyCube.position, 3.6f, Colors.WHITE);
     }
 }
 
 void drawHPAboveCubes(Camera3D camera) {
-    foreach (index, enemyCube; enemyCubes) {
+    foreach (enemyCube; enemyCubes) {
         Vector3 cubeWorldPosition = enemyCube.position;
-        cubeWorldPosition.y += 2.5f;
+        cubeWorldPosition.y += CUBE_DRAW_HEIGHT;
         Vector2 cubeScreenPosition = GetWorldToScreen(cubeWorldPosition, camera);
-        string hpText = "HP: " ~ to!string(enemyCubes[index].health);
+        string hpText = "HP: " ~ to!string(enemyCube.health);
         DrawText(toStringz(enemyCube.name), cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y + 30, 20, Colors.RED);
         DrawText(hpText.ptr, cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y, 20, Colors.RED);
     }
@@ -31,15 +37,8 @@ void drawHPAboveCubes(Camera3D camera) {
 
 void attackTab(int element) {
     if (battleState.playerTurn && battleState.playerTurns > 0) {
-        switch (element) {
-            case 0:
-                physicalAttack();
-                break;
-            case 1:
-                // Add other attack types here
-                break;
-            default:
-                break;
+        if (element == 0) {
+            physicalAttack();
         }
         battleState.playerTurns--;
         if (battleState.playerTurns <= 0) {
@@ -51,21 +50,17 @@ void attackTab(int element) {
 
 void drawPlayerHealthBar(int playerHealth, int maxPlayerHealth) {
     int screenHeight = GetScreenHeight();
-    int barWidth = 200;
-    int barHeight = 20;
-    int barX = 10;
-    int barY = screenHeight - barHeight - 10;
     float healthPercentage = cast(float)playerHealth / maxPlayerHealth;
-    DrawRectangle(barX, barY, barWidth, barHeight, Colors.GRAY);
-    DrawRectangle(barX, barY, cast(int)(barWidth * healthPercentage), barHeight, Colors.RED);
+    DrawRectangle(cast(int)PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET), cast(int)PLAYER_HEALTH_BAR_WIDTH, cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
+    DrawRectangle(cast(int)PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET), cast(int)(PLAYER_HEALTH_BAR_WIDTH * healthPercentage), cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.RED);
     string healthText = "Health: " ~ to!string(playerHealth) ~ "/" ~ to!string(maxPlayerHealth);
-    DrawText(healthText.ptr, barX + 5, barY + 5, 10, Colors.WHITE);
+    DrawText(healthText.ptr, PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET + 5), 10, Colors.WHITE);
 }
 
 void physicalAttack() {
-    if (enemyCubes.length > selectedEnemyIndex) {
+    if (selectedEnemyIndex < enemyCubes.length) {
         EnemyCube enemy = enemyCubes[selectedEnemyIndex];
-        enemy.health -= 10;
+        enemy.health -= ATTACK_DAMAGE;
         if (!rel) writeln("Attacked ", enemy.name, ", Health left: ", enemy.health);
         if (enemy.health <= 0) {
             if (!rel) writeln(enemy.name, " is destroyed!");
@@ -113,7 +108,7 @@ void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraA
     cubePosition.y += 10.0f;
     camera.position.y += 10.0f;
     camera.target.y += 10.0f;
-    
+
     enemyModel = LoadModel("res/enemy_model.glb"); // Load model once here
 
     Vector3 enemyCubeOffset = Vector3(0.0f, 0.0f, -7.0f);
@@ -131,9 +126,9 @@ void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraA
 
 void enemyTurn() {
     if (!battleState.playerTurn) {
-        foreach (index, enemyCube; enemyCubes) {
+        foreach (enemyCube; enemyCubes) {
             if (enemyCube.health > 0) {
-                playerHealth -= 10;
+                playerHealth -= ATTACK_DAMAGE;
                 if (!rel) {
                     writeln("Enemy ", enemyCube.name, " attacks! Player HP: ", playerHealth);
                 }
@@ -172,7 +167,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         DrawText(cast(char*)menuTabs[i], i * tabWidth + 10, 10, 20, Colors.WHITE);
     }
 
-    if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy  || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) {
+    if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) {
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
         selectedButtonIndex = 0;
     }
@@ -198,10 +193,10 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         DrawText(cast(char*)buttonText[i], rectX + buttonMargin + 10, buttonY + 10, 20, Colors.BLACK);
     }
 
-    if (IsKeyPressed(KeyboardKey.KEY_DOWN)&& !selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy) {
+    if (IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy) {
         selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
     }
-    if (IsKeyPressed(KeyboardKey.KEY_UP)&& !selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy) {
+    if (IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy) {
         selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
     }
 
@@ -214,19 +209,21 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
             selectingEnemy = false;
         }
     }
+
     // Draw enemy model
     BeginMode3D(camera);
     drawEnemyCubes();
     EndMode3D();
+
     if (selectingEnemy) {
         foreach (index, enemyCube; enemyCubes) {
-            if (enemyCubes[index].health > 0) {
+            if (enemyCube.health > 0) {
                 Vector3 cubeWorldPosition = enemyCube.position;
-                cubeWorldPosition.y += 2.5f;
+                cubeWorldPosition.y += CUBE_DRAW_HEIGHT;
                 Vector2 cubeScreenPosition = GetWorldToScreen(cubeWorldPosition, camera);
                 Color enemyColor = (index == selectedEnemyIndex) ? Colors.RED : Colors.WHITE;
                 DrawCube(enemyCube.position, 2.0f, 2.0f, 2.0f, enemyColor);
-                string hpText = "HP: " ~ to!string(enemyCubes[index].health);
+                string hpText = "HP: " ~ to!string(enemyCube.health);
                 DrawText(cast(char*)enemyCube.name, cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y + 30, 20, enemyColor);
                 DrawText(cast(char*)hpText.ptr, cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y, 20, enemyColor);
             }
@@ -234,7 +231,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && selectingEnemy) {
             selectedEnemyIndex = cast(int)((selectedEnemyIndex + 1) % enemyCubes.length);
         }
-        if (IsKeyPressed(KeyboardKey.KEY_LEFT)&& selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && selectingEnemy) {
+        if (IsKeyPressed(KeyboardKey.KEY_LEFT) && selectingEnemy || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && selectingEnemy) {
             selectedEnemyIndex = cast(int)((selectedEnemyIndex - 1 + enemyCubes.length) % enemyCubes.length);
         }
     }
