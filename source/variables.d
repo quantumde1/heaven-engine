@@ -2,6 +2,9 @@ module variables;
 import graphics.cubes;
 import std.typecons;
 import raylib;
+
+extern (C) char* get_file_data_from_archive(const char *input_file, const char *file_name, uint *file_size_out);
+
 struct EnemyCube {
     Vector3 position;
     string name;

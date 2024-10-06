@@ -25,12 +25,16 @@ void showMainMenu(ref GameState currentGameState) {
     int selectedMenuIndex = 0;
     Music menuMusic;
     Music btnMenuMusic;
-
+    uint audio_size;
+    char *audio_data = get_file_data_from_archive("res/data.bin", "menu_music.mp3", &audio_size);
+    uint sfx_size;
+    char *sfx_data = get_file_data_from_archive("res/data.bin", "menu_btn_sfx.wav", &sfx_size);
+    
     // Load and play the menu music
     if (isAudioEnabled()) {
-        menuMusic = LoadMusicStream("res/menu_music.mp3");
+        menuMusic = LoadMusicStreamFromMemory(".MP3", cast(const(ubyte)*)audio_data, audio_size);
         PlayMusicStream(menuMusic);
-        btnMenuMusic = LoadMusicStream("res/menu_btn_sfx.wav");
+        btnMenuMusic = LoadMusicStreamFromMemory(".WAV", cast(const(ubyte)*)sfx_data, sfx_size);
     }
 
     int animFrames = 0;

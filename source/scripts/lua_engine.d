@@ -112,10 +112,16 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
 }
 
 extern (C) nothrow int lua_LoadMusic(lua_State *L) {
+    try {
     musicpath = cast(char*)luaL_checkstring(L, 1);
+    uint audio_size;
+    char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
     if (isAudioEnabled()) {
         UnloadMusicStream(music);
-        music = LoadMusicStream(musicpath);
+        music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+    }
+    } catch (Exception e) {
+
     }
     return 0;
 }

@@ -165,17 +165,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     luaL_openaudiolib(L);
     luaL_openmovelib(L);
     luaL_opendialoglib(L);
-    
     if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
         writeln("Lua error: ", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
     
     Model floorModel = LoadModel(model_location_path);
-    auto fs = toStringz("shaders/lighting.fs");
-    auto vs = toStringz("shaders/lighting.vs");
-    shader = LoadShader(vs, fs);
+    auto fs = "lighting.fs";
+    auto vs = "lighting.vs";
+    uint fssize;
+    char *fsdata = get_file_data_from_archive("res/shaders.bin", cast(char*)fs, &fssize);
+    uint vssize;
+    char *vsdata = get_file_data_from_archive("res/shaders.bin", cast(char*)vs, &vssize);
     
+    shader = LoadShaderFromMemory(vsdata, fsdata);
     // Set shader locations
     shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
     shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");

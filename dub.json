@@ -21,12 +21,14 @@
 	"lflags-posix": [
 		"-L/usr/lib",
 		"-L.",
-		"-L/opt/local/lib"
+		"-L/opt/local/lib",
+		"-L/usr/local/lib"
 	],
 	"libs-posix": [
 		"raylib",
 		"lua-5.3",
-		"vlc"
+		"vlc",
+		"hpff"
 	],
 	"libs-windows": [
 		"raylib",

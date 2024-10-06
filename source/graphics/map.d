@@ -41,7 +41,8 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
     }
     rectX = menuPositions[selectedMenuIndex][0];
     rectY = menuPositions[selectedMenuIndex][1];
-
+    uint image_size;
+    char *image_data = get_file_data_from_archive("res/data.bin", "map_back.png", &image_size);
     SetTargetFPS(60);
     const int menuWidth = screenWidth / 5;
     const int menuHeight = screenHeight / 10;
@@ -52,14 +53,21 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
     // Load textures for animation
     Texture2D[] arrowTextures = new Texture2D[16];
     foreach (i; 0 .. 16) {
-        arrowTextures[i] = LoadTexture(toStringz("res/MC*-" ~ i.to!string() ~ ".png"));
+        uint arrowSize;
+        char *arrow_data = get_file_data_from_archive("res/data.bin", toStringz("MC*-" ~ i.to!string() ~ ".png"), &arrowSize);
+        Image arrowArrow = LoadImageFromMemory(".PNG", cast(const(ubyte)*)arrow_data, arrowSize);
+        arrowTextures[i] = LoadTextureFromImage(arrowArrow);
+        UnloadImage(arrowArrow);
     }
-    
-    Texture2D mapTexture = LoadTexture("res/map_back.png");
+    Image imageMapBack = LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size);
+    Texture2D mapTexture = LoadTextureFromImage(imageMapBack);
+    UnloadImage(imageMapBack);
+    uint audio_size;
+    char *audio_data = get_file_data_from_archive("res/data.bin", "map_music.mp3", &audio_size);
     Music musicMenu;
 
     if (isAudioEnabled()) {
-        musicMenu = LoadMusicStream("res/map_music.mp3");
+        musicMenu = LoadMusicStreamFromMemory(".MP3", cast(const(ubyte)*)audio_data, audio_size);
         PlayMusicStream(musicMenu);
     }
     
