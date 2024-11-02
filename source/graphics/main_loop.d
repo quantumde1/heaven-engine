@@ -299,7 +299,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         playerStepCounter = 0;
                         encounterThreshold = uniform(900, 3000, rnd);
                         inBattle = true;
-                        initBattle(camera, cubePosition, cameraAngle, randomNumber);
+                        initBattle(camera, cubePosition, cameraAngle, randomNumber, false);
                     }
 
                     if (inBattle) {

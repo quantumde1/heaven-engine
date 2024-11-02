@@ -27,10 +27,16 @@ extern (C) nothrow int lua_initBattle(lua_State *L) {
     originalCameraTarget = camera.target;
     StopMusicStream(music);
     allowControl = false;
+    bool isBoss;
+    if (luaL_checkinteger(L, 2) == 1) {
+        isBoss = true;
+    } else {
+        isBoss = false;
+    }
     playerStepCounter = 0;
     inBattle = true;
     try {
-        initBattle(camera, cubePosition, cameraAngle, to!int(luaL_checkinteger(L, 1))-1);
+        initBattle(camera, cubePosition, cameraAngle, to!int(luaL_checkinteger(L, 1))-1,isBoss);
     } catch (Exception e) {
 
     }
