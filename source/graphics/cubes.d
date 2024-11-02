@@ -5,6 +5,7 @@ import raylib;
 import std.typecons : Nullable;
 import graphics.main_loop;
 import variables;
+import std.stdio;
 
 //This is a cube structure. Here we're specify all informations which need for cube initializing and moving.
 struct Cube {
@@ -21,6 +22,7 @@ struct Cube {
     bool isLoaded;
     Vector3[] moveQueuePositions;
     float[] moveQueueDurations;
+    float rotation;
 }
 
 struct DialogNoCube {
@@ -54,6 +56,7 @@ nothrow beginNextMove(ref Cube cube) {
         cube.moveQueuePositions = cube.moveQueuePositions[1..$];
         cube.moveQueueDurations = cube.moveQueueDurations[1..$];
     } else {
+        cube.isMoving = false;
         allowControl = true;
     }
 }
@@ -78,6 +81,12 @@ bool isAnyCubeMoving() {
     return false;
 }
 
+import std.math;
+
+void rotateCube(ref Cube cube, float targetAngle, float rotationSpeed, float deltaTime) {
+    cube.rotation = targetAngle;
+}
+
 //adding cubes to map
 nothrow addCube(Vector3 position, string name, string[] text, int emotion, int choicePage) {
     //adding all needed for cube struct
@@ -91,4 +100,21 @@ nothrow addCube(Vector3 position, string name, string[] text, int emotion, int c
                                    Vector3Add(position, Vector3(4.0f, 4.0f, 4.0f)));
     //adding to massive
     cubes ~= cube;
+}
+
+nothrow void removeCube(string name) {
+    // Find the index of the cube in the array by name
+    int indexToRemove = -1;
+    foreach (index, cube; cubes) {
+        try {if (!rel) writeln("cube name:", cube.name, "cube index:", index); } catch (Exception e) {}
+        if (cube.name == name) {
+            indexToRemove = cast(int)index;
+            break;
+        }
+    }
+
+    // If the cube is found, remove it from the array
+    if (indexToRemove != -1) {
+        cubes = cubes[0 .. indexToRemove] ~ cubes[indexToRemove + 1 .. cubes.length];
+    }
 }

@@ -89,7 +89,9 @@ void checkForVictory(ref Camera3D camera, ref Vector3 cubePosition) {
         UnloadModel(enemyModel);
         UnloadMusicStream(music);
         allowControl = true;
-        music = LoadMusicStream(musicpath);
+        uint audio_size;
+        char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
+        music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
         PlayMusicStream(music);
     }
 }
@@ -117,9 +119,9 @@ void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraA
     for (int i = 0; i <= randomCounter; i++) {
         enemyCubeOffset.x = i * 4.0f;
         Vector3 enemyCubePosition = Vector3Add(cubePosition, enemyCubeOffset);
-        EnemyCube enemyCube = {enemyCubePosition, "TestCube" ~ (i + 1).to!string(), 20, enemyModel};
+        EnemyCube enemyCube = {enemyCubePosition, "debug" ~ (i + 1).to!string(), 20, enemyModel};
         enemyCubes ~= enemyCube;
-        addCube(enemyCube.position, enemyCube.name, ["test"], 0, 0);
+        addCube(enemyCube.position, enemyCube.name, [""], 0, 0);
     }
     battleState.playerTurns = 1;
     battleState.enemyTurns = cast(int)enemyCubes.length;
@@ -244,20 +246,4 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
 
     drawPlayerHealthBar(playerHealth, 120);
     checkForVictory(camera, cubePosition);
-}
-
-nothrow void removeCube(string name) {
-    // Find the index of the cube in the array by name
-    int indexToRemove = -1;
-    foreach (index, cube; cubes) {
-        if (cube.name == name) {
-            indexToRemove = cast(int)index;
-            break;
-        }
-    }
-
-    // If the cube is found, remove it from the array
-    if (indexToRemove != -1) {
-        cubes = cubes[0 .. indexToRemove] ~ cubes[indexToRemove + 1 .. $];
-    }
 }

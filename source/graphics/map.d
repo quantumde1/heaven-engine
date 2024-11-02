@@ -2,7 +2,6 @@ module graphics.map;
 
 import raylib;
 import graphics.scene;
-import graphics.cubes;
 import std.stdio;
 import std.string;
 import graphics.main_loop;
@@ -12,7 +11,7 @@ import std.conv;
 import std.algorithm;
 import std.uni: isWhite;
 
-void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cubes, string location) {
+void openMap(string location) {
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
     const int rectWidth = 100;
@@ -110,7 +109,7 @@ void openMap(Camera3D camera, Vector3 cubeSecPosition, float camAngle, Cube[] cu
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
             string location_name = locationNames[selectedMenuIndex]; // Convert to lowercase and remove whitespace for location name
             if (!rel) { writeln("Going to " ~ location_name); }
-            loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"), "res/test.png");
+            loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"));
             isNewLocationNeeded = true;
             break; // Exit the loop after loading the location
         }

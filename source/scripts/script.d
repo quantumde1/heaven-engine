@@ -88,6 +88,11 @@ nothrow char parse_conf(string filename, string type) {
                 if (!rel) debug_print(dialog);
                 return dialog.front.to!char;
             }
+             else if (type == "opmenu" && trimmedLine.startsWith("OPMENU:")) {
+                auto opmenu = trimmedLine["OPMENU:".length .. $].strip();
+                if (!rel) debug_print(opmenu);
+                return opmenu.front.to!char;
+            }
         }
     } catch (Exception e) {
         debug_print("Error parsing config: " ~ e.msg);

@@ -25,13 +25,25 @@ import graphics.map;
 import std.array;
 import ui.inventory;
 
+// Constants
 enum FontSize = 20;
 enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
 enum FPS = 60;
 
-nothrow void loadLocation(char* first, const(char)* sec) {
+// Function Declarations
+nothrow void loadLocation(char* first);
+void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
+                   int playerStepCounter, int encounterThreshold, bool inBattle);
+void drawWeatherDateTime(string weather, string time, string date);
+ControlConfig loadControlConfig();
+void closeAudio();
+void fadeEffect(float alpha, bool fadeIn);
+void engine_loader(string window_name, int screenWidth, int screenHeight);
+
+// Function Implementations
+nothrow void loadLocation(char* first) {
     model_location_path = first;
     if (!rel) { 
         try { 
@@ -95,7 +107,8 @@ ControlConfig loadControlConfig() {
         parse_conf("conf/layout.conf", "left"),
         parse_conf("conf/layout.conf", "backward"),
         parse_conf("conf/layout.conf", "forward"),
-        parse_conf("conf/layout.conf", "dialog")
+        parse_conf("conf/layout.conf", "dialog"),
+        parse_conf("conf/layout.conf", "opmenu")
     );
 }
 
@@ -122,6 +135,8 @@ void fadeEffect(float alpha, bool fadeIn) {
 import raylib_lights;
 
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
+    // Initialization
+    
     bool isGamepadConnected = IsGamepadAvailable(0);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
@@ -129,47 +144,55 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     uint seed = cast(uint)Clock.currTime().toUnixTime();
     auto rnd = Random(seed);
     auto rnd_sec = Random(seed);
-    int encounterThreshold = uniform(900, 3000, rnd);
-    int randomNumber = uniform(1, 3, rnd_sec);
     
+    encounterThreshold = uniform(900, 3000, rnd);
+    randomNumber = uniform(1, 3, rnd_sec);
+    
+    // Window and Audio Initialization
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
     ToggleFullscreen();
     SetTargetFPS(FPS);
-    initWindowAndCamera(window_name, screenWidth, screenHeight, camera);
     rel = isReleaseBuild();
     
+    // Fade In and Out Effects
     fadeEffect(0.0f, true);
     fadeEffect(fadeAlpha, false);
     
+    // Play Opening Video
     BeginDrawing();
     playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
     ClearBackground(Colors.BLACK);
     EndDrawing();
     
+    // Load Control Configuration and Initialize Audio
     immutable ControlConfig controlConfig = loadControlConfig();
     InitAudioDevice();
     showMainMenu(currentGameState);
-    
+    // Lua Initialization
+    if (!rel) { writeln("loading lua"); }
+    L = luaL_newstate();
+    luaL_openlibs(L);
+    luaL_registerAllLibraries(L);
+    // Load Lua Script
+    if (!rel) {
+        if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
+            lua_pop(L, 1);
+            writeln("Lua error: ", lua_tostring(L, -1));
+        }
+    } else {
+        if (luaL_dofile(L, "scripts/event_00.bin") != LUA_OK) {
+            lua_pop(L, 1);
+            writeln("Script execution error: ", lua_tostring(L, -1));
+        }
+    }
+    initWindowAndCamera(camera);
+    // Load Models
     float cameraSpeed = 5.0f;
-    Model playerModel = LoadModel("res/mc.glb");
-    Model[] cubeModels = [ LoadModel("res/mc.glb"), LoadModel("res/mc.glb")];
     float rotationStep = 1.3f;
     float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
     
-    if (!rel) { writeln("loading lua"); }
-    
-    lua_State* L = luaL_newstate();
-    luaL_openlibs(L);
-    luaL_opendrawinglib(L);
-    luaL_openaudiolib(L);
-    luaL_openmovelib(L);
-    luaL_opendialoglib(L);
-    if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
-        writeln("Lua error: ", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
-    
+    // Load Floor Model and Shaders
     Model floorModel = LoadModel(model_location_path);
     auto fs = "lighting.fs";
     auto vs = "lighting.vs";
@@ -179,14 +202,15 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     char *vsdata = get_file_data_from_archive("res/shaders.bin", cast(char*)vs, &vssize);
     
     shader = LoadShaderFromMemory(vsdata, fsdata);
-    // Set shader locations
+    
+    // Set Shader Locations
     shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
     shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     int ambientLoc = GetShaderLocation(shader, "ambient");
     float[4] values = [ 0.1f, 0.1f, 0.1f, 1.0f ];
     SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
     
-    // Assign shader to models
+    // Assign Shader to Models
     void assignShaderToModel(Model model) {
         for (int i = 0; i < model.materialCount; i++) {
             model.materials[i].shader = shader;
@@ -198,33 +222,39 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         assignShaderToModel(cubeModel);
     }
     assignShaderToModel(floorModel);
-    
+    fontdialog = LoadFont("res/font.png");
+    // Lighting Setup
     modelCharacterSize = 5.0f;
     modelLocationSize = 19.0f;
     lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
-    
-    SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2; \\\\
-        030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpr
-ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
+    luaL_initDialogs(L);
 
+    // Gamepad Mappings
+    SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,    dpright:h0.2;
+        030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
+    foreach (i, cubeModel; cubeModels) {
+        cubes[i].rotation = 0.0f;
+    }
+    // Main Game Loop
     while (!WindowShouldClose()) {
         if (videoFinished) {
             switch (currentGameState) {
                 case GameState.MainMenu:
                     showMainMenu(currentGameState);
                     break;
+
                 case GameState.InGame:
                     deltaTime = GetFrameTime();
                     if (isAudioEnabled()) {
                         UpdateMusicStream(music);
                     }
                     UpdateLightValues(shader, lights[0]);    
+                    luaL_updateDialog(L);
                     
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
                         controlConfig.forward_button,
                         controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
-
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
 
                     Nullable!Cube collidedCube = handleCollisions(cubePosition, cubes, cubeBoundingBox);
@@ -240,6 +270,7 @@ ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;")
                         cubePosition = Vector3(0, 0, 0);
                         camera.position = Vector3(0, 10, 10);
                         camera.target = Vector3(0, 4, 0);
+                        cameraAngle = 90.0f;
                         UnloadModel(floorModel);
                         floorModel = LoadModel(model_location_path);
                         isNewLocationNeeded = false;
@@ -279,6 +310,7 @@ ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;")
                         }
                     }
 
+                    // Show Map Prompt
                     showMapPrompt = Vector3Distance(cubePosition, targetPosition) < 4.0f;
 
                     if (showMapPrompt) {
@@ -297,15 +329,19 @@ ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;")
 
                         if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                             StopMusicStream(music);
-                            openMap(camera, cubePosition, cameraAngle, cubes, location_name);
+                            openMap(location_name);
                         }
                     }
+                    if (showDialog) {
 
-                    int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
-                    if (!inBattle && !friendlyZone) {
-                        draw_flickering_rhombus(colorChoice, colorIntensity);
+                    } else {
+                        // Flickering Effect
+                        int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
+                        if (!inBattle && !friendlyZone) {
+                            draw_flickering_rhombus(colorChoice, colorIntensity);
+                        }
                     }
-
+                    // Update Moving Cubes
                     foreach (ref cube; cubes) {
                         if (cube.isMoving) {
                             float elapsedTime = GetTime() - cube.moveStartTime;
@@ -321,10 +357,12 @@ ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;")
                         }
                     }
 
+                    // Debug Toggle
                     if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame && !rel) {
                         showDebug = !showDebug;
                     }
                     
+                    // Check Dialog Status
                     lua_getglobal(L, "checkDialogStatus");
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
                         lua_pop(L, 2);
@@ -333,11 +371,14 @@ ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;")
                         lua_pop(L, 1);
                     }
 
+                    // Draw Debug Information
                     if (showDebug) {
                         drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, 
                         encounterThreshold, inBattle);
                     }
-                    if (IsKeyPressed(KeyboardKey.KEY_I)) {
+
+                    // Inventory Handling
+                    if (IsKeyPressed(controlConfig.opmenu_button)) {
                         showInventory = true;
                     }
                     if (showInventory) {
@@ -364,6 +405,7 @@ ight:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;")
         }
     }
 
+    // Cleanup
     EndDrawing();
     UnloadShader(shader); 
     scope(exit) closeAudio();

@@ -1,5 +1,6 @@
 module vlc;
 
+version (Posix) {
 extern (C) {
     struct libvlc_instance_t;
     struct libvlc_media_t;
@@ -72,4 +73,8 @@ void function(void*), void* user_data) {
     auto event_manager = libvlc_media_player_event_manager(player);
     libvlc_event_attach(event_manager, libvlc_event_type_t.libvlc_MediaPlayerEndReached, &endReachedCallback, 
     cast(void*)user_data);
+}
+}
+version (Windows) {
+    
 }

@@ -21,13 +21,26 @@ private const float TWO_PI = 2.0f * std.math.PI;
 private const float FULL_ROTATION = 360.0f;
 private const float HALF_ROTATION = 180.0f;
 
-// Initializing window and camera
-void initWindowAndCamera(string windowName, int screenWidth, int screenHeight, ref Camera3D camera) {
+// Function to initialize the camera
+Camera3D createCamera() {
+    // Set the field of view and projection type
+    float fov = 45.0f;
+    CameraProjection projection = CameraProjection.CAMERA_PERSPECTIVE;
+    
+    // Create and return the camera
+    return Camera3D(positionCam, targetCam, upCam, fov, projection);
+}
+
+// Function to initialize the window and camera
+void initWindowAndCamera(ref Camera3D camera) {
+    // Check if the window should close
     if (WindowShouldClose()) {
         writeln("Window initialization error");
         return;
     }
-    camera = Camera3D(Vector3(0.0f, 10.0f, 10.0f), Vector3(0.0f, 4.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f), 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
+    
+    // Initialize the camera
+    camera = createCamera();
 }
 
 void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, float cameraSpeed, float deltaTime,
@@ -55,10 +68,12 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     }
 
     if (!trackingCube.isNull) {
-        Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max - trackingCube.get.boundingBox.min) / 2.0f;
+        Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max - 
+        trackingCube.get.boundingBox.min) / 2.0f;
         Vector3 direction = Vector3Normalize(Vector3Subtract(targetPosition, camera.position));
         camera.target = Vector3Lerp(camera.target, targetPosition, deltaTime * cameraSpeed);
-        camera.position = Vector3Lerp(camera.position, Vector3Subtract(camera.target, Vector3Scale(direction, desiredDistance)), deltaTime * cameraSpeed);
+        camera.position = Vector3Lerp(camera.position, Vector3Subtract(camera.target, 
+        Vector3Scale(direction, desiredDistance)), deltaTime * cameraSpeed);
     }
 }
 
@@ -88,7 +103,8 @@ void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
 
-void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, float rotationStep, float radius) {
+void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, 
+float rotationStep, float radius) {
     if (allowControl) {
         if (IsKeyDown(KeyboardKey.KEY_LEFT)) {
             cameraAngle = (cameraAngle - rotationStep + FULL_ROTATION) % FULL_ROTATION;
@@ -98,7 +114,8 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
         if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
             cameraAngle = (cameraAngle - 45.0f + FULL_ROTATION) % FULL_ROTATION;
         }
-        if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
+        if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(0, 
+        GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
             cameraAngle = (cameraAngle + 45.0f) % FULL_ROTATION;
         } else {
             float rightAxisMovement = GetGamepadAxisMovement(0, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
@@ -119,30 +136,31 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
 void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
-    SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0], ShaderUniformDataType.SHADER_UNIFORM_VEC3);    
+    SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
+    ShaderUniformDataType.SHADER_UNIFORM_VEC3);    
 
     float playerScale = modelCharacterSize; 
-    float cubeScale = 5.0f; 
 
     BeginMode3D(camera);
-
     // Draw cubes as models
     foreach (i, cubeModel; cubeModels) {
         Vector3 position = cubes[i].boundingBox.min;
-        DrawModel(cubeModel, position, cubeScale, Colors.WHITE);
+        DrawModelEx(cubeModel, position, Vector3(0.0f, 1.0f, 0.0f), cubes[i].rotation, Vector3(playerScale, 
+        playerScale, playerScale), Colors.WHITE);
     }
 
     // Draw player model with rotation
     Vector3 playerPosition = cubePosition;
     float additionalRotation = 270.0f * std.math.PI / 180.0f; 
     float playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation; 
-    DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
+    DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
+    Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
 
     // Draw floor model
     DrawModel(floorModel, Vector3(0.0f, 0.0f, 0.0f), modelLocationSize, Colors.WHITE);
     EndMode3D();
 
-    if (!inBattle && !friendlyZone) {
+    if (!inBattle) {
         draw_navigation(cameraAngle);
     }
 }
