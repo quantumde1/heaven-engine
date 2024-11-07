@@ -1,260 +1,133 @@
 module graphics.ui_drawing;
 
-import graphics.main_loop;
-import graphics.cubes;
-import dialogs.dialog_system;
 import raylib;
-import std.typecons;
 import variables;
 import std.stdio;
 import script;
 import core.time;
 import core.thread;
+import std.string;
 
 void showMainMenu(ref GameState currentGameState) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
-    int menuWidth = screenWidth / 5;
-    int menuHeight = screenHeight / 10;
-    int buttonPadding = 10;
+    
+    // Load the font from the image
+    Font menuFont = LoadFont("res/font.png");
+    
+    float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
+    // Load the logo texture
+    Texture2D logoTexture = LoadTexture("res/logo.png");
+    
+    // Calculate the position for the logo
+    int logoX = (screenWidth - logoTexture.width) / 2;
+    int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
 
-    // Calculate the position of the menu in the bottom right corner
-    int menuX = screenWidth - menuWidth - 10;
-    int menuY = screenHeight - (menuHeight + buttonPadding) * 3 - 10;
     string[] menuOptions = ["Start Game", "Options", "Exit Game"];
     int selectedMenuIndex = 0;
-    Music menuMusic;
-    Music btnMenuMusic;
-    uint audio_size;
-    char *audio_data = get_file_data_from_archive("res/data.bin", "menu_music.mp3", &audio_size);
-    uint sfx_size;
-    char *sfx_data = get_file_data_from_archive("res/data.bin", "menu_btn_sfx.wav", &sfx_size);
-    
-    // Load and play the menu music
-    if (isAudioEnabled()) {
-        menuMusic = LoadMusicStreamFromMemory(".MP3", cast(const(ubyte)*)audio_data, audio_size);
-        PlayMusicStream(menuMusic);
-        btnMenuMusic = LoadMusicStreamFromMemory(".WAV", cast(const(ubyte)*)sfx_data, sfx_size);
-    }
-
-    int animFrames = 0;
-    bool isGifLoaded = false;
-    Image imScarfyAnim;
-
-    // Loading indicator variables
-    int loadingBarWidth = screenWidth;
-    int loadingBarHeight = 25;
-    int loadingBarX = 0;
-    int loadingBarY = screenHeight - loadingBarHeight - 10; // Position the bar 10 pixels from the bottom
-    float loadingProgress = 0.0f;
-    float loadingBarAlpha = 1.0f;
-    version (Posix) {
-    auto loadGifThread = new Thread({
-        imScarfyAnim = LoadImageAnim("res/menu_background.gif", &animFrames);
-        isGifLoaded = true;
-    });
-    }
-    version (Windows) {
-         auto loadGifThread = new Thread({
-        imScarfyAnim = LoadImageAnim("hui.siegheil", &animFrames);
-        isGifLoaded = true;
-    });
-    }
-    loadGifThread.start();
-
-    Texture2D texScarfyAnim = {0};
-    int nextFrameDataOffset = 0;
-    int currentAnimFrame = 0;
-    int frameDelay = 2;
-    int frameCounter = 0;
     float scaleX = 1.0f;
-    float splashFadeAlpha = 0.0f;
-    float fadeAlpha = 1.0f;
-    bool loadingBarComplete = false;
-    int posY = GetScreenHeight() - 20 - 40;
-    while (!WindowShouldClose()) {
-        frameCounter++;
-        if (frameCounter >= frameDelay) {
-            currentAnimFrame++;
-            if (currentAnimFrame >= animFrames) currentAnimFrame = 0;
 
-            nextFrameDataOffset = imScarfyAnim.width * imScarfyAnim.height * 4 * currentAnimFrame;
-            if (texScarfyAnim.id != 0) {
-                UpdateTexture(texScarfyAnim, imScarfyAnim.data + nextFrameDataOffset);
-            }
-            frameCounter = 0;
-        }
+    // Fade-in effect
+    while (fadeAlpha < 1.0f) {
+        fadeAlpha += 0.02f; // Increase alpha value for fading in
+        if (fadeAlpha > 1.0f) fadeAlpha = 1.0f; // Clamp to 1.0
 
         BeginDrawing();
         ClearBackground(Colors.BLACK);
 
-        if (!isGifLoaded) {
-            loadingProgress += 0.006f;
-            if (loadingProgress >= 1.0f) {
-                loadingProgress = 1.0f;
-                loadingBarComplete = true;
-            }
-            DrawRectangle(loadingBarX, loadingBarY, loadingBarWidth, loadingBarHeight, Fade(Colors.DARKGRAY, loadingBarAlpha));
-            DrawRectangle(loadingBarX, loadingBarY, cast(int)(loadingBarWidth * loadingProgress), loadingBarHeight, Fade(Colors.GREEN, loadingBarAlpha));
-            DrawText("Loading...", loadingBarX + loadingBarWidth / 2 - MeasureText("Loading...", 20) / 2, loadingBarY - 30, 20, Colors.WHITE);
-        } else {
-            if (loadingBarComplete && loadingBarAlpha > 0.0f) {
-                loadingBarAlpha -= 0.02f; // Adjust the decrement value to control the speed of the fade
-            }
+        // Draw the logo with fading
+        DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
 
-            if (texScarfyAnim.id == 0) {
-                texScarfyAnim = LoadTextureFromImage(imScarfyAnim);
-                scaleX = cast(float)screenWidth / texScarfyAnim.width;
-            }
+        // Draw the menu options with fading
+        for (int i = 0; i < menuOptions.length; i++) {
+            Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
+            int textWidth = cast(int)MeasureTextEx(menuFont, toStringz(menuOptions[i]), 30, 0).x;
+            int textX = (screenWidth - textWidth) / 2; // Center the text
+            int textY = logoY + logoTexture.height + 30 + (30 * i); // Position below the logo
 
-            if (isAudioEnabled()) {
-                UpdateMusicStream(menuMusic);
-            }
-            DrawTextureEx(texScarfyAnim, Vector2(0, 0), 0.0f, scaleX, Fade(Colors.WHITE, splashFadeAlpha));
-
-            if (splashFadeAlpha < 1.0f) {
-                splashFadeAlpha += 0.04f;
-            } else {
-                if (IsGamepadAvailable(0)) {
-                    int buttonSize = 30;
-                    int circleCenterX = 40 + buttonSize / 2;
-                    int circleCenterY = posY + buttonSize / 2;
-                    int textYOffset = 7; // Adjust this offset based on your font and text size
-                    DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.GREEN);
-                    DrawText(cast(char*)("A"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
-                    DrawText(cast(char*)(" to open"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
-                } else {
-                    int fontSize = 20;
-                    DrawText(cast(char*)("Press enter to start"), 40, posY, fontSize, Colors.BLACK);
-                }
-                for (int i = 0; i < menuOptions.length; i++) {
-                    Color buttonColor = (i == selectedMenuIndex) ? Colors.DARKGRAY : Colors.LIGHTGRAY;
-                    DrawRectangleRounded(Rectangle(menuX, menuY + (menuHeight + buttonPadding) * i, menuWidth, menuHeight), 0.2f, 10, buttonColor);
-                    DrawText(cast(char*)menuOptions[i], menuX + 10, menuY + 10 + (menuHeight + buttonPadding) * i, 20, Colors.WHITE);
-                }
-
-                if (isAudioEnabled()) {
-                    UpdateMusicStream(btnMenuMusic);
-                }
-
-                if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
-                    if (isAudioEnabled()) {
-                        PlayMusicStream(btnMenuMusic);
-                    }
-                    selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
-                }
-
-                if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
-                    if (isAudioEnabled()) {
-                        PlayMusicStream(btnMenuMusic);
-                    }
-                    selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
-                }
-
-                if (IsKeyReleased(KeyboardKey.KEY_UP) || IsKeyReleased(KeyboardKey.KEY_DOWN)) {
-                    if (isAudioEnabled()) {
-                        auto stopThread = new Thread({
-                            Thread.sleep(dur!"msecs"(150));
-                            StopMusicStream(btnMenuMusic);
-                        });
-                        stopThread.start();
-                    }
-                } else if (IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) || 
-                IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
-                    auto stopThread = new Thread({
-                            Thread.sleep(dur!"msecs"(200));
-                            StopMusicStream(btnMenuMusic);
-                        });
-                        stopThread.start();
-                }
-
-                if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-                    switch (selectedMenuIndex) {
-                        case 0:
-                            while (fadeAlpha > 0.0f) {
-                                fadeAlpha -= 0.04f;
-                                BeginDrawing();
-                                ClearBackground(Colors.BLACK);
-                                DrawTextureEx(texScarfyAnim, Vector2(0, 0), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-                                EndDrawing();
-                            }
-                            currentGameState = GameState.InGame;
-                            if (isAudioEnabled()) {
-                                StopMusicStream(menuMusic);
-                                UnloadMusicStream(menuMusic);
-                            }
-                            UnloadTexture(texScarfyAnim);
-                            UnloadImage(imScarfyAnim);
-                            return;
-                        case 1:
-                            break;
-                        case 2:
-                            currentGameState = GameState.Exit;
-                            return;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            // Draw the loading bar even after GIF is loaded for the fade effect
-            if (loadingBarAlpha > 0.0f) {
-                DrawRectangle(loadingBarX, loadingBarY, loadingBarWidth, loadingBarHeight, Fade(Colors.DARKGRAY, loadingBarAlpha));
-                DrawRectangle(loadingBarX, loadingBarY, cast(int)(loadingBarWidth * loadingProgress), loadingBarHeight, Fade(Colors.GREEN, loadingBarAlpha));
-                DrawText("Loading...", loadingBarX + loadingBarWidth / 2 - MeasureText("Loading...", 20) / 2, loadingBarY - 30, 20, Fade(Colors.WHITE, loadingBarAlpha));
-            }
+            // Apply fading to the text color
+            Color fadedTextColor = Fade(textColor, fadeAlpha);
+            DrawTextEx(menuFont, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
         }
 
         EndDrawing();
     }
 
-    if (isAudioEnabled()) {
-        UnloadMusicStream(menuMusic);
-        UnloadMusicStream(btnMenuMusic);
-    }
-    UnloadTexture(texScarfyAnim);
-    UnloadImage(imScarfyAnim);
-}
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(Colors.BLACK);
 
-void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl, ref bool showDialog, ref bool allow_exit_dialog, ref string name) {
-    bool isCubeNotNull = !collidedCube.isNull;
-    import std.string : toStringz;
-    int posY = GetScreenHeight() - 20 - 40;
-    // Check if cube collision is not null
-    if (isCubeNotNull) {
-        if (!showDialog && allow_exit_dialog && !inBattle) {
-            if (IsGamepadAvailable(0)) {
-                int buttonSize = 30;
-                int circleCenterX = 40 + buttonSize / 2;
-                int circleCenterY = posY + buttonSize / 2;
-                int textYOffset = 7; // Adjust this offset based on your font and text size
-                DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.RED);
-                DrawText(("B"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
-                DrawText((" to dialog"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
-            } else {
-                int fontSize = 20;
-                DrawText(toStringz("Press "~dlg~" for dialog"), 40, posY, fontSize, Colors.BLACK);
+        // Draw the logo
+        DrawTexture(logoTexture, logoX, logoY, Colors.WHITE);
+
+        // Draw the menu options
+        for (int i = 0; i < menuOptions.length; i++) {
+            Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
+            int textWidth = cast(int)MeasureTextEx(menuFont, toStringz(menuOptions[i]), 30, 0).x;
+            int textX = (screenWidth - textWidth) / 2; // Center the text
+            int textY = logoY + logoTexture.height + 30 + (30 * i); // Position below the logo
+
+            DrawTextEx(menuFont, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, textColor);
+        }
+
+        // Handle input for menu navigation
+        if (IsKeyPressed(KeyboardKey.KEY_DOWN)) {
+            selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
+        }
+
+        if (IsKeyPressed(KeyboardKey.KEY_UP)) {
+            selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
+        }
+
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE)) {
+            switch (selectedMenuIndex) {
+                case 0:
+                    // Calculate the positions for the menu options
+                    int[] menuOptionYPositions = new int[menuOptions.length];
+                    for (int i = 0; i < menuOptions.length; i++) {
+                        menuOptionYPositions[i] = logoY + logoTexture.height + 30 + (30 * i);
+                    }
+
+                    // Fade out effect when starting the game
+                    while (fadeAlpha > 0.0f) {
+                        fadeAlpha -= 0.04f; // Decrease the alpha value for fading
+                        if (fadeAlpha < 0.0f) fadeAlpha = 0.0f; // Clamp to 0.0
+
+                        BeginDrawing();
+                        ClearBackground(Colors.BLACK);
+
+                        // Draw the logo at its stored position with fading
+                        DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
+
+                        // Draw the menu options at their stored positions with fading
+                        for (int i = 0; i < menuOptions.length; i++) {
+                            Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
+                            int textWidth = cast(int)MeasureTextEx(menuFont, toStringz(menuOptions[i]), 30, 0).x;
+                            int textX = (screenWidth - textWidth) / 2; // Center the text
+                            int textY = menuOptionYPositions[i]; // Use the stored Y position
+
+                            // Apply fading to the text color
+                            Color fadedTextColor = Fade(textColor, fadeAlpha);
+                            DrawTextEx(menuFont, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
+                        }
+
+                        EndDrawing();
+                    }
+                    currentGameState = GameState.InGame;
+                    return;
+                case 1:
+                    // Handle options menu
+                    return;
+                case 2:
+                    currentGameState = GameState.Exit;
+                    return;
+                default:
+                    break;
             }
         }
 
-        // If all correct, show dialog from script with all needed text, name, emotion etc
-        if (IsKeyPressed(dlg) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
-            if (allow_exit_dialog) {
-                allow_exit_dialog = false;
-                allowControl = false;
-                name = collidedCube.get.name;
-                showDialog = true;
-                // Set the global variables to the current cube's dialog
-                name_global = collidedCube.get.name;
-                message_global = collidedCube.get.text;
-                emotion_global = collidedCube.get.emotion;
-                pageChoice_glob = collidedCube.get.choicePage;
-            }
-        }
+        EndDrawing();
     }
-
-    // If dialog is not ended (not all text pages showed), show up "Press enter for continue" for showing next page of text
-    if (showDialog && isCubeNotNull) {
-        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
-    }
+    UnloadTexture(logoTexture);
+    UnloadFont(menuFont);
 }

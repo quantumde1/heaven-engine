@@ -160,7 +160,11 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
         choices[i] = luaL_checkstring(L, -1).to!string;
         lua_pop(L, 1);
     }
-    
+    if (lua_gettop(L) == 6) {
+        typingSpeed = cast(float)luaL_checknumber(L, 6);
+    } else {
+        typingSpeed = 0.03f;
+    }
     showDialog = true;
     allowControl = false;
     show_sec_dialog = true;

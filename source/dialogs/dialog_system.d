@@ -8,6 +8,8 @@ import std.range;
 import variables;
 import std.math;
 import std.string;
+import std.typecons;
+import graphics.cubes;
 
 void display_dialog(string character, int emotion, string[] pages, int choicePage) {
     if (choicePage == 0 && !rel) {
@@ -36,7 +38,7 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
     // Typing effect for the current page text
     static int currentCharIndex = 0; // Index of the current character being displayed
     static float typingTimer = 0.0f; // Timer for typing effect
-    float typingSpeed = 0.03f; // Time in seconds between each character
+    //float typingSpeed = 0.03f; // Time in seconds between each character
     // Format the current page text
     string currentPageText = formatText(pages[currentPage]);
     int lineY = rectY + charPaddingY + 10;
@@ -154,4 +156,47 @@ string formatText(string text) {
         }
     }
     return formattedText;
+}
+
+void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl, ref bool showDialog, ref bool allow_exit_dialog, ref string name) {
+    bool isCubeNotNull = !collidedCube.isNull;
+    import std.string : toStringz;
+    int posY = GetScreenHeight() - 20 - 40;
+    // Check if cube collision is not null
+    if (isCubeNotNull) {
+        if (!showDialog && allow_exit_dialog && !inBattle) {
+            if (IsGamepadAvailable(0)) {
+                int buttonSize = 30;
+                int circleCenterX = 40 + buttonSize / 2;
+                int circleCenterY = posY + buttonSize / 2;
+                int textYOffset = 7; // Adjust this offset based on your font and text size
+                DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.RED);
+                DrawText(("B"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
+                DrawText((" to dialog"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
+            } else {
+                int fontSize = 20;
+                DrawText(toStringz("Press "~dlg~" for dialog"), 40, posY, fontSize, Colors.BLACK);
+            }
+        }
+
+        // If all correct, show dialog from script with all needed text, name, emotion etc
+        if (IsKeyPressed(dlg) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+            if (allow_exit_dialog) {
+                allow_exit_dialog = false;
+                allowControl = false;
+                name = collidedCube.get.name;
+                showDialog = true;
+                // Set the global variables to the current cube's dialog
+                name_global = collidedCube.get.name;
+                message_global = collidedCube.get.text;
+                emotion_global = collidedCube.get.emotion;
+                pageChoice_glob = collidedCube.get.choicePage;
+            }
+        }
+    }
+
+    // If dialog is not ended (not all text pages showed), show up "Press enter for continue" for showing next page of text
+    if (showDialog && isCubeNotNull) {
+        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
+    }
 }

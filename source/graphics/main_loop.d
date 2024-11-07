@@ -79,28 +79,6 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
 }
 
-void drawWeatherDateTime(string weather, string time, string date) {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-    
-    int rightCathetus = screenHeight / 4;
-    int topCathetus = rightCathetus * 3;
-    
-    DrawTriangle(
-        Vector2(screenWidth, 0),
-        Vector2(screenWidth - topCathetus, 0),
-        Vector2(screenWidth, rightCathetus),
-        Colors.BLUE
-    );
-    
-    int textX = screenWidth - screenHeight / 10;
-    int textY = rightCathetus / 4;
-    
-    DrawText(cast(char*)weather, textX, textY, FontSize, Colors.WHITE);
-    DrawText(cast(char*)time, textX, textY + TextSpacing, FontSize, Colors.WHITE);
-    DrawText(cast(char*)date, textX, textY + TextSpacing * 2, FontSize, Colors.WHITE);
-}
-
 ControlConfig loadControlConfig() {
     return ControlConfig(
         parse_conf("conf/layout.conf", "right"),

@@ -102,6 +102,7 @@ enum int FONT_SIZE = 40;
 enum float PADDING_RATIO = 1.0 / 9.0;
 enum int CHAR_RECT_HEIGHT_RATIO = 5;
 enum int CHAR_RECT_WIDTH_RATIO = 7;
+float typingSpeed;
 
 /* inventory */
 string[][] buttonTexts = [
