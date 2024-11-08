@@ -26,7 +26,32 @@ local sergey_dialog_bad = {
     "What we must do now?!"
 }
 
+local neededPosition = { 10.0, 0.0, 10.0 }
+
+function tablesEqual(table1, table2)
+    if #table1 ~= #table2 then
+        return false
+    end
+    for i = 1, #table1 do
+        if table1[i] ~= table2[i] then
+            return false
+        end
+    end
+    return true
+end
+
 function checkDialogStatus()
+    local cubePosition = { getCubeX(), getCubeY(), getCubeZ()}
+    
+    if tablesEqual(cubePosition, neededPosition) and tablesEqual(neededPosition, { 10.0, 0.0, 10.0}) then
+        rotateCamera(90.0, 130.0)
+        addCube(10.0, 0.0, 7.0, "Text", {""}, 1, -1)
+        howMuchModels(3);
+        setCubeModel(3, "res/mc.glb")
+        dialogBox("Text", {"Oh shit. How you find me?", "Go ahead, please. I dont wanna see you."}, 1, -1, {""})
+        neededPosition = { }
+    end
+
     if isDialogExecuted() then
         local dialogName = getDialogName()
         if dialogName == previousDialogName then

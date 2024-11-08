@@ -287,6 +287,21 @@ extern (C) nothrow int lua_StopMusic(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_getCubeXPos(lua_State *L) {
+    lua_pushnumber(L, cast(int)cubePosition.x);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCubeYPos(lua_State *L) {
+    lua_pushnumber(L, cast(int)cubePosition.y);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCubeZPos(lua_State *L) {
+    lua_pushnumber(L, cast(int)cubePosition.z);
+    return 1;
+}
+
 // Cube management functions
 extern (C) nothrow int lua_addCube(lua_State *L) {
     auto name = luaL_checkstring(L, 4);
@@ -348,6 +363,9 @@ extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "isCubeMoving", &lua_cubeMoveStatus);
     lua_register(L, "setCubeModel", &lua_setCubeModel);
     lua_register(L, "removeCubeModel", &lua_removeCubeModel);
+    lua_register(L, "getCubeX", &lua_getCubeXPos);
+    lua_register(L, "getCubeY", &lua_getCubeYPos);
+    lua_register(L, "getCubeZ", &lua_getCubeZPos);
     lua_register(L, "howMuchModels", &lua_howMuchModels);
     lua_register(L, "rotateCamera", &luaL_rotateCam);
     lua_register(L, "loadScript", &luaL_loadScript);

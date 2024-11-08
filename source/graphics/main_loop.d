@@ -339,7 +339,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame && !rel) {
                         showDebug = !showDebug;
                     }
-                    
                     // Check Dialog Status
                     lua_getglobal(L, "checkDialogStatus");
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
