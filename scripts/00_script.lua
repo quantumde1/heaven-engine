@@ -45,9 +45,6 @@ function checkDialogStatus()
     
     if tablesEqual(cubePosition, neededPosition) and tablesEqual(neededPosition, { 10.0, 0.0, 10.0}) then
         rotateCamera(90.0, 130.0)
-        addCube(10.0, 0.0, 7.0, "Text", {""}, 1, -1)
-        howMuchModels(3);
-        setCubeModel(3, "res/mc.glb")
         dialogBox("Text", {"Oh shit. How you find me?", "Go ahead, please. I dont wanna see you."}, 1, -1, {""})
         neededPosition = { }
     end
@@ -77,7 +74,7 @@ end
 -- Load music and location
 loadMusic("default.mp3")
 playMusic()
-loadLocation("res/area1.glb")
+loadLocation("res/area1.glb", 19.0)
 
 -- Create coroutine for managing dialogs
 local dialogCoroutine

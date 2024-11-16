@@ -93,12 +93,7 @@ void checkForVictory(ref Camera3D camera, ref Vector3 cubePosition) {
         camera.target = originalCameraTarget;
         StopMusicStream(music);
         UnloadModel(enemyModel);
-        UnloadMusicStream(music);
         allowControl = true;
-        uint audio_size;
-        char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
-        music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-        PlayMusicStream(music);
     }
 }
 
@@ -111,8 +106,8 @@ bool isBossfight) {
         char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
         if (isAudioEnabled()) {
             StopMusicStream(music);
-            music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-            PlayMusicStream(music);
+            musicBattle = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+            PlayMusicStream(musicBattle);
         } else {
             StopMusicStream(music);
         }
@@ -121,8 +116,8 @@ bool isBossfight) {
         char *audio_data = get_file_data_from_archive("res/data.bin", "boss_battle.mp3", &audio_size);
         if (isAudioEnabled()) {
             StopMusicStream(music);
-            music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-            PlayMusicStream(music);
+            musicBattle = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+            PlayMusicStream(musicBattle);
         } else {
             StopMusicStream(music);
         }

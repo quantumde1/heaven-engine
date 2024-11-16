@@ -33,7 +33,7 @@ enum TextSpacing = 30;
 enum FPS = 60;
 
 // Function Declarations
-nothrow void loadLocation(char* first);
+nothrow void loadLocation(char* first, float size);
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
                    int playerStepCounter, int encounterThreshold, bool inBattle);
 void drawWeatherDateTime(string weather, string time, string date);
@@ -43,8 +43,9 @@ void fadeEffect(float alpha, bool fadeIn);
 void engine_loader(string window_name, int screenWidth, int screenHeight);
 
 // Function Implementations
-nothrow void loadLocation(char* first) {
+nothrow void loadLocation(char* first, float size) {
     model_location_path = first;
+    modelLocationSize = size;
     if (!rel) { 
         try { 
             writeln("loading loc ", model_location_path); 
@@ -203,7 +204,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     fontdialog = LoadFont("res/font.png");
     // Lighting Setup
     modelCharacterSize = 5.0f;
-    modelLocationSize = 19.0f;
     lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
     luaL_initDialogs(L);
 
@@ -283,9 +283,12 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     if (inBattle) {
                         cameraAngle = 90.0f;
                         drawBattleUI(camera, cubePosition);
+                        UpdateMusicStream(musicBattle);
                         if (!selectingEnemy) {
                             drawHPAboveCubes(camera);
                         }
+                    } else {
+                        PlayMusicStream(music);
                     }
 
                     // Show Map Prompt

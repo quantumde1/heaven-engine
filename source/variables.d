@@ -129,6 +129,7 @@ int selectedSubmenuButtonIndex = 0;
 /* audio things */
 Music music;
 char* musicpath;
+Music musicBattle;
 
 /* controls */
 struct ControlConfig {
