@@ -25,7 +25,8 @@
 		"-L/usr/local/lib"
 	],
 	"lflags-windows": [
-		"-L./"
+		"-L./",
+		"-L./libs/"
 	],
 	"libs-posix": [
 		"raylib",
@@ -38,7 +39,7 @@
 		"lua53",
 		"libhpff"
 	],
-	"license": "BSD 0-clause",
+	"license": "MIT License",
 	"name": "heaven-engine",
 	"subConfigurations": {
 		"bindbc-lua": "static"
