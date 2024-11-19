@@ -16,4 +16,4 @@ heaven-engine-test-*
 .ldc2_cache
 sky.sh
 a.out
-libhpff.so
+*.so
