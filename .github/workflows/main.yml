@@ -36,7 +36,7 @@ jobs:
             cd /app && \
             git config --global --add safe.directory /app && \
             chmod +x ./build.sh && \
-            ./build.sh
+            ./build.sh && rm -rf .git
           "
 
       - name: Create archive
