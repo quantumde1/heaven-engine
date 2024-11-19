@@ -28,7 +28,7 @@ jobs:
               lua5.3 \
               dub \
               gcc \
-              gdc \
+              gcc-gdc \
               bash \
               alpine-sdk && \
             cd /app && \
