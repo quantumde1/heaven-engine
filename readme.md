@@ -38,7 +38,7 @@ and in powershell/cmd run commands as on Linux.
 
 ### API
 its placed here:
-[api](https://underlevel.ddns.net/git/quantumde1/heaven-engine/src/main/api.md)
+[api](docs/api.md)
 
 ### Plans
 
