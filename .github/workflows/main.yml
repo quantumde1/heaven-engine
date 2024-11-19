@@ -43,7 +43,7 @@ jobs:
         run: zip -r -9 build.zip ./ # Замените ./build/ на директорию с результатами сборки
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3  # Updated to v3
         with:
           name: build-artifacts
           path: build.zip
