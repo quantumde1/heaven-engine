@@ -15,3 +15,5 @@ heaven-engine-test-*
 *.obj
 *.lst
 .ldc2_cache
+sky.sh
+a.out
