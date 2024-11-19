@@ -15,6 +15,7 @@ if $BUILD_CMD > /dev/null 2>&1; then
     if python3 utils/obfuscator.py heaven-engine obfuscated-engine > /dev/null 2>&1; then
         # Move obfuscated-engine to heaven-engine
         mv obfuscated-engine heaven-engine
+	chmod +x ./heaven-engine
         echo "Build complete!"
     else
         echo "Build incomplete, see errors above"
