@@ -8,7 +8,6 @@ RESET='\e[0m'
 
 printf "${BLUE}[INFO] Be sure you have installed dub, libvlc, liblua5.3, raylib and D compiler!${RESET}\n"
 
-
 # Check and update git submodules
 printf "${BLUE}[INFO] Checking for git submodules...${RESET}\n"
 git submodule update --init --recursive
@@ -20,19 +19,25 @@ fi
 # Change directory to hpff and build
 printf "${GREEN}[BUILD] Building hpff...${RESET}\n"
 cd hpff/ || { printf "${RED}[ERROR] Failed to change directory to hpff!${RESET}\n"; exit 1; }
-./build.sh
-if [ $? -ne 0 ]; then
-    printf "${RED}[ERROR] hpff build failed!${RESET}\n"
-    exit 1
-fi
 
-# Move the built library to the parent directory
-mv ./libhpff.so ../
-if [ $? -eq 0 ]; then
-    printf "${GREEN}[SUCCESS] libhpff.so moved to the parent directory.${RESET}\n"
+# Check if libhpff.so already exists
+if [ -f "../libhpff.so" ]; then
+    printf "${YELLOW}[WARNING] libhpff.so already built. Skipping build process.${RESET}\n"
 else
-    printf "${RED}[ERROR] Failed to move libhpff.so!${RESET}\n"
-    exit 1
+    ./build.sh
+    if [ $? -ne 0 ]; then
+        printf "${RED}[ERROR] hpff build failed!${RESET}\n"
+        exit 1
+    else
+        # Move the built library to the parent directory
+        mv ./libhpff.so ../
+        if [ $? -eq 0 ]; then
+            printf "${GREEN}[SUCCESS] libhpff.so moved to the parent directory.${RESET}\n"
+        else
+            printf "${RED}[ERROR] Failed to move libhpff.so!${RESET}\n"
+            exit 1
+        fi
+    fi
 fi
 
 # Return to the original directory
@@ -59,7 +64,7 @@ else
         touch sky.sh && printf "#!/bin/sh\nexec heaven-engine\n" > sky.sh && chmod +x sky.sh
         printf "\n${GREEN}[BUILD] Build complete!${RESET}\n"
     else
-        printf -e "${RED}[BUILD] Build incomplete!${RESET}\n\n${YELLOW}[LOGS]${RESET}:\n"
+        printf "${RED}[BUILD] Build incomplete!${RESET}\n\n${YELLOW}[LOGS]${RESET}:\n"
         echo "$ERROR_OUTPUT"
         exit 1
     fi

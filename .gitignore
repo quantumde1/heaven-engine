@@ -1,7 +1,6 @@
 .dub
 docs.json
 __dummy.html
-docs/
 /heaven-engine
 heaven-engine.so
 heaven-engine.dylib
@@ -17,3 +16,4 @@ heaven-engine-test-*
 .ldc2_cache
 sky.sh
 a.out
+libhpff.so
