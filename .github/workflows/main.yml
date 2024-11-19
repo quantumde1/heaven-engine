@@ -1,0 +1,38 @@
+name: CI/CD Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          # Install Alpine Linux in a container
+          docker run --rm -it alpine:edge /bin/sh -c "
+            apk add --no-cache \
+              raylib \
+              vlc \
+              lua5.3 \
+              dub \
+              gcc \
+              gdc \
+              bash \
+              alpine-sdk && \
+            # Copy the project files into the container
+            mkdir -p /app && \
+            cp -r /github/workspace/* /app && \
+            cd /app && \
+            chmod +x ./build.sh && \
+            ./build.sh
+          "
