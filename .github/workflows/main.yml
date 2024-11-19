@@ -32,6 +32,7 @@ jobs:
               bash \
               alpine-sdk && \
             cd /app && \
+            git config --global --add safe.directory /app && \
             chmod +x ./build.sh && \
             ./build.sh
           "
