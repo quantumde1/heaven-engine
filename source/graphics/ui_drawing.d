@@ -12,21 +12,19 @@ void showMainMenu(ref GameState currentGameState) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     
-    // Load the font from the image
-    Font menuFont = LoadFont("res/font_en.png");
-    
     float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
-    // Load the logo texture
     Texture2D logoTexture = LoadTexture("res/logo.png");
     
-    // Calculate the position for the logo
     int logoX = (screenWidth - logoTexture.width) / 2;
     int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
 
-    string[] menuOptions = ["Start Game", "Options", "Exit Game"];
+    string[] menuOptions = ["Start Game", "Language: English", "Shaders: On", "Exit Game"];
     int selectedMenuIndex = 0;
     float scaleX = 1.0f;
 
+    // Language toggle variable
+    bool isEnglish = true;
+    bool shaderEnabled = true;
     // Fade-in effect
     while (fadeAlpha < 1.0f) {
         fadeAlpha += 0.02f; // Increase alpha value for fading in
@@ -41,13 +39,13 @@ void showMainMenu(ref GameState currentGameState) {
         // Draw the menu options with fading
         for (int i = 0; i < menuOptions.length; i++) {
             Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-            int textWidth = cast(int)MeasureTextEx(menuFont, toStringz(menuOptions[i]), 30, 0).x;
+            int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
             int textX = (screenWidth - textWidth) / 2; // Center the text
             int textY = logoY + logoTexture.height + 30 + (30 * i); // Position below the logo
 
             // Apply fading to the text color
             Color fadedTextColor = Fade(textColor, fadeAlpha);
-            DrawTextEx(menuFont, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
+            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
         }
 
         EndDrawing();
@@ -63,11 +61,11 @@ void showMainMenu(ref GameState currentGameState) {
         // Draw the menu options
         for (int i = 0; i < menuOptions.length; i++) {
             Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-            int textWidth = cast(int)MeasureTextEx(menuFont, toStringz(menuOptions[i]), 30, 0).x;
+            int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
             int textX = (screenWidth - textWidth) / 2; // Center the text
             int textY = logoY + logoTexture.height + 30 + (30 * i); // Position below the logo
 
-            DrawTextEx(menuFont, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, textColor);
+            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, textColor);
         }
 
         // Handle input for menu navigation
@@ -77,6 +75,29 @@ void showMainMenu(ref GameState currentGameState) {
 
         if (IsKeyPressed(KeyboardKey.KEY_UP)) {
             selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
+        }
+
+        // Handle language toggle
+        if (selectedMenuIndex == 1) { // Language option selected
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+                shaderEnabled = false;
+                menuOptions[1] = "Language: Russian"; // Change to Russian
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+                shaderEnabled = true;
+                menuOptions[1] = "Language: English"; // Change to English
+            }
+        }
+
+        if (selectedMenuIndex == 2) { // Language option selected
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+                isEnglish = false;
+                menuOptions[2] = "Shaders: Off"; // Change to Russian
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+                isEnglish = true;
+                menuOptions[2] = "Shaders: On"; // Change to English
+            }
         }
 
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE)) {
@@ -102,13 +123,13 @@ void showMainMenu(ref GameState currentGameState) {
                         // Draw the menu options at their stored positions with fading
                         for (int i = 0; i < menuOptions.length; i++) {
                             Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-                            int textWidth = cast(int)MeasureTextEx(menuFont, toStringz(menuOptions[i]), 30, 0).x;
+                            int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
                             int textX = (screenWidth - textWidth) / 2; // Center the text
                             int textY = menuOptionYPositions[i]; // Use the stored Y position
 
                             // Apply fading to the text color
                             Color fadedTextColor = Fade(textColor, fadeAlpha);
-                            DrawTextEx(menuFont, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
+                            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
                         }
 
                         EndDrawing();
@@ -118,7 +139,7 @@ void showMainMenu(ref GameState currentGameState) {
                 case 1:
                     // Handle options menu
                     return;
-                case 2:
+                case 3:
                     currentGameState = GameState.Exit;
                     return;
                 default:
@@ -129,5 +150,4 @@ void showMainMenu(ref GameState currentGameState) {
         EndDrawing();
     }
     UnloadTexture(logoTexture);
-    UnloadFont(menuFont);
 }

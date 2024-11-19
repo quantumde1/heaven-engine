@@ -55,6 +55,8 @@ struct EnemyCube {
     int health = 20;
     Model model;
 }
+Model floorModel;
+bool loadedShader;
 
 struct BattleState {
     int playerTurns;
@@ -166,13 +168,7 @@ Shader shader;
 bool isNewLocationNeeded = false;
 float rotationCube;
 bool needRotationCube;
-
-struct Snowflake {
-    Vector3 position;
-    float size;
-    float speed;
-}
-
+bool shaderEnabled = true;
 
 /* textures */
 char* model_location_path;

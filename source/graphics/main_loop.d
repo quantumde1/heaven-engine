@@ -115,7 +115,6 @@ import raylib_lights;
 
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Initialization
-    
     bool isGamepadConnected = IsGamepadAvailable(0);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
@@ -133,6 +132,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     SetTargetFPS(FPS);
     rel = isReleaseBuild();
     
+    fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     fadeEffect(0.0f, true);
     fadeEffect(fadeAlpha, false);
@@ -172,7 +172,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     BoundingBox cubeBoundingBox;
     
     // Load Floor Model and Shaders
-    Model floorModel = LoadModel(model_location_path);
+    floorModel = LoadModel(model_location_path);
     auto fs = "lighting.fs";
     auto vs = "lighting.vs";
     uint fssize;
@@ -201,7 +201,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         assignShaderToModel(cubeModel);
     }
     assignShaderToModel(floorModel);
-    fontdialog = LoadFont("res/font_en.png");
     // Lighting Setup
     modelCharacterSize = 5.0f;
     lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);

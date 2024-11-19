@@ -35,7 +35,6 @@ void openMap(string location) {
     rectY = 50 + selectedMenuIndex * (rectHeight + 10); // Adjusted for spacing
 
     // Load font from file
-    Font customFont = LoadFont("res/font.png");
 
     // Load textures and music
     uint image_size;
@@ -98,12 +97,12 @@ camera.zoom = 1.0f; // Default zoom level
         
         // Draw the interface elements (e.g., menu options)
         DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
-        DrawTextEx(customFont, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
+        DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
         
         for (int i = 0; i < menuOptions.length; i++) {
             Color buttonColor = (i == selectedMenuIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
             DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
-            DrawTextEx(customFont, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
+            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
         }
         DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * menuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Red color
 
@@ -167,12 +166,12 @@ while (!WindowShouldClose()) {
                 
                 // Draw the interface elements (e.g., menu options)
                 DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
-                DrawTextEx(customFont, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
+                DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
                 
                 for (int i = 0; i < menuOptions.length; i++) {
                     Color buttonColor = (i == selectedMenuIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
                     DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
-                    DrawTextEx(customFont, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
+                    DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
                 }
                 DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * menuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Red color
                 
@@ -198,13 +197,13 @@ while (!WindowShouldClose()) {
         DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
 
         // Draw the "Select destination" text on the gray panel
-        DrawTextEx(customFont, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
+        DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
 
         // Draw allowed locations
         for (int i = 0; i < menuOptions.length; i++) {
             Color buttonColor = (i == selectedMenuIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
             DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
-            DrawTextEx(customFont, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
+            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
         }
 
         // Draw outline for the entire button area
@@ -234,5 +233,5 @@ while (!WindowShouldClose()) {
     foreach (texture; arrowTextures) {
         UnloadTexture(texture);
     }
-    UnloadFont(customFont); // Unload the custom font
+    UnloadFont(fontdialog); // Unload the custom font
 }
