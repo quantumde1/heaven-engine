@@ -12,16 +12,17 @@ on:
       
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # This is required to use GitHub Actions, but we will use an Alpine container
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: |
-          # Install Alpine Linux in a container
-          docker run --rm -it alpine:edge /bin/sh -c "
+      - name: Build with Alpine
+        uses: docker://alpine:edge
+        with:
+          args: |
+            /bin/sh -c "
             apk add --no-cache \
               raylib \
               vlc \
@@ -37,4 +38,4 @@ jobs:
             cd /app && \
             chmod +x ./build.sh && \
             ./build.sh
-          "
+            "
