@@ -13,7 +13,7 @@ void showMainMenu(ref GameState currentGameState) {
     int screenHeight = GetScreenHeight();
     
     // Load the font from the image
-    Font menuFont = LoadFont("res/font.png");
+    Font menuFont = LoadFont("res/font_en.png");
     
     float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
     // Load the logo texture

@@ -180,7 +180,6 @@ while (!WindowShouldClose()) {
                 DrawRectangle(0, 0, screenWidth, screenHeight, Color(0, 0, 0, cast(ubyte)fadeOutAlpha)); // Draw fade rectangle
                 EndDrawing();
             }
-            needZoom = false;
             loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"), 19.0f);
             isNewLocationNeeded = true;
             break; // Exit the loop after loading the location

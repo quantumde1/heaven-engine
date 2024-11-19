@@ -201,7 +201,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         assignShaderToModel(cubeModel);
     }
     assignShaderToModel(floorModel);
-    fontdialog = LoadFont("res/font.png");
+    fontdialog = LoadFont("res/font_en.png");
     // Lighting Setup
     modelCharacterSize = 5.0f;
     lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
