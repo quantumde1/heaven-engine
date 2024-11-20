@@ -197,7 +197,7 @@ version (Posix) {
                 DrawText(cast(char*)("Press Enter to Skip"), 40, posY, 20, Colors.WHITE);
             }
 
-            if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+            if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                 foreach (video; video_list) {
                     cleanup_video(video);
                 }

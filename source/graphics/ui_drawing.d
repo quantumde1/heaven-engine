@@ -23,7 +23,6 @@ void showMainMenu(ref GameState currentGameState) {
     string[] menuOptions;
     // Language toggle variable
     bool isEnglish = true;
-    bool shaderEnabled = true;
     
     if (isAudioEnabled()) {
         audioEnabled = true;
@@ -77,43 +76,50 @@ void showMainMenu(ref GameState currentGameState) {
         }
 
         // Handle input for menu navigation
-        if (IsKeyPressed(KeyboardKey.KEY_DOWN)) {
+        if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, 
+        GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
             selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
         }
 
-        if (IsKeyPressed(KeyboardKey.KEY_UP)) {
+        if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
             selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
         }
 
         switch (selectedMenuIndex) {
         // Handle language toggle
         case 1:
-            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
-                shaderEnabled = false;
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
+                isEnglish = false;
                 menuOptions[1] = "Language: Russian"; // Change to Russian
             }
-            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
-                shaderEnabled = true;
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, 
+            GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
+                isEnglish = true;
                 menuOptions[1] = "Language: English"; // Change to English
             }
             break;
 
         case 2:
-            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
                 shaderEnabled = false;
                 menuOptions[2] = "Shaders: Off"; // Change to Russian
             }
-            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
                 shaderEnabled = true;
                 menuOptions[2] = "Shaders: On"; // Change to English
             }
             break;
         case 3:
-            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
                 audioEnabled = false;
                 menuOptions[3] = "Sound: Off"; // Change to Russian
             }
-            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, 
+            GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
                 audioEnabled = true;
                 menuOptions[3] = "Sound: On"; // Change to English
             }
@@ -121,7 +127,7 @@ void showMainMenu(ref GameState currentGameState) {
         default:
             break;
         }
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE)) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
             switch (selectedMenuIndex) {
                 case 0:
                     // Calculate the positions for the menu options

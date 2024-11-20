@@ -83,6 +83,10 @@ bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;
 bool audioEnabled;
+int gamepadInt = 0;
+version (Linux) {
+    int gamepadInt = 1;
+}
 
 /* dialogs */
 bool allowControl = true; //for checking is control allowed at this moment
@@ -183,3 +187,4 @@ void assignShaderToModel(Model model) {
         model.materials[i].shader = shader;
     }
 }
+

@@ -135,10 +135,10 @@ while (!WindowShouldClose()) {
         DrawText("Press enter to go to location", 40, posY, 20, Colors.BLACK);
     }
 
-    if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+    if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
         selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
     }
-    if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+    if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
         selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
     }
 
@@ -148,7 +148,7 @@ while (!WindowShouldClose()) {
         rectX = menuPositions[selectedMenuIndex][0];
         rectY = menuPositions[selectedMenuIndex][1];
         
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
             
             string location_name = locationNames[selectedMenuIndex]; // Convert to lowercase and remove whitespace for location name
             if (!rel) { writeln("Going to " ~ location_name); }

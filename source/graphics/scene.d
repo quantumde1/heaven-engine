@@ -54,10 +54,10 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     float currentSpeedMultiplier = IsKeyDown(KeyboardKey.KEY_RIGHT_SHIFT) ? SpeedMultiplier : 3.0f;
 
     Vector3 movement = Vector3(0, 0, 0);
-    if (IsKeyDown(fwd) || GetGamepadAxisMovement(0, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3) movement += forward;
-    if (IsKeyDown(bkd) || GetGamepadAxisMovement(0, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3) movement -= forward;
-    if (IsKeyDown(lft) || GetGamepadAxisMovement(0, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3) movement -= right;
-    if (IsKeyDown(rgt) || GetGamepadAxisMovement(0, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3) movement += right;
+    if (IsKeyDown(fwd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) movement += forward;
+    if (IsKeyDown(bkd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) movement -= forward;
+    if (IsKeyDown(lft) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) movement -= right;
+    if (IsKeyDown(rgt) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) movement += right;
 
     if (!Vector3Equals(movement, Vector3Zero())) {
         movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
@@ -111,14 +111,14 @@ float rotationStep, float radius) {
         } else if (IsKeyDown(KeyboardKey.KEY_RIGHT)) {
             cameraAngle = (cameraAngle + rotationStep) % FULL_ROTATION;
         }
-        if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
+        if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
             cameraAngle = (cameraAngle - 45.0f + FULL_ROTATION) % FULL_ROTATION;
         }
-        if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(0, 
+        if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(gamepadInt, 
         GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
             cameraAngle = (cameraAngle + 45.0f) % FULL_ROTATION;
         } else {
-            float rightAxisMovement = GetGamepadAxisMovement(0, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
+            float rightAxisMovement = GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
             if (rightAxisMovement < -0.2) {
                 cameraAngle = (cameraAngle - rotationStep * 1.5f + FULL_ROTATION) % FULL_ROTATION;
             } else if (rightAxisMovement > 0.2) {
@@ -160,7 +160,7 @@ void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float ca
     DrawModel(floorModel, Vector3(0.0f, 0.0f, 0.0f), modelLocationSize, Colors.WHITE);
     EndMode3D();
 
-    if (!inBattle) {
+    if (!inBattle && !showInventory) {
         draw_navigation(cameraAngle);
     }
 }

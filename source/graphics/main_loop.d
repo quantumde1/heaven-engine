@@ -32,13 +32,6 @@ enum ScreenPadding = 10;
 enum TextSpacing = 30;
 enum FPS = 60;
 
-// Assign Shader to Models
-void assignShaderToModel(Model model) {
-    for (int i = 0; i < model.materialCount; i++) {
-        model.materials[i].shader = shader;
-    }
-}
-
 // Function Declarations
 nothrow void loadLocation(char* first, float size);
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
@@ -196,6 +189,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     float[4] values = [ 0.1f, 0.1f, 0.1f, 1.0f ];
     SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
     
+
     assignShaderToModel(playerModel);
     foreach (ref cubeModel; cubeModels) {
         assignShaderToModel(cubeModel);
@@ -212,6 +206,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     foreach (i, cubeModel; cubeModels) {
         cubes[i].rotation = 0.0f;
     }
+    DisableCursor();
     // Main Game Loop
     while (!WindowShouldClose()) {
         if (videoFinished) {
@@ -219,7 +214,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                 case GameState.MainMenu:
                     showMainMenu(currentGameState);
                     break;
-
                 case GameState.InGame:
                     deltaTime = GetFrameTime();
                     if (audioEnabled) {
@@ -295,7 +289,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
 
                     if (showMapPrompt) {
                         const int posY = GetScreenHeight() - FontSize - 40;
-                        if (isGamepadConnected) {
+                        if (IsGamepadAvailable(gamepadInt)) {
                             const int buttonSize = 30;
                             const int circleCenterX = 40 + buttonSize / 2;
                             const int circleCenterY = posY + buttonSize / 2;
@@ -307,7 +301,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                             DrawText(toStringz("Press "~(controlConfig.dialog_button)~" to open map"), 40, posY, 20, Colors.BLACK);
                         }
 
-                        if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+                        if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                             StopMusicStream(music);
                             openMap(location_name);
                         }
@@ -357,7 +351,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     }
 
                     // Inventory Handling
-                    if (IsKeyPressed(controlConfig.opmenu_button)) {
+                    if (IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) {
                         showInventory = true;
                     }
                     if (showInventory) {

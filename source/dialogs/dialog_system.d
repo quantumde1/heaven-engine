@@ -101,13 +101,13 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
                         FONT_SIZE, 1.0f, buttonColor);
         }
         // Handle input for choices
-        if (IsKeyPressed(KeyboardKey.KEY_UP) || (isGamepadConnected && IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))) {
+        if (IsKeyPressed(KeyboardKey.KEY_UP) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))) {
             selectedChoice = cast(int)((selectedChoice - 1 + choices.length) % choices.length); // Wrap around
         }
-        if (IsKeyPressed(KeyboardKey.KEY_DOWN) || (isGamepadConnected && IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))) {
+        if (IsKeyPressed(KeyboardKey.KEY_DOWN) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))) {
             selectedChoice = cast(int)((selectedChoice + 1) % choices.length); // Wrap around
         }
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             answer_num = selectedChoice;
         }
     }
@@ -115,7 +115,7 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
     // Handle advancing the dialog
     if (isTextFullyDisplayed) {
         // If the text is fully displayed, check for Enter key to go to the next page
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             currentPage++;
             currentCharIndex = 0; // Reset character index for the next page
             isTextFullyDisplayed = false; // Reset the text display state
@@ -128,7 +128,7 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
         }
     } else {
         // If the text is not fully displayed, pressing Enter will show the full text
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             isTextFullyDisplayed = true; // Set the flag to indicate the text is fully displayed
         }
     }
@@ -180,7 +180,7 @@ void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl,
         }
 
         // If all correct, show dialog from script with all needed text, name, emotion etc
-        if (IsKeyPressed(dlg) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+        if (IsKeyPressed(dlg) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
             if (allow_exit_dialog) {
                 allow_exit_dialog = false;
                 allowControl = false;

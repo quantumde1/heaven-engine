@@ -184,13 +184,15 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         DrawText(cast(char*)menuTabs[i], i * tabWidth + 10, 10, 20, Colors.WHITE);
     }
 
-    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(0, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy)) {
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
         selectedButtonIndex = 0;
     }
-    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(0, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)) {
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
         selectedButtonIndex = 0;
     }
@@ -213,16 +215,16 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     }
 
     if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
-    (IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
         selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
     }
     if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) || 
-    (IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy)) {
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy)) {
         selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
     }
 
     if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE) || 
-    IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+    IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
         if (selectedTabIndex == 0 && !selectingEnemy) {
             secInBattle = true;
             selectingEnemy = true;
@@ -252,11 +254,11 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
                 20, enemyColor);
             }
         }
-        if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && selectingEnemy) || (IsGamepadButtonPressed(0, 
+        if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
         GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && selectingEnemy)) {
             selectedEnemyIndex = cast(int)((selectedEnemyIndex + 1) % enemyCubes.length);
         }
-        if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && selectingEnemy) || (IsGamepadButtonPressed(0,
+        if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && selectingEnemy) || (IsGamepadButtonPressed(gamepadInt,
         GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && selectingEnemy)) {
             selectedEnemyIndex = cast(int)((selectedEnemyIndex - 1 + enemyCubes.length) % enemyCubes.length);
         }

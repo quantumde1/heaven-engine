@@ -29,11 +29,15 @@ void drawInventory() {
         DrawText(cast(char*)menuTabs[i], i * tabWidth + 10, 10, 20, Colors.WHITE);
     }
 
-    if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) ) {
+    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy)) {
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
         selectedButtonIndex = 0;
     }
-    if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)) {
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
         selectedButtonIndex = 0;
     }
@@ -54,14 +58,16 @@ void drawInventory() {
         DrawRectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight, buttonColor);
         DrawText(cast(char*)buttonText[i], rectX + buttonMargin + 10, buttonY + 10, 20, Colors.BLACK);
     }
-
-    if (IsKeyPressed(KeyboardKey.KEY_DOWN)|| IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
         selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
     }
-    if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(0, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) || 
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy)) {
         selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
     }
-    if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) ) {
+
+    if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
         allowControl = true;
         showInventory = false;
         return;

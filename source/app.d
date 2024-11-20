@@ -16,7 +16,6 @@ void main() {
 	} else {
 		SetTraceLogLevel(0);
 	}
-	DisableCursor();
 	validateRaylibBinding();
 	SetExitKey(KeyboardKey.KEY_NULL);
 	int screenWidth = GetScreenWidth();
