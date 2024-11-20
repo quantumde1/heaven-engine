@@ -82,6 +82,7 @@ int ver = 1;
 bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;
+bool audioEnabled;
 
 /* dialogs */
 bool allowControl = true; //for checking is control allowed at this moment
@@ -169,9 +170,16 @@ bool isNewLocationNeeded = false;
 float rotationCube;
 bool needRotationCube;
 bool shaderEnabled = true;
+char* fsdata; // Use dynamic arrays instead of char*
+char* vsdata;
 
 /* textures */
 char* model_location_path;
 char* texture_model_location_path;
 
-
+// Assign Shader to Models
+void assignShaderToModel(Model model) {
+    for (int i = 0; i < model.materialCount; i++) {
+        model.materials[i].shader = shader;
+    }
+}

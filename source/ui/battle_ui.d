@@ -104,7 +104,7 @@ bool isBossfight) {
     if (!isBossfight) {
         uint audio_size;
         char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
-        if (isAudioEnabled()) {
+        if (audioEnabled) {
             StopMusicStream(music);
             musicBattle = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
             PlayMusicStream(musicBattle);
@@ -114,7 +114,7 @@ bool isBossfight) {
     } else {
         uint audio_size;
         char *audio_data = get_file_data_from_archive("res/data.bin", "boss_battle.mp3", &audio_size);
-        if (isAudioEnabled()) {
+        if (audioEnabled) {
             StopMusicStream(music);
             musicBattle = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
             PlayMusicStream(musicBattle);

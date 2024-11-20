@@ -225,7 +225,7 @@ extern (C) nothrow int lua_LoadMusic(lua_State *L) {
         uint audio_size;
         char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
         
-        if (isAudioEnabled()) {
+        if (audioEnabled) {
             UnloadMusicStream(music);
             music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
         }

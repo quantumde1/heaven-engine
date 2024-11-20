@@ -46,7 +46,7 @@ void openMap(string location) {
     char *audio_data = get_file_data_from_archive("res/data.bin", "map_music.mp3", &audio_size);
     Music musicMenu;
 
-    if (isAudioEnabled()) {
+    if (audioEnabled) {
         musicMenu = LoadMusicStreamFromMemory(".MP3", cast(const(ubyte)*)audio_data, audio_size);
         PlayMusicStream(musicMenu);
     }
@@ -227,7 +227,7 @@ while (!WindowShouldClose()) {
 
     // Unload resources
     UnloadTexture(mapTexture);
-    if (isAudioEnabled()) {
+    if (audioEnabled) {
         UnloadMusicStream(musicMenu);
     }
     foreach (texture; arrowTextures) {

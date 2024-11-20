@@ -32,6 +32,13 @@ enum ScreenPadding = 10;
 enum TextSpacing = 30;
 enum FPS = 60;
 
+// Assign Shader to Models
+void assignShaderToModel(Model model) {
+    for (int i = 0; i < model.materialCount; i++) {
+        model.materials[i].shader = shader;
+    }
+}
+
 // Function Declarations
 nothrow void loadLocation(char* first, float size);
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
@@ -74,7 +81,7 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
     
     FriendlyZone: %s
 }.format(cubePosition, inBattle ? "In Battle" : "Exploring", playerHealth, cameraAngle, 
-        playerStepCounter, encounterThreshold, rel, isAudioEnabled(), friendlyZone);
+        playerStepCounter, encounterThreshold, rel, audioEnabled, friendlyZone);
 
     DrawText(debugText.toStringz, 10, 10, FontSize, Colors.BLACK);
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
@@ -189,13 +196,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     float[4] values = [ 0.1f, 0.1f, 0.1f, 1.0f ];
     SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
     
-    // Assign Shader to Models
-    void assignShaderToModel(Model model) {
-        for (int i = 0; i < model.materialCount; i++) {
-            model.materials[i].shader = shader;
-        }
-    }
-    
     assignShaderToModel(playerModel);
     foreach (ref cubeModel; cubeModels) {
         assignShaderToModel(cubeModel);
@@ -222,7 +222,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
 
                 case GameState.InGame:
                     deltaTime = GetFrameTime();
-                    if (isAudioEnabled()) {
+                    if (audioEnabled) {
                         UpdateMusicStream(music);
                     }
                     UpdateLightValues(shader, lights[0]);    

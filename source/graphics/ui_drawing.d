@@ -18,13 +18,21 @@ void showMainMenu(ref GameState currentGameState) {
     int logoX = (screenWidth - logoTexture.width) / 2;
     int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
 
-    string[] menuOptions = ["Start Game", "Language: English", "Shaders: On", "Exit Game"];
     int selectedMenuIndex = 0;
     float scaleX = 1.0f;
-
+    string[] menuOptions;
     // Language toggle variable
     bool isEnglish = true;
     bool shaderEnabled = true;
+    
+    if (isAudioEnabled()) {
+        audioEnabled = true;
+        menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "Exit Game"];
+    } else {
+        audioEnabled = false;
+        menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "Exit Game"];
+    }
+    
     // Fade-in effect
     while (fadeAlpha < 1.0f) {
         fadeAlpha += 0.02f; // Increase alpha value for fading in
@@ -77,8 +85,9 @@ void showMainMenu(ref GameState currentGameState) {
             selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
         }
 
+        switch (selectedMenuIndex) {
         // Handle language toggle
-        if (selectedMenuIndex == 1) { // Language option selected
+        case 1:
             if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
                 shaderEnabled = false;
                 menuOptions[1] = "Language: Russian"; // Change to Russian
@@ -87,19 +96,31 @@ void showMainMenu(ref GameState currentGameState) {
                 shaderEnabled = true;
                 menuOptions[1] = "Language: English"; // Change to English
             }
-        }
+            break;
 
-        if (selectedMenuIndex == 2) { // Language option selected
+        case 2:
             if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
-                isEnglish = false;
+                shaderEnabled = false;
                 menuOptions[2] = "Shaders: Off"; // Change to Russian
             }
             if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
-                isEnglish = true;
+                shaderEnabled = true;
                 menuOptions[2] = "Shaders: On"; // Change to English
             }
+            break;
+        case 3:
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+                audioEnabled = false;
+                menuOptions[3] = "Sound: Off"; // Change to Russian
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+                audioEnabled = true;
+                menuOptions[3] = "Sound: On"; // Change to English
+            }
+            break;
+        default:
+            break;
         }
-
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE)) {
             switch (selectedMenuIndex) {
                 case 0:
@@ -136,10 +157,8 @@ void showMainMenu(ref GameState currentGameState) {
                     }
                     currentGameState = GameState.InGame;
                     return;
-                case 1:
-                    // Handle options menu
-                    return;
-                case 3:
+                
+                case 4:
                     currentGameState = GameState.Exit;
                     return;
                 default:
