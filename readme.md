@@ -1,5 +1,7 @@
 # Heaven engine(Meido in Hebun!)
 
+![example event parameter](https://github.com/quantumde1/heaven-engine/actions/workflows/main.yml/badge.svg?event=push)
+
 Engine, developed primarly for Sky game series. Its now in state of active development, game too :)
 
 ## Features
