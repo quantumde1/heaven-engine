@@ -1,49 +1,61 @@
-# Heaven engine(Meido in Hebun!)
+# JRPG Engine, called as... meido in Hebun!
 
 ![build passing](https://github.com/quantumde1/heaven-engine/actions/workflows/main.yml/badge.svg?event=push)
 
 ![lines of code](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/quantumde1/heaven-engine/badge)
 
-Engine, developed primarly for Sky game series. Its now in state of active development, game too :)
-
 ## Features
-Features, available now:
+
 - [x] Simple source code with comments(based on raylib by @raysan5)
 - [x] Lua scripts (only few functions implemented)
 - [x] Control configuration file
 - [x] Audio playing
 - [x] Battle system
 - [x] Main menu
-- [ ] Pause menu
 - [ ] Personas, skills, load, etc menus
 - [x] Loading models and sprites(partially)
 - [x] video playback
 
-## Simple docs!
+## Guide
 
-### Building
+### Building on POSIX
 
 For building, you need install this packages(at least on Alpine linux):
 ```
-apk add raylib-dev lua5.4-dev dub ldc alpine-sdk vlc
+raylib-dev lua5.3-dev dub ldc clang vlc-dev
 ```
-after this, in source directory, run for debug:
+after installing, in source directory, run for debug build:
 ```
-dub build --force //Compiler must me LDC2/GDC, DMD isn't working!
+./build.sh
 ```
-and for release
+and for production-ready build
 ```
-dub build --build=release
+./build.sh --release
 ```
-On windows, instructions is similar, but you need to download ldc2/dmd from official Digital Mars D website.
-[dmd](https://downloads.dlang.org/releases/2.x/2.108.1/dmd-2.108.1.exe),
-[ldc2](https://github.com/ldc-developers/ldc/releases/download/v1.38.0/ldc2-1.38.0-windows-multilib.exe)
-and in powershell/cmd run commands as on Linux.
+Script will done everything automatically(but not installing dependencies, see above)
+
+### Building on Windows
+
+Currently broken. If anyone can help with fixing - dm me, please
 
 ### API
 its placed here:
 [api](docs/api.md)
 
-### Plans
+## FAQ
 
-Game will be open-source, and if will be developed fully will cost $1 at Steam(100RUB in VK Play).
+### Why I must use it?
+
+This engine suitable only for Shin Megami Tensei like JRPGs, not anything else. Also, this engine licensed under MIT, so you can do anything what you want, only giving a credit to me somewhere in your modification/game/etc.
+
+### Why so many dependencies?
+
+Engine built on top of multiple libraries to speed up development. I don't wanna write a new library for playing video and audio synchroniously, or new OpenGL wrapper for simplifying my life.
+
+### Why code is so bad?
+
+I wrote it for myself, and i don't know how to make it better, because i'm newbie in game development. If anyone can help with clearing the code - please, dm me into matrix/telegram.
+
+### Why everything done in one thread?
+
+Because my engine is shitty-coded. Also this will work better on old CPUs.
