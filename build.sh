@@ -43,31 +43,27 @@ fi
 # Return to the original directory
 cd .. || { printf "${RED}[ERROR] Failed to return to the original directory!${RESET}\n"; exit 1; }
 
-# Check if heaven-engine already exists
-if [ -f "./heaven-engine" ]; then
-    printf "${YELLOW}[WARNING] heaven-engine already built. Skipping build process.${RESET}\n"
+# Check for the --release flag
+if [ "$1" = "--release" ]; then
+    BUILD_CMD="dub build --build=release"
 else
-    # Check for the --release flag
-    if [ "$1" = "--release" ]; then
-        BUILD_CMD="dub build --build=release"
-    else
-        BUILD_CMD="dub build"
-    fi
-
-    # Execute the build command and hide output, but capture errors
-    printf "${GREEN}[BUILD] Building engine...${RESET}\b"
-    ERROR_OUTPUT=$($BUILD_CMD)
-
-    if [ $? -eq 0 ]; then
-        strip ./heaven-engine
-        echo "MADE_BY_QUANTUMDE1_UNDERLEVEL_STUDIOS_2024_ALL_RIGHTS_RESERVED_UNDER_MIT_LICENSE_LMAO" >> ./heaven-engine
-        touch sky.sh && printf "#!/bin/sh\nexec heaven-engine\n" > sky.sh && chmod +x sky.sh
-        printf "\n${GREEN}[BUILD] Build complete!${RESET}\n"
-    else
-        printf "${RED}[BUILD] Build incomplete!${RESET}\n\n${YELLOW}[LOGS]${RESET}:\n"
-        echo "$ERROR_OUTPUT"
-        exit 1
-    fi
+    BUILD_CMD="dub build"
 fi
+
+# Execute the build command and hide output, but capture errors
+printf "${GREEN}[BUILD] Building engine...${RESET}\b"
+ERROR_OUTPUT=$($BUILD_CMD)
+
+if [ $? -eq 0 ]; then
+    strip ./heaven-engine
+    echo "MADE_BY_QUANTUMDE1_UNDERLEVEL_STUDIOS_2024_ALL_RIGHTS_RESERVED_UNDER_MIT_LICENSE_LMAO" >> ./heaven-engine
+    touch sky.sh && printf "#!/bin/sh\nexec heaven-engine\n" > sky.sh && chmod +x sky.sh
+    printf "\n${GREEN}[BUILD] Build complete!${RESET}\n"
+else
+    printf "${RED}[BUILD] Build incomplete!${RESET}\n\n${YELLOW}[LOGS]${RESET}:\n"
+    echo "$ERROR_OUTPUT"
+    exit 1
+fi
+
 
 printf "${GREEN}[INFO] All processes completed successfully!${RESET}\n"

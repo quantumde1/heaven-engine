@@ -233,5 +233,4 @@ while (!WindowShouldClose()) {
     foreach (texture; arrowTextures) {
         UnloadTexture(texture);
     }
-    UnloadFont(fontdialog); // Unload the custom font
 }
