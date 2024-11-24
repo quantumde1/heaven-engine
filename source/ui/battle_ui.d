@@ -248,9 +248,9 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
                 Color enemyColor = (index == selectedEnemyIndex) ? Colors.RED : Colors.WHITE;
                 DrawCube(enemyCube.position, 2.0f, 2.0f, 2.0f, enemyColor);
                 string hpText = "HP: " ~ to!string(enemyCube.health);
-                DrawText(cast(char*)enemyCube.name, cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y + 30,
+                DrawText(toStringz(enemyCube.name), cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y + 30,
                 20, enemyColor);
-                DrawText(cast(char*)hpText.ptr, cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y, 
+                DrawText(cast(char*)(hpText.ptr), cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y, 
                 20, enemyColor);
             }
         }

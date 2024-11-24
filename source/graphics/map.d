@@ -112,8 +112,6 @@ camera.zoom = 1.0f; // Default zoom level
     }
 
 float currentZoom = 1.0f; // Variable to control zoom level
-bool needzoom1;
-bool needzoom2;
 
 // Main game loop
 while (!WindowShouldClose()) {

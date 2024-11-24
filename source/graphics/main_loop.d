@@ -115,7 +115,6 @@ import raylib_lights;
 
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Initialization
-    bool isGamepadConnected = IsGamepadAvailable(0);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
     float fadeAlpha = 2.0f;
@@ -136,13 +135,12 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Fade In and Out Effects
     fadeEffect(0.0f, true);
     fadeEffect(fadeAlpha, false);
-    
     // Play Opening Video
     BeginDrawing();
     playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
     ClearBackground(Colors.BLACK);
     EndDrawing();
-    
+    DisableCursor();
     // Load Control Configuration and Initialize Audio
     immutable ControlConfig controlConfig = loadControlConfig();
     InitAudioDevice();
@@ -206,14 +204,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     foreach (i, cubeModel; cubeModels) {
         cubes[i].rotation = 0.0f;
     }
-    DisableCursor();
     // Main Game Loop
     while (!WindowShouldClose()) {
         if (videoFinished) {
             switch (currentGameState) {
-                case GameState.MainMenu:
-                    showMainMenu(currentGameState);
-                    break;
                 case GameState.InGame:
                     deltaTime = GetFrameTime();
                     if (audioEnabled) {
@@ -225,7 +219,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
                         controlConfig.forward_button,
-                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
+                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, cubes);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
 
                     Nullable!Cube collidedCube = handleCollisions(cubePosition, cubes, cubeBoundingBox);
