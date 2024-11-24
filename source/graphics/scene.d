@@ -44,7 +44,7 @@ void initWindowAndCamera(ref Camera3D camera) {
 }
 
 void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, float cameraSpeed, float deltaTime,
-                                 char fwd, char bkd, char lft, char rgt, bool allowControl) {
+                                 char fwd, char bkd, char lft, char rgt, bool allowControl, Cube[] cubes) {
     if (!allowControl || isCubeMoving) return;
 
     Vector3 forward = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
@@ -61,12 +61,26 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
 
     if (!Vector3Equals(movement, Vector3Zero())) {
         movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
-        camera.position += movement;
-        camera.target += movement;
-        cubePosition += movement;
-        if (!friendlyZone) playerStepCounter++;
+        
+        // Check for collisions before moving
+        BoundingBox cubeBoundingBox;
+        Nullable!Cube collidedCube = handleCollisions(cubePosition + movement, cubes, cubeBoundingBox);
+        
+        if (collidedCube.isNull) {
+            // No collision detected, move the cube
+            camera.position += movement;
+            camera.target += movement;
+            cubePosition += movement;
+            if (!friendlyZone) playerStepCounter++;
+        } else {
+            // Collision detected, handle response (e.g., stop movement or slide)
+            // Here you can implement a simple response, like stopping the movement
+            // or adjusting the position based on the collision normal.
+            // For simplicity, we will just not move the cube in this example.
+        }
     }
 
+    // Existing tracking logic
     if (!trackingCube.isNull) {
         Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max - 
         trackingCube.get.boundingBox.min) / 2.0f;
@@ -168,6 +182,24 @@ void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float ca
 Nullable!Cube handleCollisions(Vector3 cubePosition, Cube[] cubes, ref BoundingBox cubeBoundingBox) {
         // Define the bounding box for the cube at the current position
     cubeBoundingBox = BoundingBox(cubePosition, Vector3Add(cubePosition, Vector3(CubeSize, CubeSize, CubeSize)));
+
+    // Check for collisions with other cubes
+    foreach (cube; cubes) {
+        if (CheckCollisionBoxes(cubeBoundingBox, cube.boundingBox)) {
+            return Nullable!Cube(cube); // Return the collided cube
+        }
+    }
+    
+    return Nullable!Cube.init; // Return an empty Nullable!Cube if no collision is detected
+}
+
+Nullable!Cube handleCollisionsDialog(Vector3 cubePosition, Cube[] cubes, ref BoundingBox cubeBoundingBox) {
+    // Define the bounding box for the cube at the current position
+    // Expand the bounding box by 3.0f in all directions
+    Vector3 expandedPosition = Vector3Subtract(cubePosition, Vector3(3.0f, 3.0f, 3.0f));
+    Vector3 expandedSize = Vector3Add(cubePosition, Vector3(3.0f, 3.0f, 3.0f));
+    
+    cubeBoundingBox = BoundingBox(expandedPosition, expandedSize);
 
     // Check for collisions with other cubes
     foreach (cube; cubes) {

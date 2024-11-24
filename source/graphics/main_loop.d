@@ -219,10 +219,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
                         controlConfig.forward_button,
-                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
+                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, cubes);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
-
-                    Nullable!Cube collidedCube = handleCollisions(cubePosition, cubes, cubeBoundingBox);
+                    Nullable!Cube collidedCubeDialog = handleCollisionsDialog(cubePosition, cubes, cubeBoundingBox);
                     BeginDrawing();
                     ClearBackground(Colors.RAYWHITE);
                     
@@ -248,7 +247,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         allow_exit_dialog = allowControl = false;
                         display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
                     } else {
-                        displayDialogs(collidedCube, controlConfig.dialog_button, allowControl, showDialog, 
+                        displayDialogs(collidedCubeDialog, controlConfig.dialog_button, allowControl, showDialog, 
                         allow_exit_dialog, name);
                     }
 
