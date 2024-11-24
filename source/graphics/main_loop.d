@@ -219,7 +219,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
                         controlConfig.forward_button,
-                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, cubes);
+                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
 
                     Nullable!Cube collidedCube = handleCollisions(cubePosition, cubes, cubeBoundingBox);

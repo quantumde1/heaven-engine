@@ -62,7 +62,7 @@ function checkDialogStatus()
         if dialogName == "Alexey" and istalked == true then
             updateCubeDialog("Alexey", alexey_dialog)
             rotateCamera(180.0, 130.0)
-            startCubeMove(alexey, 3.0, 0.0, 0.0, 0.8)
+            startCubeMove(alexey, 6.0, 0.0, 0.0, 0.8)
             startCubeRotation(alexey, 270, 80, 10)
         end
         previousDialogName = dialogName
@@ -145,7 +145,7 @@ changeCameraPosition(0.0, 10.0, 10.0)
 changeCameraTarget(0.0, 4.0, 0.0)
 changeCameraUp(0.0, 1.0, 0.0)
 -- Add cubes for Sergey and Alexey
-addCube(-3.0, 0.0, 0.0, "Sergey", {""}, 1, -1)
+addCube(-6.0, 0.0, 0.0, "Sergey", {""}, 1, -1)
 addCube(2.0, 0.0, 4.0, "Alexey", {""}, 1, -1)
 howMuchModels(2);
 setCubeModel(sergey, "res/mc.glb")
