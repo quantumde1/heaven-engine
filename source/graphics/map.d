@@ -125,7 +125,7 @@ while (!WindowShouldClose()) {
     }
 
     // Handle input
-    if (IsGamepadAvailable(0)) {
+    if (IsGamepadAvailable(gamepadInt)) {
         DrawCircle(40 + 15, posY + 15, 15, Colors.RED);
         DrawText("B", 40 + 15 - 5, posY + 15 - 7, 20, Colors.BLACK);
         DrawText(" go to location", 40 + 30 + 5, posY, 20, Colors.BLACK);

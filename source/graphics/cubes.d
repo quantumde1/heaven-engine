@@ -106,7 +106,7 @@ nothrow void removeCube(string name) {
     // Find the index of the cube in the array by name
     int indexToRemove = -1;
     foreach (index, cube; cubes) {
-        try {if (!rel) writeln("cube name:", cube.name, "cube index:", index); } catch (Exception e) {}
+        try {if (!rel) writeln("cube name:", cube.name, " cube index:", index); } catch (Exception e) {}
         if (cube.name == name) {
             indexToRemove = cast(int)index;
             break;

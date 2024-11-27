@@ -29,14 +29,14 @@ extern (C) nothrow int lua_initBattle(lua_State *L) {
     allowControl = false;
     bool isBoss;
     if (luaL_checkinteger(L, 2) == 1) {
-        isBoss = true;
+        isBossfight = true;
     } else {
-        isBoss = false;
+        isBossfight = false;
     }
     playerStepCounter = 0;
     inBattle = true;
     try {
-        initBattle(camera, cubePosition, cameraAngle, to!int(luaL_checkinteger(L, 1))-1,isBoss);
+        initBattle(camera, cubePosition, cameraAngle, to!int(luaL_checkinteger(L, 1))-1);
     } catch (Exception e) {
 
     }

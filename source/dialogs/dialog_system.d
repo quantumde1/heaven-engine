@@ -17,7 +17,7 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
         return;
     }
     
-    bool isGamepadConnected = IsGamepadAvailable(0);
+    bool isGamepadConnected = IsGamepadAvailable(gamepadInt);
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     int paddingWidth = cast(int)(screenWidth * PADDING_RATIO);
@@ -165,7 +165,7 @@ void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl,
     // Check if cube collision is not null
     if (isCubeNotNull) {
         if (!showDialog && allow_exit_dialog && !inBattle) {
-            if (IsGamepadAvailable(0)) {
+            if (IsGamepadAvailable(gamepadInt)) {
                 int buttonSize = 30;
                 int circleCenterX = 40 + buttonSize / 2;
                 int circleCenterY = posY + buttonSize / 2;

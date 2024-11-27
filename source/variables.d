@@ -69,6 +69,13 @@ EnemyCube[] enemyCubes; // Массив для хранения вражески
 int selectedEnemyIndex = 0; // Индекс выбранного вражеского куба
 bool selectingEnemy = false; // Флаг выбора вражеского куба
 bool inBattle = false;
+bool isBossfight;
+int retreated;
+float runMessageTimer = 0.0f;
+bool showRunMessage = false;
+bool showRetreatedMessage = false;
+float retreatedMessageTimer = 0.0f;
+string retreatMessage; // To hold the retreat messag
 int selectedTabIndex = 0;
 int secInBattle = false;
 
@@ -84,9 +91,6 @@ bool showMapPrompt = false;
 bool showDebug = false;
 bool audioEnabled;
 int gamepadInt = 0;
-version (Linux) {
-    int gamepadInt = 1;
-}
 
 /* dialogs */
 bool allowControl = true; //for checking is control allowed at this moment

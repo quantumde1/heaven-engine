@@ -7,6 +7,7 @@ import script;
 import core.time;
 import core.thread;
 import std.string;
+import graphics.main_loop;
 
 void showMainMenu(ref GameState currentGameState) {
     int screenWidth = GetScreenWidth();
@@ -61,7 +62,14 @@ void showMainMenu(ref GameState currentGameState) {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(Colors.BLACK);
-
+        if (IsKeyPressed(KeyboardKey.KEY_F3) && !rel) {
+            showDebug = !showDebug;
+        }
+        // Draw Debug Information
+        if (showDebug) {
+            drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, 
+            encounterThreshold, inBattle);
+        }
         // Draw the logo
         DrawTexture(logoTexture, logoX, logoY, Colors.WHITE);
 

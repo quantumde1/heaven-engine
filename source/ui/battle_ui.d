@@ -10,6 +10,7 @@ import std.conv;
 import std.algorithm;
 import script;
 import std.string;
+import std.random;
 
 const float CUBE_DRAW_HEIGHT = 2.5f;
 const float PLAYER_HEALTH_BAR_WIDTH = 200.0f;
@@ -52,13 +53,13 @@ void attackTab(int element) {
 void drawPlayerHealthBar(int playerHealth, int maxPlayerHealth) {
     int screenHeight = GetScreenHeight();
     float healthPercentage = cast(float)playerHealth / maxPlayerHealth;
-    DrawRectangle(cast(int)PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
+    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
     PLAYER_HEALTH_BAR_Y_OFFSET), cast(int)PLAYER_HEALTH_BAR_WIDTH, cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
-    DrawRectangle(cast(int)PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
+    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
     PLAYER_HEALTH_BAR_Y_OFFSET), cast(int)(PLAYER_HEALTH_BAR_WIDTH * healthPercentage), 
     cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.RED);
     string healthText = "Health: " ~ to!string(playerHealth) ~ "/" ~ to!string(maxPlayerHealth);
-    DrawText(healthText.ptr, PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
+    DrawText(toStringz(healthText), PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
     PLAYER_HEALTH_BAR_Y_OFFSET + 5), 10, Colors.WHITE);
 }
 
@@ -80,6 +81,7 @@ void physicalAttack() {
 void gameOverScreen() {
     DrawText("GAME OVER", GetScreenWidth() / 2 - MeasureText("GAME OVER", 20) / 2, GetScreenHeight() / 2 - 10, 40,
      Colors.RED);
+    
 }
 
 void checkForVictory(ref Camera3D camera, ref Vector3 cubePosition) {
@@ -99,8 +101,7 @@ void checkForVictory(ref Camera3D camera, ref Vector3 cubePosition) {
 
 Model enemyModel; // Define at a broader scope to make accessible elsewhere
 
-void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, int randomCounter, 
-bool isBossfight) {
+void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, int randomCounter) {
     if (!isBossfight) {
         uint audio_size;
         char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
@@ -173,7 +174,6 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     Color barColor = Colors.BLUE;
     int barHeight = screenHeight / 9;
     DrawRectangle(0, 0, screenWidth, barHeight, barColor);
-
     string[] menuTabs = ["Attack", "Skill", "Item", "Talk", "Escape"];
     int numberOfTabs = cast(int)menuTabs.length;
     int tabWidth = screenWidth / numberOfTabs;
@@ -204,7 +204,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int rectX = 10;
     int rectY = barHeight + 10;
     DrawRectangle(rectX, rectY, rectWidth, rectHeight, Colors.GRAY);
-
+    
     int buttonHeight = 50;
     int buttonMargin = 10;
     for (int i = 0; i < numberOfButtons; i++) {
@@ -213,7 +213,33 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         DrawRectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight, buttonColor);
         DrawText(cast(char*)buttonText[i], rectX + buttonMargin + 10, buttonY + 10, 20, Colors.BLACK);
     }
+    if (isBossfight) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
+            showRunMessage = true; // Set the flag to true when the message should be shown
+            runMessageTimer = 0.0f; // Reset the timer
+        }
 
+        // Update the timer in the drawBattleUI function
+        if (showRunMessage) {
+            runMessageTimer += GetFrameTime(); // Increment the timer by the time since the last frame
+            if (runMessageTimer >= 3.0f) {
+                showRunMessage = false; // Hide the message after 3 seconds
+            }
+        }
+
+        // Draw the message if the flag is true
+        if (showRunMessage) {
+            DrawText("You cannot run!", GetScreenWidth() / 2 - MeasureText("You cannot run!", 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
+        }
+    } else {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
+            
+            showRunMessage = true; // Set the flag to true when the message should be shown
+            runMessageTimer = 0.0f; // Reset the timer
+        }
+    }
     if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
     (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
         selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;

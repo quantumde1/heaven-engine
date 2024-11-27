@@ -185,7 +185,7 @@ version (Posix) {
 
             // Add Skip text/button
             int posY = GetScreenHeight() - 20 - 40;
-            if (IsGamepadAvailable(0)) {
+            if (IsGamepadAvailable(gamepadInt)) {
                 int buttonSize = 30;
                 int circleCenterX = 40 + buttonSize / 2;
                 int circleCenterY = posY + buttonSize / 2;

@@ -53,6 +53,17 @@ nothrow void loadLocation(char* first, float size) {
     }
 }
 
+ControlConfig loadControlConfig() {
+    return ControlConfig(
+        parse_conf("conf/layout.conf", "right"),
+        parse_conf("conf/layout.conf", "left"),
+        parse_conf("conf/layout.conf", "backward"),
+        parse_conf("conf/layout.conf", "forward"),
+        parse_conf("conf/layout.conf", "dialog"),
+        parse_conf("conf/layout.conf", "opmenu")
+    );
+}
+
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
                    int playerStepCounter, int encounterThreshold, bool inBattle) {
     const string debugText = q{
@@ -75,20 +86,9 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
     FriendlyZone: %s
 }.format(cubePosition, inBattle ? "In Battle" : "Exploring", playerHealth, cameraAngle, 
         playerStepCounter, encounterThreshold, rel, audioEnabled, friendlyZone);
-
-    DrawText(debugText.toStringz, 10, 10, FontSize, Colors.BLACK);
+    if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
+    else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
-}
-
-ControlConfig loadControlConfig() {
-    return ControlConfig(
-        parse_conf("conf/layout.conf", "right"),
-        parse_conf("conf/layout.conf", "left"),
-        parse_conf("conf/layout.conf", "backward"),
-        parse_conf("conf/layout.conf", "forward"),
-        parse_conf("conf/layout.conf", "dialog"),
-        parse_conf("conf/layout.conf", "opmenu")
-    );
 }
 
 void closeAudio() {
@@ -115,6 +115,13 @@ import raylib_lights;
 
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Initialization
+    version (linux) {
+        gamepadInt = 1;
+        if (!rel) writeln("Linux version detected");
+    }
+    if (!rel) {
+        writeln("gamepadInt: ", gamepadInt);
+    }
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
     float fadeAlpha = 2.0f;
@@ -208,6 +215,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     while (!WindowShouldClose()) {
         if (videoFinished) {
             switch (currentGameState) {
+                case GameState.MainMenu:
+                    showMainMenu(currentGameState);
+                    break;
                 case GameState.InGame:
                     deltaTime = GetFrameTime();
                     if (audioEnabled) {
@@ -263,11 +273,56 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         playerStepCounter = 0;
                         encounterThreshold = uniform(900, 3000, rnd);
                         inBattle = true;
-                        initBattle(camera, cubePosition, cameraAngle, randomNumber, false);
+                        isBossfight = false;
+                        initBattle(camera, cubePosition, cameraAngle, randomNumber);
                     }
 
                     if (inBattle) {
                         cameraAngle = 90.0f;
+                        if (!isBossfight) {
+                            if (showRunMessage) {
+                                runMessageTimer += GetFrameTime(); // Increment the timer by the time since the last frame
+                                DrawText("Your team...", GetScreenWidth() / 2 - MeasureText("Your team...", 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
+                                retreated = uniform(0, 2, rnd); // Generates 0 or 1, true if 0, false if 1
+                                if (retreated == 0) {
+                                    retreatMessage = "Retreated!";
+                                } else if (retreated == 1) {
+                                    retreatMessage = "Not retreated!";
+                                }
+                                if (runMessageTimer >= 3.0f) {
+                                    showRunMessage = false; // Hide the run message after 3 seconds
+                                    showRetreatedMessage = true; // Show the retreated message
+                                    runMessageTimer = 0.0f; // Reset the timer for the next message
+                                }
+                            }
+
+                            if (showRetreatedMessage) {
+                                DrawText(toStringz(retreatMessage), GetScreenWidth() / 2 - MeasureText(toStringz(retreatMessage), 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
+                                // Optionally, you can add a timer for the retreated message as well
+                                retreatedMessageTimer += GetFrameTime(); // Increment the timer for the retreated message
+                                if (retreatedMessageTimer >= 3.0f) {
+                                    showRetreatedMessage = false; // Hide the retreated message after 3 seconds
+                                    retreatedMessageTimer = 0.0f; // Reset the timer
+                                    if (retreated == 0) {
+                                        if (!rel) { writeln ("retreated!"); }
+                                        inBattle = false;
+                                        cubePosition = originalCubePosition;
+                                        camera.position = originalCameraPosition;
+                                        camera.target = originalCameraTarget;
+                                        for (int i = 0; i < enemyCubes.length; i++) {
+                                            if (!rel) writeln(enemyCubes[i].name, " is destroyed!");
+                                            removeCube(enemyCubes[i].name);
+                                        }
+                                        StopMusicStream(music);
+                                        UnloadModel(enemyModel);
+                                        allowControl = true;
+                                    } else {
+                                        if (!rel) { writeln ("not retreated!"); }
+                                        enemyTurn();
+                                    }
+                                }
+                            }
+                        }
                         drawBattleUI(camera, cubePosition);
                         UpdateMusicStream(musicBattle);
                         if (!selectingEnemy) {
@@ -344,7 +399,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     }
 
                     // Inventory Handling
-                    if (IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) {
+                    if (IsKeyPressed(controlConfig.opmenu_button) && !showDialog || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP) && !showDialog) {
                         showInventory = true;
                     }
                     if (showInventory) {
@@ -361,6 +416,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     StopMusicStream(music);
                     EndDrawing();
                     CloseWindow();
+                    UnloadFont(fontdialog);
                     closeAudio();
                     lua_close(L);
                     return;
