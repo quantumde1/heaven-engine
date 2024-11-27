@@ -2,6 +2,8 @@
 docs.json
 __dummy.html
 /heaven-engine
+heaven-engine.exe
+heaven-engine.pdb
 heaven-engine.so
 heaven-engine.dylib
 heaven-engine.dll
