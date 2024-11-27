@@ -121,9 +121,14 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
             isTextFullyDisplayed = false; // Reset the text display state
             if (currentPage >= pages.length) {
                 showDialog = false;
-                allowControl = true;
-                allow_exit_dialog = true;
+                if (battleDialog == true) {
+                    battleDialog = false;
+                    allow_exit_dialog = true;
+                } else {
+                    allowControl = true;
+                }
                 currentPage = 0; // Reset to the first page if needed
+                
             }
         }
     } else {

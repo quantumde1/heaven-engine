@@ -65,6 +65,7 @@ struct BattleState {
 }
 Cube[] battleCubes;
 BattleState battleState;
+bool battleDialog;
 EnemyCube[] enemyCubes; // Массив для хранения вражеских кубов
 int selectedEnemyIndex = 0; // Индекс выбранного вражеского куба
 bool selectingEnemy = false; // Флаг выбора вражеского куба

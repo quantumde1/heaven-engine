@@ -30,6 +30,8 @@ extern (C) nothrow int lua_initBattle(lua_State *L) {
     bool isBoss;
     if (luaL_checkinteger(L, 2) == 1) {
         isBossfight = true;
+        name_global = to!string(luaL_checkstring(L, 3));
+        message_global = [to!string(luaL_checkstring(L, 4))];
     } else {
         isBossfight = false;
     }

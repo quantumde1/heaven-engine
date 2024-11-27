@@ -13,6 +13,7 @@ import std.array;
 extern (C) int testPlayback(char* argv, int gamepadint);
 int playVideo(char* argv) {
     // Load and play music
+    DisableCursor();
     int test = testPlayback(argv, gamepadInt);
     while (test != 1488) {
         

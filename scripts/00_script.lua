@@ -107,7 +107,7 @@ function startDialogCoroutine()
             while isDialogExecuted() do
                 coroutine.yield()
             end
-            initBattle(1,1)
+            initBattle(1,1, "Alexey", "Our talk already ended!")
             while getBattleStatus() do
                 coroutine.yield()
                 battleRunning = getBattleStatus()

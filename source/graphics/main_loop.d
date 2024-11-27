@@ -324,6 +324,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                                 }
                             }
                         }
+                        if (battleDialog == true) {
+                            display_dialog(name_global, emotion_global, message_global, -1);
+                        }
                         drawBattleUI(camera, cubePosition);
                         UpdateMusicStream(musicBattle);
                         if (!selectingEnemy) {

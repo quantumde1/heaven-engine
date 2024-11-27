@@ -11,6 +11,7 @@ import std.algorithm;
 import script;
 import std.string;
 import std.random;
+import dialogs.dialog_system;
 
 const float CUBE_DRAW_HEIGHT = 2.5f;
 const float PLAYER_HEALTH_BAR_WIDTH = 200.0f;
@@ -173,16 +174,10 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int screenHeight = GetScreenHeight();
     Color barColor = Colors.BLUE;
     int barHeight = screenHeight / 9;
-    DrawRectangle(0, 0, screenWidth, barHeight, barColor);
+    
     string[] menuTabs = ["Attack", "Skill", "Item", "Talk", "Escape"];
     int numberOfTabs = cast(int)menuTabs.length;
     int tabWidth = screenWidth / numberOfTabs;
-
-    for (int i = 0; i < numberOfTabs; i++) {
-        Color tabColor = (i == selectedTabIndex) ? Colors.DARKGRAY : Colors.LIGHTGRAY;
-        DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
-        DrawText(cast(char*)menuTabs[i], i * tabWidth + 10, 10, 20, Colors.WHITE);
-    }
 
     if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
     GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
@@ -202,24 +197,53 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int rectWidth = screenWidth / 4;
     int rectHeight = (2 * screenHeight) / 3;
     int rectX = 10;
-    int rectY = barHeight + 10;
-    DrawRectangle(rectX, rectY, rectWidth, rectHeight, Colors.GRAY);
-    
+    int rectY = barHeight + 15;
+    Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
+    DrawRectangleRounded(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, semiTransparentBlack);
+    // Draw the outline for the rounded rectangle
+    DrawRectangleRoundedLines(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
+    for (int i = 0; i < numberOfTabs; i++) {
+        Color tabColor = (i == selectedTabIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
+        DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
+        
+        // Calculate the Y-coordinate for the text to be at the bottom left of the tab
+        int textY = barHeight - 40; // Adjust this value for vertical positioning
+        DrawTextEx(fontdialog, toStringz(menuTabs[i]), Vector2(i * tabWidth + 10, textY), 40, 1.0f, Colors.WHITE);
+    }
     int buttonHeight = 50;
     int buttonMargin = 10;
-    for (int i = 0; i < numberOfButtons; i++) {
-        int buttonY = rectY + (buttonHeight + buttonMargin) * i;
-        Color buttonColor = (i == selectedButtonIndex) ? Colors.GRAY : Colors.LIGHTGRAY;
-        DrawRectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight, buttonColor);
-        DrawText(cast(char*)buttonText[i], rectX + buttonMargin + 10, buttonY + 10, 20, Colors.BLACK);
+    if (!battleDialog) {
+        drawPlayerHealthBar(playerHealth, 120);
+        
+        // Draw the background rectangle for the button area
+        DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
+        
+        for (int i = 0; i < numberOfButtons; i++) {
+            int buttonY = rectY + (buttonHeight + buttonMargin) * i;
+            Color buttonColor = (i == selectedButtonIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
+            
+            // Draw the rounded rectangle for each button
+            DrawRectangleRounded(Rectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight), 0.03f, 16, buttonColor);
+            
+            // Draw the button text
+            DrawTextEx(fontdialog, toStringz(buttonText[i]), Vector2(rectX + buttonMargin + 10, buttonY + 4), 30, 1.0f, Colors.WHITE);
+        }
+        
+        // Draw the outline for the button area
+        DrawRectangleRoundedLines(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
     }
     if (isBossfight) {
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
             showRunMessage = true; // Set the flag to true when the message should be shown
             runMessageTimer = 0.0f; // Reset the timer
         }
 
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 2 && selectedTabIndex == 3 || 
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 2 && selectedTabIndex == 3) {
+            battleDialog = true;
+            allowControl = false;
+        }
         // Update the timer in the drawBattleUI function
         if (showRunMessage) {
             runMessageTimer += GetFrameTime(); // Increment the timer by the time since the last frame
@@ -227,14 +251,14 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
                 showRunMessage = false; // Hide the message after 3 seconds
             }
         }
-
+        
         // Draw the message if the flag is true
         if (showRunMessage) {
             DrawText("You cannot run!", GetScreenWidth() / 2 - MeasureText("You cannot run!", 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
         }
     } else {
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
             
             showRunMessage = true; // Set the flag to true when the message should be shown
             runMessageTimer = 0.0f; // Reset the timer
@@ -293,7 +317,5 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     if (!battleState.playerTurn) {
         enemyTurn();
     }
-
-    drawPlayerHealthBar(playerHealth, 120);
     checkForVictory(camera, cubePosition);
 }
