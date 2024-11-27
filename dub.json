@@ -25,19 +25,19 @@
 		"-L/usr/local/lib"
 	],
 	"lflags-windows": [
-		"-L./",
-		"-L./libs/"
+		"-L./"
 	],
 	"libs-posix": [
 		"raylib",
 		"lua-5.3",
-		"vlc",
+		"playback",
 		"hpff"
 	],
 	"libs-windows": [
 		"raylib",
 		"lua53",
-		"libhpff"
+		"libhpff",
+		"playback"
 	],
 	"license": "MIT License",
 	"name": "heaven-engine",

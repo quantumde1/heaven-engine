@@ -144,13 +144,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     fadeEffect(fadeAlpha, false);
     // Play Opening Video
     BeginDrawing();
-    playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
+    InitAudioDevice();
+    playVideo(cast(char*)(getcwd()~"/res/opening.mpeg"));
+    //videoFinished = true;
     ClearBackground(Colors.BLACK);
     EndDrawing();
     DisableCursor();
     // Load Control Configuration and Initialize Audio
     immutable ControlConfig controlConfig = loadControlConfig();
-    InitAudioDevice();
     showMainMenu(currentGameState);
     // Lua Initialization
     if (!rel) { writeln("loading lua"); }

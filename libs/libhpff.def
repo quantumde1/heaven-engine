@@ -1,5 +1,0 @@
-LIBRARY "libhpff"
-EXPORTS
-    Y
-    M
-    get_file_data_from_archive

@@ -3,11 +3,6 @@
 	"versions": {
 		"bindbc-loader": "1.1.5",
 		"bindbc-lua": "0.6.1",
-		"bindbc-raylib": "0.9.1",
-		"glib-d": "0.0.3",
-		"gtk-d": "3.10.0",
-		"luad": "~master",
-		"mpv": "0.32.1",
 		"raylib-d": "5.0.1"
 	}
 }
