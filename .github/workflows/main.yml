@@ -29,14 +29,14 @@ jobs:
               lua5.3 \
               vlc \
               dub \
-              lld \
-              ldc \
+              gcc \
+              gcc-gdc \
               bash \
-              alpine-sdk 7zip && wget https://github.com/ldc-developers/ldc/releases/download/v1.40.0-beta4/ldc2-1.40.0-beta4-windows-multilib.7z && mkdir /opt/ldc2/ && 7z x ldc2-1.40.0-beta4-windows-multilib.7z && cp -r ldc2-1.40.0-beta4-windows-multilib/lib* /opt/ldc2/ && echo '"i[3-6]86-.*-windows-msvc": { switches = [ "-defaultlib=phobos2-ldc,druntime-ldc", "-link-defaultlib-shared=false" ]; lib-dirs = [ "/opt/ldc2/lib32" ]; }; "x86_64-.*-windows-msvc": { switches = [ "-defaultlib=phobos2-ldc,druntime-ldc", "-link-defaultlib-shared=false" ]; lib-dirs = [ "/opt/ldc2/lib64" ]; };' >> /etc/ldc2.conf &&   \
+              alpine-sdk && \
             cd /app && \
             git config --global --add safe.directory /app && \
             chmod +x ./build.sh && \
-            ./build.sh && rm -rf .git && dub build --arch=x86_64-pc-windows-msvc --force
+            ./build.sh && rm -rf .git
           "
 
       - name: Create archive
@@ -45,5 +45,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3  # Updated to v3
         with:
-          name: build-artifacts-all-in-one
+          name: build-artifacts
           path: build.zip
