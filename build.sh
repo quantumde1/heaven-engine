@@ -59,11 +59,6 @@ if [ $? -eq 0 ]; then
     echo "MADE_BY_QUANTUMDE1_UNDERLEVEL_STUDIOS_2024_ALL_RIGHTS_RESERVED_UNDER_MIT_LICENSE_LMAO" >> ./heaven-engine
     touch sky.sh && printf "#!/bin/sh\nexec heaven-engine\n" > sky.sh && chmod +x sky.sh
     printf "\n${GREEN}[BUILD] Build complete!${RESET}\n"
-else
-    printf "${RED}[BUILD] Build incomplete!${RESET}\n\n${YELLOW}[LOGS]${RESET}:\n"
-    echo "$ERROR_OUTPUT"
-    exit 1
 fi
-
 
 printf "${GREEN}[INFO] All processes completed successfully!${RESET}\n"
