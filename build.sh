@@ -8,62 +8,6 @@ YELLOW='\e[33m'
 BLUE='\e[34m'
 RESET='\e[0m'
 
-# Function to install dependencies
-install_dependencies() {
-    # Check for sudo or doas
-    if command -v sudo > /dev/null; then
-        SUDO_CMD="sudo"
-    elif command -v doas > /dev/null; then
-        SUDO_CMD="doas"
-    else
-        printf "${RED}[ERROR] Neither sudo nor doas is available. Please install dependencies manually.${RESET}\n"
-        return
-    fi
-
-    case "$1" in
-        "alpine")
-            printf "${BLUE}[INFO] Alpine detected!${RESET}\n"
-            printf "${BLUE}[INFO] Installing dependencies for Alpine...${RESET}\n"
-            $SUDO_CMD apk add dub lua5.3 raylib gcc musl-dev ldc
-            ;;
-        "arch")
-            printf "${BLUE}[INFO] Arch detected!${RESET}\n"
-            printf "${BLUE}[INFO] Installing dependencies for Arch...${RESET}\n"
-            $SUDO_CMD pacman -S --noconfirm dub lua53 raylib gcc ldc
-            ;;
-        *)
-            printf "${RED}[ERROR] Unsupported OS. Please install dependencies manually.${RESET}\n"
-            printf "${BLUE}[INFO] Make sure you have installed dub, liblua5.3, raylib and D compiler!${RESET}\n"
-            ;;
-    esac
-}
-
-if [ "$DEBIAN_FRONTEND" = "noninteractive" ]; then
-    echo "Running in non-interactive mode."
-    install_deps="n"  # Default to skipping in non-interactive mode
-else
-    echo "Running in interactive mode or DEBIAN_FRONTEND is set to: $DEBIAN_FRONTEND"
-    read -p "Do you want to automatically install dependencies? (y/n): " install_deps
-fi
-
-if [ "$install_deps" = "y" ]; then
-    # Detect the OS
-    OS=""
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS=$ID
-    fi
-
-    # Install dependencies based on the detected OS
-    if [ -n "$OS" ]; then
-        install_dependencies "$OS"
-    else
-        printf "${RED}[ERROR] Unable to detect the operating system.${RESET}\n"
-    fi
-else
-    printf "${YELLOW}[INFO] Skipping dependency installation. Please install them manually if needed.${RESET}\n"
-fi
-
 # Check and update git submodules
 printf "${BLUE}[INFO] Checking for git submodules...${RESET}\n"
 git submodule update --init --recursive
