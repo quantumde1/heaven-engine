@@ -17,6 +17,7 @@ install_dependencies() {
         SUDO_CMD="doas"
     else
         printf "${RED}[ERROR] Neither sudo nor doas is available. Please install dependencies manually.${RESET}\n"
+        return
     fi
 
     case "$1" in
@@ -37,19 +38,25 @@ install_dependencies() {
     esac
 }
 
-# Detect the OS
-OS=""
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    OS=$ID
-fi
+# Ask the user if they want to automatically install dependencies
+read -p "Do you want to automatically install dependencies? (y/n): " install_deps
 
-# Install dependencies based on the detected OS
-if [ -n "$OS" ]; then
-    install_dependencies "$OS"
+if [ "$install_deps" = "y" ]; then
+    # Detect the OS
+    OS=""
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$ID
+    fi
+
+    # Install dependencies based on the detected OS
+    if [ -n "$OS" ]; then
+        install_dependencies "$OS"
+    else
+        printf "${RED}[ERROR] Unable to detect the operating system.${RESET}\n"
+    fi
 else
-    printf "${RED}[ERROR] Unable to detect the operating system.${RESET}\n"
-    
+    printf "${YELLOW}[INFO] Skipping dependency installation. Please install them manually if needed.${RESET}\n"
 fi
 
 # Check and update git submodules
