@@ -31,13 +31,15 @@ fi
 # Return to the original directory
 cd ..
 
+# Change directory to libplayback/
 cd libplayback/
 # Check if libplayback.so already exists
 if [ -f "../libplayback.so" ]; then
     printf "${YELLOW}[WARNING] libplayback.so already built. Skipping build process.${RESET}\n"
 else
-    cc -fPIC -c text.c -lraylib -I /opt/local/include -L /opt/local/lib
-    gcc -shared -o libplayback.so text.o -lraylib -I /opt/local/include -L /opt/local/lib
+    # Compile with optimization flags
+    cc -fPIC -c text.c -O3 -march=native -lraylib -I /opt/local/include -L /opt/local/lib
+    gcc -shared -o libplayback.so text.o -O3 -march=native -lraylib -I /opt/local/include -L /opt/local/lib
     # Move the built library to the parent directory
     mv ./libplayback.so ../
     printf "${GREEN}[SUCCESS] libplayback.so moved to the parent directory.${RESET}\n"

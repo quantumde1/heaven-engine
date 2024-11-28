@@ -14,7 +14,7 @@
 - [x] Main menu
 - [ ] Personas, skills, load, etc menus
 - [x] Loading models and sprites(partially)
-- [x] video playback
+- [x] video playback (without sound at this moment)
 
 ## Guide
 
@@ -22,7 +22,7 @@
 
 For building, you need install this packages(at least on Alpine linux):
 ```
-raylib-dev lua5.3-dev dub ldc clang vlc-dev
+raylib-dev lua5.3-dev dub ldc gcc
 ```
 after installing, in source directory, run for debug build:
 ```
