@@ -23,6 +23,7 @@ const int ATTACK_DAMAGE = 10;
 void drawEnemyCubes() {
     foreach (enemyCube; enemyCubes) {
         DrawModel(enemyCube.model, enemyCube.position, 3.6f, Colors.WHITE);
+        assignShaderToModel(enemyCube.model);
     }
 }
 
@@ -179,15 +180,15 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int numberOfTabs = cast(int)menuTabs.length;
     int tabWidth = screenWidth / numberOfTabs;
 
-    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) && !battleDialog|| (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy)&& !battleDialog || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy && !battleDialog)) {
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
         selectedButtonIndex = 0;
     }
-    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) && !battleDialog|| (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) && !battleDialog|| (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)&& !battleDialog) {
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
         selectedButtonIndex = 0;
     }
@@ -242,7 +243,6 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 2 && selectedTabIndex == 3 || 
             IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 2 && selectedTabIndex == 3) {
             battleDialog = true;
-            allowControl = false;
         }
         // Update the timer in the drawBattleUI function
         if (showRunMessage) {
@@ -264,17 +264,17 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
             runMessageTimer = 0.0f; // Reset the timer
         }
     }
-    if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
-    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) && !battleDialog|| 
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy && !battleDialog)) {
         selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
     }
-    if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) || 
-    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) && !battleDialog|| 
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy && !battleDialog)) {
         selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
     }
 
-    if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE) || 
-    IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+    if (IsKeyPressed(KeyboardKey.KEY_ENTER) && !battleDialog|| IsKeyPressed(KeyboardKey.KEY_SPACE) && !battleDialog|| 
+    IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)&& !battleDialog) {
         if (selectedTabIndex == 0 && !selectingEnemy) {
             secInBattle = true;
             selectingEnemy = true;

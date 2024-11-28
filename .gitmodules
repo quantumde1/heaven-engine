@@ -1,3 +1,7 @@
 [submodule "hpff"]
 	path = hpff
 	url = https://github.com/quantumde1/hpff
+
+[submodule "libplayback"]
+	path = libplayback
+	url = https://github.com/quantumde1/libplayback

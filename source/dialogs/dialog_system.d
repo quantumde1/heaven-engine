@@ -120,15 +120,18 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
             currentCharIndex = 0; // Reset character index for the next page
             isTextFullyDisplayed = false; // Reset the text display state
             if (currentPage >= pages.length) {
-                showDialog = false;
-                if (battleDialog == true) {
+                
+                if (battleDialog) {
                     battleDialog = false;
+                    showDialog = false;
                     allow_exit_dialog = true;
-                } else {
+                }
+                else {
+                    showDialog = false;
                     allowControl = true;
+                    allow_exit_dialog = true;
                 }
                 currentPage = 0; // Reset to the first page if needed
-                
             }
         }
     } else {
