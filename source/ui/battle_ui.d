@@ -254,7 +254,9 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         
         // Draw the message if the flag is true
         if (showRunMessage) {
-            DrawText("You cannot run!", GetScreenWidth() / 2 - MeasureText("You cannot run!", 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
+            DrawTextEx(fontdialog, "You cannot run!", 
+            Vector2(GetScreenWidth() / 2 - MeasureTextEx(fontdialog, "You cannot run!", 40, 0).x / 2, GetScreenHeight() / 2 - 10),
+            40, 0, Colors.RED);
         }
     } else {
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
