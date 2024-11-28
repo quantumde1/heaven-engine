@@ -38,12 +38,12 @@ install_dependencies() {
     esac
 }
 
-# Check if running in a non-interactive environment
-if [ -z "$CI" ] && [ -z "$DEBIAN_FRONTEND" ]; then
-    # Ask the user if they want to automatically install dependencies
-    read -p "Do you want to automatically install dependencies? (y/n): " install_deps
-else
+if [ "$DEBIAN_FRONTEND" = "noninteractive" ]; then
+    echo "Running in non-interactive mode."
     install_deps="n"  # Default to skipping in non-interactive mode
+else
+    echo "Running in interactive mode or DEBIAN_FRONTEND is set to: $DEBIAN_FRONTEND"
+    read -p "Do you want to automatically install dependencies? (y/n): " install_deps
 fi
 
 if [ "$install_deps" = "y" ]; then
