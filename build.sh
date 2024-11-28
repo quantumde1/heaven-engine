@@ -60,6 +60,8 @@ printf "${GREEN}[BUILD] Building engine...${RESET}\b"
 $BUILD_CMD
 
 # If the build was successful, proceed with further steps
+strip ./libplayback.so
+strip ./libhpff.so
 strip ./heaven-engine
 echo "MADE_BY_QUANTUMDE1_UNDERLEVEL_STUDIOS_2024_ALL_RIGHTS_RESERVED_UNDER_MIT_LICENSE_LMAO" >> ./heaven-engine
 touch sky.sh && printf "#!/bin/sh\nexec heaven-engine\n" > sky.sh && chmod +x sky.sh

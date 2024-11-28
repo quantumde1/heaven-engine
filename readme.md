@@ -36,7 +36,10 @@ Script will done everything automatically(but not installing dependencies, see a
 
 ### Building on Windows
 
-Currently broken. If anyone can help with fixing - dm me, please
+Instuction is slightly harder than for UNIX like OSes.
+
+First, you must get mingw-w64 or other C compiler to compile libplayback and libhpff from source(i recommend to do it, because i may forget update them precompiled in repo).
+Next, you must get LDC/DMD. And then you must cd into dir with engine, do git submodule update --init --recursive, and then dub build.
 
 ### API
 its placed here:
