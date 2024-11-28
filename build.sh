@@ -17,19 +17,18 @@ install_dependencies() {
         SUDO_CMD="doas"
     else
         printf "${RED}[ERROR] Neither sudo nor doas is available. Please install dependencies manually.${RESET}\n"
-        exit 1
     fi
 
     case "$1" in
         "alpine")
             printf "${BLUE}[INFO] Alpine detected!${RESET}\n"
             printf "${BLUE}[INFO] Installing dependencies for Alpine...${RESET}\n"
-            $SUDO_CMD apk add dub lua5.3 raylib gcc musl-dev
+            $SUDO_CMD apk add dub lua5.3 raylib gcc musl-dev ldc
             ;;
         "arch")
             printf "${BLUE}[INFO] Arch detected!${RESET}\n"
             printf "${BLUE}[INFO] Installing dependencies for Arch...${RESET}\n"
-            $SUDO_CMD pacman -S --noconfirm dub lua53 raylib gcc
+            $SUDO_CMD pacman -S --noconfirm dub lua53 raylib gcc ldc
             ;;
         *)
             printf "${RED}[ERROR] Unsupported OS. Please install dependencies manually.${RESET}\n"
