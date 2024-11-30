@@ -27,10 +27,10 @@ void showMainMenu(ref GameState currentGameState) {
     
     if (isAudioEnabled()) {
         audioEnabled = true;
-        menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "Exit Game"];
+        menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
     } else {
         audioEnabled = false;
-        menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "Exit Game"];
+        menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "FPS: 60", "Exit Game"];
     }
     
     // Fade-in effect
@@ -58,8 +58,8 @@ void showMainMenu(ref GameState currentGameState) {
 
         EndDrawing();
     }
-
     while (!WindowShouldClose()) {
+
         BeginDrawing();
         ClearBackground(Colors.BLACK);
         if (IsKeyPressed(KeyboardKey.KEY_F3) && !rel) {
@@ -112,24 +112,38 @@ void showMainMenu(ref GameState currentGameState) {
             if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, 
     GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
                 shaderEnabled = false;
-                menuOptions[2] = "Shaders: Off"; // Change to Russian
+                menuOptions[2] = "Shaders: Off";
             }
             if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, 
     GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
                 shaderEnabled = true;
-                menuOptions[2] = "Shaders: On"; // Change to English
+                menuOptions[2] = "Shaders: On";
             }
             break;
         case 3:
             if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, 
     GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
                 audioEnabled = false;
-                menuOptions[3] = "Sound: Off"; // Change to Russian
+                menuOptions[3] = "Sound: Off";
             }
             if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, 
             GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
                 audioEnabled = true;
-                menuOptions[3] = "Sound: On"; // Change to English
+                menuOptions[3] = "Sound: On";
+            }
+            break;
+        case 4:
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
+                FPS = 30;
+                SetTargetFPS(FPS);
+                menuOptions[4] = "FPS: 30"; 
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, 
+            GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
+                FPS = 60;
+                SetTargetFPS(FPS);
+                menuOptions[4] = "FPS: 60";
             }
             break;
         default:

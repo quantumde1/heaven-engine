@@ -21,6 +21,7 @@ import dialogs.dialog_system;
 import ui.navigator;
 import scripts.lua_engine;
 import graphics.cubes;
+import raylib_lights;
 import graphics.map;
 import std.array;
 import ui.inventory;
@@ -30,7 +31,6 @@ enum FontSize = 20;
 enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
-enum FPS = 60;
 
 // Function Declarations
 nothrow void loadLocation(char* first, float size);
@@ -111,8 +111,6 @@ void fadeEffect(float alpha, bool fadeIn) {
     }
 }
 
-import raylib_lights;
-
 void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Initialization
     version (linux) {
@@ -135,9 +133,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Window and Audio Initialization
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
     ToggleFullscreen();
-    SetTargetFPS(FPS);
     rel = isReleaseBuild();
-    
+    SetTargetFPS(FPS);
     fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     fadeEffect(0.0f, true);
@@ -170,6 +167,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
             writeln("Script execution error: ", lua_tostring(L, -1));
         }
     }
+    
     initWindowAndCamera(camera);
     // Load Models
     float cameraSpeed = 5.0f;
@@ -202,7 +200,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     }
     assignShaderToModel(floorModel);
     // Lighting Setup
-    modelCharacterSize = 5.0f;
+    //modelCharacterSize = 5.0f;
     lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
     luaL_initDialogs(L);
 
@@ -253,7 +251,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                     }
 
                     drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
-                    
+                    if (!inBattle && !showInventory) {
+                        draw_navigation(cameraAngle);
+                    }
                     if (show_sec_dialog && showDialog) {
                         allow_exit_dialog = allowControl = false;
                         display_dialog(name_global, emotion_global, message_global, pageChoice_glob);

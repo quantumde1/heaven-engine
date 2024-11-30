@@ -70,6 +70,13 @@ extern (C) nothrow int lua_removeCube(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_playVideo(lua_State *L) {
+    try {
+        playVideo(cast(char*)luaL_checkstring(L, 1));
+    } catch (Exception e) {}
+    return 0;
+}
+
 extern (C) nothrow int lua_changeCameraPosition(lua_State *L) {
     positionCam = Vector3(
         luaL_checknumber(L, 1),
@@ -216,6 +223,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "getBattleStatus", &lua_getBattleStatus);
     lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
+    lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
     lua_register(L, "clearChoice", &luaL_dialogClearChoice);
 }
@@ -330,12 +338,14 @@ extern (C) nothrow int lua_addCube(lua_State *L) {
 
 extern (C) nothrow int lua_setMcModel(lua_State *L) {
     playerModel = LoadModel(luaL_checkstring(L, 1));
+    modelCharacterSize = luaL_checknumber(L, 2);
     return 0;
 }
 
 extern (C) nothrow int lua_setCubeModel(lua_State *L) {
     int index = cast(int)luaL_checkinteger(L, 1) - 1;
     const char* modelPath = luaL_checkstring(L, 2);
+    modelCubeSize = luaL_checknumber(L, 3);
     cubeModels[index] = LoadModel(modelPath);
     return 0;
 }

@@ -3,7 +3,6 @@ module graphics.cubes;
 
 import raylib;
 import std.typecons : Nullable;
-import graphics.main_loop;
 import variables;
 import std.stdio;
 

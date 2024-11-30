@@ -65,11 +65,40 @@ void drawPlayerHealthBar(int playerHealth, int maxPlayerHealth) {
     PLAYER_HEALTH_BAR_Y_OFFSET + 5), 10, Colors.WHITE);
 }
 
+void drawPlayerManaBar(int playerMana, int maxPlayerMana) {
+    int screenHeight = GetScreenHeight();
+    float manaPercentage = cast(float)playerMana / maxPlayerMana;
+    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
+    PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)PLAYER_HEALTH_BAR_WIDTH, 
+    cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY); // Adjust Y position for mana bar
+    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
+    PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)(PLAYER_HEALTH_BAR_WIDTH * manaPercentage), 
+    cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.BLUE);
+    string manaText = "Mana: " ~ to!string(playerMana) ~ "/" ~ to!string(maxPlayerMana);
+    DrawText(toStringz(manaText), PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
+    PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5 + 5), 10, Colors.WHITE);
+}
+
 void physicalAttack() {
     if (selectedEnemyIndex < enemyCubes.length) {
         EnemyCube enemy = enemyCubes[selectedEnemyIndex];
         enemy.health -= ATTACK_DAMAGE;
         if (!rel) writeln("Attacked ", enemy.name, ", Health left: ", enemy.health);
+        if (enemy.health <= 0) {
+            if (!rel) writeln(enemy.name, " is destroyed!");
+            enemyCubes = enemyCubes[0 .. selectedEnemyIndex] ~ enemyCubes[selectedEnemyIndex + 1 .. $];
+            removeCube(enemy.name);
+        } else {
+            enemyCubes[selectedEnemyIndex] = enemy;
+        }
+    }
+}
+
+void skillAttack() {
+    if (selectedEnemyIndex < enemyCubes.length) {
+        EnemyCube enemy = enemyCubes[selectedEnemyIndex];
+        enemy.health -= ATTACK_DAMAGE;
+        if (!rel) writeln("Magic attacked ", enemy.name, ", Health left: ", enemy.health);
         if (enemy.health <= 0) {
             if (!rel) writeln(enemy.name, " is destroyed!");
             enemyCubes = enemyCubes[0 .. selectedEnemyIndex] ~ enemyCubes[selectedEnemyIndex + 1 .. $];
@@ -173,7 +202,6 @@ void enemyTurn() {
 void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
-    Color barColor = Colors.BLUE;
     int barHeight = screenHeight / 9;
     
     string[] menuTabs = ["Attack", "Skill", "Item", "Talk", "Escape"];
@@ -215,7 +243,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int buttonMargin = 10;
     if (!battleDialog) {
         drawPlayerHealthBar(playerHealth, 120);
-        
+        drawPlayerManaBar(playerMana, 30);
         // Draw the background rectangle for the button area
         DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
         

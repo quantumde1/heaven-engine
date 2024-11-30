@@ -7,11 +7,9 @@ import graphics.cubes;
 import std.string;
 import std.stdio;
 import std.math;
-import ui.navigator;
 import variables;
 import std.path : dirName, buildNormalizedPath;
 import std.file;
-import ui.battle_ui;
 import std.random;
 import std.datetime;
 import std.conv;
@@ -153,14 +151,12 @@ void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float ca
     SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
     ShaderUniformDataType.SHADER_UNIFORM_VEC3);    
 
-    float playerScale = modelCharacterSize; 
-
+    float playerScale = modelCharacterSize;
     BeginMode3D(camera);
     // Draw cubes as models
     foreach (i, cubeModel; cubeModels) {
         Vector3 position = cubes[i].boundingBox.min;
-        DrawModelEx(cubeModel, position, Vector3(0.0f, 1.0f, 0.0f), cubes[i].rotation, Vector3(playerScale, 
-        playerScale, playerScale), Colors.WHITE);
+        DrawModelEx(cubeModel, position, Vector3(0.0f, 1.0f, 0.0f), cubes[i].rotation, Vector3(modelCubeSize, modelCubeSize, modelCubeSize), Colors.WHITE);
     }
 
     // Draw player model with rotation
@@ -173,10 +169,6 @@ void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float ca
     // Draw floor model
     DrawModel(floorModel, Vector3(0.0f, 0.0f, 0.0f), modelLocationSize, Colors.WHITE);
     EndMode3D();
-
-    if (!inBattle && !showInventory) {
-        draw_navigation(cameraAngle);
-    }
 }
 
 Nullable!Cube handleCollisions(Vector3 cubePosition, Cube[] cubes, ref BoundingBox cubeBoundingBox) {

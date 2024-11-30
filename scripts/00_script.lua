@@ -41,9 +41,9 @@ function tablesEqual(table1, table2)
 end
 
 function checkDialogStatus()
-    local cubePosition = { getCubeX(), getCubeY(), getCubeZ()}
+    local cubePosition = { getCubeX(), getCubeY(), getCubeZ() }
     
-    if tablesEqual(cubePosition, neededPosition) and tablesEqual(neededPosition, { 10.0, 0.0, 10.0}) then
+    if tablesEqual(cubePosition, neededPosition) then
         rotateCamera(90.0, 130.0)
         dialogBox("Text", {"Oh shit. How you find me?", "Go ahead, please. I dont wanna see you."}, 1, -1, {""})
         neededPosition = { }
@@ -125,6 +125,7 @@ function startDialogCoroutine()
                     cubeMoving = isCubeMoving()
                 end
                 if cubeMoving == false then
+                    playVideo("res/opening.mpeg")
                     removeCubeModel(alexey)
                     removeCube("Alexey")
                     updateCubeDialog("Sergey", sergey_dialog_bad)
@@ -140,7 +141,7 @@ function updateDialog()
     end
 end
 
-setPlayerModel("res/mc.glb")
+setPlayerModel("res/mc.glb", 3.0)
 changeCameraPosition(0.0, 10.0, 10.0)
 changeCameraTarget(0.0, 4.0, 0.0)
 changeCameraUp(0.0, 1.0, 0.0)
@@ -148,7 +149,7 @@ changeCameraUp(0.0, 1.0, 0.0)
 addCube(-6.0, 0.0, 0.0, "Sergey", {""}, 1, -1)
 addCube(2.0, 0.0, 4.0, "Alexey", {""}, 1, -1)
 howMuchModels(2);
-setCubeModel(sergey, "res/mc.glb")
-setCubeModel(alexey, "res/mc.glb")
+setCubeModel(sergey, "res/mc.glb", 3.0)
+setCubeModel(alexey, "res/mc.glb", 3.0)
 -- Start the dialog coroutine
 startDialogCoroutine()

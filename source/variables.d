@@ -79,6 +79,7 @@ float retreatedMessageTimer = 0.0f;
 string retreatMessage; // To hold the retreat messag
 int selectedTabIndex = 0;
 int secInBattle = false;
+int playerMana = 30;
 
 /* lua things */
 lua_State* L;
@@ -100,6 +101,7 @@ bool allow_exit_dialog = true; //can you exit from dialog
 int selectedChoice = 0;
 int pageChoice_glob;
 int answer_num;
+string name = "Sasha";
 bool isTextFullyDisplayed;
 int emotion_global;
 string name_global;
@@ -127,14 +129,11 @@ string[][] buttonTexts = [
 string[][] buttonTextsInventory = [
     ["Rasputin"], // Для вкладки "Summon"
     ["Rasputin"],  // Для вкладки "Return"
-    ["Dia 6MP", "Agi 4MP", "Bufu 4MP"], // skill
+    ["Agi 4MP", "Bufu 4MP", "Zio 3MP", "Dia 6MP"],  // Для вкладки "Magic"
     ["Revival Bead"], // item
     ["Save", "Exit game"] // system
 ];
-string[10] availableItems;
-string[12] inventory;
-string[5] myDemons;
-string name = "Sasha";
+string[3] myDemons;
 int selectedButtonIndex = 0;
 int selectedSubmenuButtonIndex = 0;
 
@@ -174,6 +173,8 @@ float modelLocationSize;
 string location_name;
 bool friendlyZone;
 float modelCharacterSize;
+float modelCubeSize;
+int FPS = 60;
 Shader shader;
 bool isNewLocationNeeded = false;
 float rotationCube;
