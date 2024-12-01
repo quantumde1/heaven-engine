@@ -73,6 +73,11 @@ extern (C) nothrow int lua_removeCube(lua_State *L) {
 extern (C) nothrow int lua_playVideo(lua_State *L) {
     try {
         playVideo(cast(char*)luaL_checkstring(L, 1));
+        if (lua_gettop(L) == 2) {
+            StopMusicStream(music);
+            music = LoadMusicStream(luaL_checkstring(L, 2));
+            PlayMusicStream(music);
+        }
     } catch (Exception e) {}
     return 0;
 }

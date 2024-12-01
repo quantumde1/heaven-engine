@@ -125,7 +125,7 @@ function startDialogCoroutine()
                     cubeMoving = isCubeMoving()
                 end
                 if cubeMoving == false then
-                    playVideo("res/opening.mpeg")
+                    playVideo("res/ending.mpeg", "res/ending.mp3")
                     removeCubeModel(alexey)
                     removeCube("Alexey")
                     updateCubeDialog("Sergey", sergey_dialog_bad)
