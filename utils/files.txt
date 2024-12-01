@@ -1,0 +1,2 @@
+file 'silent.mp3'
+file 'opening.mp3'

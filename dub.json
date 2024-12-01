@@ -30,14 +30,14 @@
 	"libs-posix": [
 		"raylib",
 		"lua-5.3",
-		"playback",
+		"vlc",
 		"hpff"
 	],
 	"libs-windows": [
 		"raylib",
 		"lua53",
 		"libhpff",
-		"playback"
+		"vlc"
 	],
 	"license": "MIT License",
 	"name": "heaven-engine",

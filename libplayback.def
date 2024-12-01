@@ -1,3 +1,0 @@
-LIBRARY "libplayback"
-EXPORTS
-    testPlayback

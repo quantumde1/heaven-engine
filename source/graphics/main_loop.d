@@ -142,7 +142,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Play Opening Video
     BeginDrawing();
     InitAudioDevice();
-    playVideo(cast(char*)(getcwd()~"/res/opening.mpeg"));
+    playVideo(cast(char*)"Z:/home/user/heaven-engine/res/ending.mp4");
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
     EndDrawing();
@@ -156,16 +156,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     luaL_openlibs(L);
     luaL_registerAllLibraries(L);
     // Load Lua Script
-    if (!rel) {
-        if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
-            lua_pop(L, 1);
-            writeln("Lua error: ", lua_tostring(L, -1));
-        }
-    } else {
-        if (luaL_dofile(L, "scripts/event_00.bin") != LUA_OK) {
-            lua_pop(L, 1);
-            writeln("Script execution error: ", lua_tostring(L, -1));
-        }
+    if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
+        lua_pop(L, 1);
+        writeln("Lua error: ", lua_tostring(L, -1));
     }
     
     initWindowAndCamera(camera);
