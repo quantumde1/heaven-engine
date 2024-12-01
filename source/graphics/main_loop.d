@@ -142,7 +142,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     // Play Opening Video
     BeginDrawing();
     InitAudioDevice();
-    playVideo(cast(char*)"Z:/home/user/heaven-engine/res/ending.mp4");
+    playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
     EndDrawing();
