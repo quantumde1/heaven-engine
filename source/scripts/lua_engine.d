@@ -74,7 +74,12 @@ extern (C) nothrow int lua_playVideo(lua_State *L) {
     try {
         StopMusicStream(music);
         videoFinished = false;
-        playVideo(cast(char*)toStringz(getcwd()~"/"~luaL_checkstring(L, 1).to!string));
+        version (Windows) {
+            playVideo(cast(char*)toStringz("/"~getcwd()~"/"~luaL_checkstring(L, 1).to!string));
+        }
+        version (Posix) {
+            playVideo(cast(char*)toStringz(getcwd()~"/"~luaL_checkstring(L, 1).to!string));
+        }
     } catch (Exception e) {}
     return 0;
 }
