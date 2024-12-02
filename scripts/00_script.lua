@@ -116,6 +116,7 @@ function startDialogCoroutine()
                 dialogBox("Alexey", {"Okay, i got it...", "You want problems - you will have it.", "I'm leaving your bullshit team. arividerchi!"}, 1,2,{"Go fuck yourself", "Good luck."})
                 while isDialogExecuted() do
                     coroutine.yield()
+                    answerValue = getAnswerValue() -- Call the function to get the answer value 
                 end
                 startCubeRotation(alexey, 270, 80, 10)
                 startCubeMove(alexey, 10.0, 0.0, 10.0, 0.9)
@@ -125,7 +126,9 @@ function startDialogCoroutine()
                     cubeMoving = isCubeMoving()
                 end
                 if cubeMoving == false then
-                    playVideo("res/ending.mp4")
+                    if answerValue == 0 then
+                        playVideo("res/ending.mp4")
+                    end
                     removeCubeModel(alexey)
                     removeCube("Alexey")
                     updateCubeDialog("Sergey", sergey_dialog_bad)
