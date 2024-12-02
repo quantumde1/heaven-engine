@@ -148,16 +148,6 @@ enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
 
-// Function Declarations
-nothrow void loadLocation(char* first, float size);
-void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
-                   int playerStepCounter, int encounterThreshold, bool inBattle);
-void drawWeatherDateTime(string weather, string time, string date);
-ControlConfig loadControlConfig();
-void closeAudio();
-void fadeEffect(float alpha, bool fadeIn);
-void engine_loader(string window_name, int screenWidth, int screenHeight);
-
 // Function Implementations
 nothrow void loadLocation(char* first, float size) {
     model_location_path = first;
