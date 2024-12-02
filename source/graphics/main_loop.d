@@ -223,9 +223,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
         gamepadInt = 1;
         if (!rel) writeln("Linux version detected");
     }
-    if (!rel) {
-        writeln("gamepadInt: ", gamepadInt);
-    }
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
     float fadeAlpha = 2.0f;
@@ -267,9 +264,16 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     luaL_openlibs(L);
     luaL_registerAllLibraries(L);
     // Load Lua Script
-    if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
-        lua_pop(L, 1);
-        writeln("Lua error: ", lua_tostring(L, -1));
+    if (!rel) {
+        if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
+            lua_pop(L, 1);
+            writeln("Lua error: ", lua_tostring(L, -1));
+        }
+    } else {
+        if (luaL_dofile(L, "scripts/00_script.bin") != LUA_OK) {
+            lua_pop(L, 1);
+            writeln("Lua error: ", lua_tostring(L, -1));
+        }
     }
     
     initWindowAndCamera(camera);
