@@ -62,6 +62,16 @@ extern (C) nothrow int lua_isDialogExecuted(lua_State *L) {
     return 1; // Number of return values
 }
 
+extern (C) nothrow int lua_setFriendlyZone(lua_State *L) {
+    if (luaL_checkinteger(L, 1) == 0) {
+        friendlyZone = false;
+    }
+    if (luaL_checkinteger(L, 1) == 1) {
+        friendlyZone = true;
+    }
+    return 0;
+}
+
 extern (C) nothrow int lua_removeCube(lua_State *L) {
     try { if (!rel) {
     writeln("Removing: ", to!string(luaL_checkstring(L, 1))); }
@@ -289,6 +299,7 @@ extern (C) nothrow void luaL_openmovelib(lua_State* L) {
     lua_register(L, "startCubeMove", &lua_startCubeMove);
     lua_register(L, "startCubeRotation", &lua_startCubeRotation);
     lua_register(L, "changeCameraUp", &lua_changeCameraUp);
+    lua_register(L, "setFriendlyZone", &lua_setFriendlyZone);
     lua_register(L, "changeCameraTarget", &lua_changeCameraTarget);
     lua_register(L, "changeCameraPosition", &lua_changeCameraPosition);
 }
