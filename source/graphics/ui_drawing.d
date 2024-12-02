@@ -186,7 +186,7 @@ void showMainMenu(ref GameState currentGameState) {
                     currentGameState = GameState.InGame;
                     return;
                 
-                case 4:
+                case 5:
                     currentGameState = GameState.Exit;
                     return;
                 default:
