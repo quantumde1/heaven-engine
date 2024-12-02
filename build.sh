@@ -30,21 +30,21 @@ fi
 cd ..
 
 # Change directory to libplayback/
-cd libplayback/
+#cd libplayback/
 # Check if libplayback.so already exists
-if [ -f "../libplayback.so" ]; then
-    printf "${YELLOW}[WARNING] libplayback.so already built. Skipping build process.${RESET}\n"
-else
-    # Compile with optimization flags
-    cc -fPIC -c text.c -O3 -march=native -lraylib -I /opt/local/include -L /opt/local/lib
-    gcc -shared -o libplayback.so text.o -O3 -march=native -lraylib -I /opt/local/include -L /opt/local/lib
-    # Move the built library to the parent directory
-    mv ./libplayback.so ../
-    printf "${GREEN}[SUCCESS] libplayback.so moved to the parent directory.${RESET}\n"
-fi
+#if [ -f "../libplayback.so" ]; then
+#    printf "${YELLOW}[WARNING] libplayback.so already built. Skipping build process.${RESET}\n"
+#else
+#    # Compile with optimization flags
+#    cc -fPIC -c text.c -O3 -march=native -lraylib -I /opt/local/include -L /opt/local/lib
+#    gcc -shared -o libplayback.so text.o -O3 -march=native -lraylib -I /opt/local/include -L /opt/local/lib
+#    # Move the built library to the parent directory
+#    mv ./libplayback.so ../
+#    printf "${GREEN}[SUCCESS] libplayback.so moved to the parent directory.${RESET}\n"
+#fi
 
-# Return to the original directory
-cd ..
+## Return to the original directory
+#cd ..
 
 # Check for the --release flag
 if [ "$1" = "--release" ]; then
@@ -66,7 +66,7 @@ else
 fi
 
 # If the build was successful, proceed with further steps
-strip ./libplayback.so
+#strip ./libplayback.so
 strip ./libhpff.so
 strip ./heaven-engine
 echo "MADE_BY_QUANTUMDE1_UNDERLEVEL_STUDIOS_2024_ALL_RIGHTS_RESERVED_UNDER_MIT_LICENSE_LMAO" >> ./heaven-engine

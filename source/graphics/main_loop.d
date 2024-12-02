@@ -382,7 +382,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         isBossfight = false;
                         initBattle(camera, cubePosition, cameraAngle, randomNumber);
                     }
-
+                    if (IsKeyPressed(KeyboardKey.KEY_F4)) {
+                        playerStepCounter = encounterThreshold +1;
+                    }
                     if (inBattle) {
                         cameraAngle = 90.0f;
                         if (!isBossfight) {
@@ -415,12 +417,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                                         cubePosition = originalCubePosition;
                                         camera.position = originalCameraPosition;
                                         camera.target = originalCameraTarget;
-                                        for (int i = 0; i < enemyCubes.length; i++) {
-                                            if (!rel) writeln(enemyCubes[i].name, " is destroyed!");
-                                            removeCube(enemyCubes[i].name);
-                                        }
+                                        removeAllEnemyCubes();
                                         StopMusicStream(music);
-                                        UnloadModel(enemyModel);
                                         allowControl = true;
                                     } else {
                                         if (!rel) { writeln ("not retreated!"); }

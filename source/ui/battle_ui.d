@@ -12,6 +12,7 @@ import script;
 import std.string;
 import std.random;
 import dialogs.dialog_system;
+import std.array;
 
 const float CUBE_DRAW_HEIGHT = 2.5f;
 const float PLAYER_HEALTH_BAR_WIDTH = 200.0f;
@@ -19,6 +20,24 @@ const float PLAYER_HEALTH_BAR_HEIGHT = 20.0f;
 const int PLAYER_HEALTH_BAR_X = 10;
 const int PLAYER_HEALTH_BAR_Y_OFFSET = 10;
 const int ATTACK_DAMAGE = 10;
+
+void removeAllEnemyCubes() {
+    // Iterate through each enemy cube and set its health to zero
+    foreach (index, enemyCube; enemyCubes) {
+        enemyCubes[index].health = 0; // Set health to zero to trigger removal logic
+    }
+
+    // Now, remove all enemy cubes that have health <= 0
+    enemyCubes = enemyCubes.filter!(cube => cube.health > 0).array(); // Convert FilterResult to array
+
+    // Optionally, you can also log the removal of each enemy cube
+    foreach (enemyCube; enemyCubes) {
+        if (enemyCube.health <= 0) {
+            if (!rel) writeln(enemyCube.name, " is destroyed!");
+            removeCube(enemyCube.name); // Call the function to remove the cube from the game
+        }
+    }
+}
 
 void drawEnemyCubes() {
     foreach (enemyCube; enemyCubes) {
@@ -310,6 +329,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
             selectingEnemy = true;
         } else if (selectingEnemy) {
             attackTab(selectedButtonIndex);
+            if (!rel) writeln("element: ", selectedButtonIndex);
             selectingEnemy = false;
         }
     }
