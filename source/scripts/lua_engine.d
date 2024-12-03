@@ -95,6 +95,7 @@ extern (C) nothrow int lua_playVideo(lua_State *L) {
 }
 
 extern (C) nothrow int lua_changeCameraPosition(lua_State *L) {
+    newCameraNeeded = true;
     positionCam = Vector3(
         luaL_checknumber(L, 1),
         luaL_checknumber(L, 2),
@@ -104,6 +105,7 @@ extern (C) nothrow int lua_changeCameraPosition(lua_State *L) {
 }
 
 extern (C) nothrow int lua_changeCameraUp(lua_State *L) {
+    newCameraNeeded = true;
     upCam = Vector3(
         luaL_checknumber(L, 1),
         luaL_checknumber(L, 2),
@@ -113,6 +115,7 @@ extern (C) nothrow int lua_changeCameraUp(lua_State *L) {
 }
 
 extern (C) nothrow int lua_changeCameraTarget(lua_State *L) {
+    newCameraNeeded = true;
     targetCam = Vector3(
         luaL_checknumber(L, 1),
         luaL_checknumber(L, 2),
@@ -230,6 +233,11 @@ extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_switchToFirstPersonLook(lua_State *L) {
+    try {  } catch (Exception e) {}
+    return 0;
+}
+
 // Register the dialog functions
 extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dialogBox", &luaL_dialogBox);
@@ -239,6 +247,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
     lua_register(L, "getBattleStatus", &lua_getBattleStatus);
     lua_register(L, "getDialogName", &lua_getDialogName);
+    lua_register(L, "switchToFirstPerson", &lua_switchToFirstPersonLook);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
     lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
@@ -315,18 +324,48 @@ extern (C) nothrow int lua_StopMusic(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_getCubeXPos(lua_State *L) {
+extern (C) nothrow int lua_getPlayerXPos(lua_State *L) {
     lua_pushnumber(L, cast(int)cubePosition.x);
     return 1;
 }
 
-extern (C) nothrow int lua_getCubeYPos(lua_State *L) {
+extern (C) nothrow int lua_getPlayerYPos(lua_State *L) {
     lua_pushnumber(L, cast(int)cubePosition.y);
     return 1;
 }
 
-extern (C) nothrow int lua_getCubeZPos(lua_State *L) {
+extern (C) nothrow int lua_getPlayerZPos(lua_State *L) {
     lua_pushnumber(L, cast(int)cubePosition.z);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCubeXPos(lua_State *L) {
+    lua_pushnumber(L, cubes[luaL_checkinteger(L, 1)-1].boundingBox.min.x);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCubeYPos(lua_State *L) {
+    lua_pushnumber(L, cubes[luaL_checkinteger(L, 1)-1].boundingBox.min.y);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCubeZPos(lua_State *L) {
+    lua_pushnumber(L, cubes[luaL_checkinteger(L, 1)-1].boundingBox.min.z);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCameraXPos(lua_State *L) {
+    lua_pushnumber(L, positionCam.x);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCameraYPos(lua_State *L) {
+    lua_pushnumber(L, positionCam.y);
+    return 1;
+}
+
+extern (C) nothrow int lua_getCameraZPos(lua_State *L) {
+    lua_pushnumber(L, positionCam.z);
     return 1;
 }
 
@@ -393,9 +432,15 @@ extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "isCubeMoving", &lua_cubeMoveStatus);
     lua_register(L, "setCubeModel", &lua_setCubeModel);
     lua_register(L, "removeCubeModel", &lua_removeCubeModel);
+    lua_register(L, "getPlayerX", &lua_getPlayerXPos);
+    lua_register(L, "getPlayerY", &lua_getPlayerYPos);
+    lua_register(L, "getPlayerZ", &lua_getPlayerZPos);
     lua_register(L, "getCubeX", &lua_getCubeXPos);
     lua_register(L, "getCubeY", &lua_getCubeYPos);
     lua_register(L, "getCubeZ", &lua_getCubeZPos);
+    lua_register(L, "getCameraX", &lua_getCameraXPos);
+    lua_register(L, "getCameraY", &lua_getCameraYPos);
+    lua_register(L, "getCameraZ", &lua_getCameraZPos);
     lua_register(L, "howMuchModels", &lua_howMuchModels);
     lua_register(L, "rotateCamera", &luaL_rotateCam);
     lua_register(L, "loadScript", &luaL_loadScript);

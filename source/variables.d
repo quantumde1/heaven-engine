@@ -15,6 +15,7 @@ Vector3 upCam; // = Vector3(0.0f, 1.0f, 0.0f);
 Camera3D camera;
 Vector3 originalCameraPosition;
 Vector3 originalCameraTarget;
+bool newCameraNeeded;
 int encounterThreshold;
 float radius;
 float cameraAngle = 90.0f;

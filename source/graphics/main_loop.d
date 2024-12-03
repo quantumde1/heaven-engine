@@ -190,8 +190,12 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
     SoundState: %s
     
     FriendlyZone: %s
+
+    Camera Position: %s
+
+    Camera Target: %s
 }.format(cubePosition, inBattle ? "In Battle" : "Exploring", playerHealth, cameraAngle, 
-        playerStepCounter, encounterThreshold, rel, audioEnabled, friendlyZone);
+        playerStepCounter, encounterThreshold, rel, audioEnabled, friendlyZone, camera.position, camera.target);
     if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
     else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
@@ -370,7 +374,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
                         displayDialogs(collidedCubeDialog, controlConfig.dialog_button, allowControl, showDialog, 
                         allow_exit_dialog, name);
                     }
-
                     float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
                         1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
 

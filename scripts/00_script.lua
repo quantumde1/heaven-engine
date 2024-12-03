@@ -122,7 +122,7 @@ end
 
 -- Функция для проверки статуса диалога
 function checkDialogStatus()
-    local cubePosition = { getCubeX(), getCubeY(), getCubeZ() } -- Получение текущей позиции куба
+    local cubePosition = { getPlayerX(), getPlayerY(), getPlayerZ() } -- Получение текущей позиции куба
     
     -- Проверка, достиг ли куб нужной позиции
     if tablesEqual(cubePosition, neededPosition) then
@@ -150,6 +150,7 @@ function checkDialogStatus()
         if bad == true then
             -- Создание новой корутины для негативного диалога Сергея
             dialogCoroutine = coroutine.create(function()
+                rotateCamera(360, 130)
                 dialogBox("Sergey", {"what must we do now?! Do you know? Ah shit. Things goes as much bad as only this can be!", "If not you two, maybe..."}, 1, 1, {"I know, im sorry.", "..nothing changed, you're an idiot!"})
                 while isDialogExecuted() do
                     coroutine.yield() -- Ожидание завершения диалога
@@ -161,7 +162,7 @@ function checkDialogStatus()
                         coroutine.yield() -- Ожидание завершения диалога
                     end
                 elseif answerValue == 1 then
-                    dialogBox("Sergey", {"Are you SO stupid?!", "I cannot go with you anytime more.", "Fuck you and your girlfriend, two fucking freaks! I'm leaving. Fuck yourself you two!"}, 1, -1, {""})
+                    dialogBox("Sergey", {"Are you SO stupid?!", "I cannot go with you anymore.", "Fuck you and your girlfriend, two fucking freaks! I'm leaving. Fuck yourself you two!"}, 1, -1, {""})
                     while isDialogExecuted() do
                         coroutine.yield() -- Ожидание завершения диалога
                     end
@@ -170,6 +171,7 @@ function checkDialogStatus()
                 end
             end)
         end
+        
         previousDialogName = dialogName -- Обновление имени предыдущего диалога
         return true, dialogName -- Возвращение статуса диалога
     end

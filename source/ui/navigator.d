@@ -6,6 +6,7 @@ import std.math;
 import std.conv;
 
 void draw_navigation(float cameraAngle) {
+    Font navFont = LoadFont("res/font_16x16_en.png");
     const int compassSize = 200;
     const int compassX = GetScreenWidth() - compassSize - 20;
     const int compassY = 20;
@@ -35,6 +36,6 @@ void draw_navigation(float cameraAngle) {
     ];
     for (int i = 0; i < 4; ++i) {
         Vector2 dirPos = Vector2(centerX + directions[i].x * (halfCompassSize - 20), centerY - directions[i].y * (halfCompassSize - 20));
-        DrawText(labels[i], int(dirPos.x.to!int - MeasureText(labels[i], 20) / 2), int(dirPos.y.to!int - 10), 20, labelColors[i]);
+        DrawTextEx(navFont, labels[i], Vector2(int(dirPos.x.to!int - MeasureText(labels[i], 20) / 2), int(dirPos.y.to!int - 10)), 20, 1.0f, labelColors[i]);
     }
 }

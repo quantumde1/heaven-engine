@@ -49,5 +49,5 @@ void draw_flickering_rhombus(int colorChoice, float intensity) {
         Vector2(centerX, centerY + rhombusSize / 2),
         Vector2(centerX - rhombusSize / 2, centerY)
     ];
-    DrawPoly(Vector2(centerX+20, centerY-20), 4, rhombusSize / 2, 45.0f, color);
+    DrawPoly(Vector2(centerX+40, centerY-50), 4, rhombusSize / 2, 90.0f, color);
 }
