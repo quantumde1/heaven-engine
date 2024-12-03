@@ -10,15 +10,21 @@ import std.file;
 import std.string;
 import script;
 
-void main() {
-	if (isReleaseBuild()) {
-		SetTraceLogLevel(8);
-	} else {
-		SetTraceLogLevel(0);
-	}
-	validateRaylibBinding();
-	SetExitKey(KeyboardKey.KEY_NULL);
-	int screenWidth = GetScreenWidth();
-	int screenHeight = GetScreenHeight();
-	engine_loader("made in heaven", screenWidth, screenHeight);
+void main(string[] args) {
+    if (isReleaseBuild()) {
+        SetTraceLogLevel(8);
+    } else {
+        SetTraceLogLevel(0);
+    }
+    validateRaylibBinding();
+    SetExitKey(KeyboardKey.KEY_NULL);
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    
+    // Check if there are enough arguments
+    if (args.length > 1) {
+        engine_loader("made in heaven", screenWidth, screenHeight, args[1]);    
+    } else {
+        engine_loader("made in heaven", screenWidth, screenHeight, "scripts/00_script.lua");
+    }
 }

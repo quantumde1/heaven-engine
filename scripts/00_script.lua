@@ -1,37 +1,6 @@
--- Инициализация переменных
-local sergey = 1
-local alexey = 2
-local mc_name = "Arseniy"
-previousDialogName = ""
-local istalked
-local bad
 
--- Диалоги для Сергея и Алексея
-local sergey_dialog = {
-    "What the hell is going on here?...",
-    "What these demons doing here?! Where are they from?",
-    "I'm pretty scared guys...",
-    "1234567890-+=_!@#$%^&()[], testing \n\n\nfont and UI"
-}
-local alexey_dialog = {
-    "I don't know what's going on, but we must get rid of these shit in our city...",
-    "I guess we will be going to this factory again tomorrow.",
-    "Are you guys with me?"
-}
+--[[ НАЧАЛО ОБЪЯВЛЕНИЯ ФУНКЦИЙ LUA ]]--
 
--- Диалоги для Сергея в зависимости от выбора игрока
-local sergey_dialog_ok = {
-    "What the fuck are you two fucking doing about...",
-    "But this sounds funny. I going with you two!"
-}
-
-local sergey_dialog_bad = {
-    "You're two fucking idiots.",
-    "What we must do now?!"
-}
-
--- Позиция, необходимая для триггера диалога
-local neededPosition = { 10.0, 0.0, 10.0 }
 
 -- Функция для сравнения двух таблиц
 function tablesEqual(table1, table2)
@@ -46,134 +15,161 @@ function tablesEqual(table1, table2)
     return true
 end
 
+function sleep(seconds)
+    local end_time = os.clock() + seconds
+    while os.clock() < end_time do
+        -- Busy-wait
+    end
+end
+
+--[[ КОНЕЦ ОБЪЯВЛЕНИЯ ФУНКЦИЙ LUA ]]--
+
+
+--[[ НАЧАЛО ОБЪЯВЛЕНИЙ ГЛОБАЛЬНЫХ ПЕРЕМЕННЫХ ]]--
+
+local globalDialogForNPC1 = {""}
+local globalDialogForNPC2 = {""}
+local answerValue
+local dialogCoroutine
+previousDialogName = ""
+local neededPosition = { 4.0, 0.0, 10.0 }
+local currentStage = 0 -- Переменная для отслеживания текущего этапа
+
+--[[ КОНЕЦ ОБЪЯВЛЕНИЯ ГЛОБАЛЬНЫХ ПЕРЕМЕННЫХ]]--
+
+
+--[[ НАЧАЛО СИСТЕМНЫХ ФУНКЦИЙ ДВИЖКА ]]--
+
+
 -- Загрузка музыки и локации
-loadMusic("default.mp3")
+loadMusic("PublicFacility.mp3")
 playMusic()
 loadLocation("res/area1.glb", 19.0)
 
--- Создание корутины для управления диалогами
-local dialogCoroutine
-local answerValue
-local battleRunning
-local cubeMoving
-
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
-        -- Начало диалога с Сергеем
-        dialogBox("Sergey", sergey_dialog, 1, 3, {"Testing", "debug answer"})
+        rotateCamera(360, 130)
+        startCubeRotation(1, 90, 80, 10)
+        -- напишите сюда код, который будет инициализироваться сразу после входа в локацию. Пример:
+        dialogBox("Yuki", {" Good job on the coverage. There's a letter for you, Maya. But there's no return address on it..."}, 0, -1, {""})
+        --dialogBox("Alexey", {"Okay, i got it...", "You want problems - you will have it.", "I'm leaving your bullshit team. arividerchi!"}, 1, 2, {"Go fuck yourself", "Good luck."})
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
         end
-
-        -- Поворот камеры
-        rotateCamera(180.0, 130.0)
-        -- Диалог с Алексеем
-        dialogBox("Alexey", alexey_dialog, 1, 2, {"Yes, i think so too...", "No, you're fucking freak!"})
+        dialogBox("Maya", {"But there's no return address on it..."}, 0, 0, {"Thanks, Yukki!--", "Thanks. But who could it be from?"})
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
-            answerValue = getAnswerValue() -- Получение значения ответа игрока    
+            answerValue = getAnswerValue()
         end
-        
-        -- Обработка ответа игрока
+        ::answer_1::
         if answerValue == 0 then
-            dialogBox("Alexey", {"Okay, so, let's go and see what the hell is going on there..."}, 1, 1, {""})
+            dialogBox("#Maya Amano", {"Editor of Kismet Publishing's teen Magazine, Coolest. The game's main character."}, 0, -1, {""})
             while isDialogExecuted() do
                 coroutine.yield() -- Ожидание завершения диалога
             end
+            rotateCamera(-90, 130)
+            showHint("Go forward!")
+
         elseif answerValue == 1 then
-            dialogBox("Alexey", {"So, u think will be better to sit and do nothing?!", "You are an idiot! Come here, i will show you some lessons of good manners!"}, 1, 1, {""})
+            print("answer 1")
+            dialogBox("Yuki", {" Yeah. No return address.", " Maybe, some your fan? xD"}, 0, -1, {""})
             while isDialogExecuted() do
                 coroutine.yield()
             end
-            -- Инициация боя
-            initBattle(1, 1, "Alexey", "Our talk already ended!")
-            while getBattleStatus() do
-                coroutine.yield()
-                battleRunning = getBattleStatus()
-            end
-            if not battleRunning then
-                dialogBox("Alexey", {"Okay, i got it...", "You want problems - you will have it.", "I'm leaving your bullshit team. arividerchi!"}, 1, 2, {"Go fuck yourself", "Good luck."})
-                while isDialogExecuted() do
-                    coroutine.yield()
-                    answerValue = getAnswerValue() -- Получение значения ответа игрока 
-                end
-                -- Движение и вращение куба Алексея
-                startCubeRotation(alexey, 270, 80, 10)
-                startCubeMove(alexey, 10.0, 0.0, 10.0, 0.9)
-                startCubeRotation(alexey, 45, 80, 10)
-                while isCubeMoving() do
-                    coroutine.yield()
-                    cubeMoving = isCubeMoving() -- Проверка, движется ли куб
-                end
-                if not cubeMoving then
-                    if answerValue == 0 then
-                        playVideo("res/ending.mp4") -- Воспроизведение видео, если игрок выбрал первый ответ
-                    end
-                    removeCubeModel(alexey) -- Удаление модели куба Алексея
-                    removeCube("Alexey") -- Удаление куба Алексея из игры
-                    updateCubeDialog("Sergey", sergey_dialog_bad) -- Обновление диалога Сергея на негативный
-                    bad = true -- Установка флага, что ситуация плохая
-                    setFriendlyZone(1) -- Установка зоны дружбы
-                end
-            end
+            answerValue = 0
+            goto answer_1
         end
     end)
 end
 
--- Функция для проверки статуса диалога
 function checkDialogStatus()
     local cubePosition = { getPlayerX(), getPlayerY(), getPlayerZ() } -- Получение текущей позиции куба
-    
+    print(neededPosition[1], neededPosition[2], neededPosition[3])
     -- Проверка, достиг ли куб нужной позиции
-    if tablesEqual(cubePosition, neededPosition) then
-        rotateCamera(90.0, 130.0) -- Поворот камеры
-        dialogBox("Text", {"Oh shit. How you find me?", "Go ahead, please. I dont wanna see you."}, 1, -1, {""})
-        neededPosition = { } -- Сброс нужной позиции
+    if currentStage == 0 and cubePosition[1] >= neededPosition[1] - 2 and cubePosition[1] <= neededPosition[1] + 2 and
+       cubePosition[2] >= neededPosition[2] - 2 and cubePosition[2] <= neededPosition[2] + 2 and
+       cubePosition[3] >= neededPosition[3] - 2 and cubePosition[3] <= neededPosition[3] + 2 then
+            hideHint()
+            dialogCoroutine = coroutine.create(function()
+            dialogBox("#Letter", {"yOu'rE nEXt...\n\n\n\n\n\n\n\n\n                JOKER"}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("You", {" .........?"}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            startCubeMove(2, getPlayerX()+4, getPlayerY(), getPlayerZ(), 0.9)
+            startCubeRotation(2, 270, 80, 10)
+            rotateCamera(-180.0, 130)
+            dialogBox("Rookie Reporter", {"Miss Amano, the chief wants to see you.", "It must be rough, always getting the difficult jobs...", "Even if I work hard, it does no good. Dreams and reality are such...(sigh) Maybe I should just quit."}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("You", {" Everything will be OK. Don't worry about it!"}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            showHint("Go forward!")
+        end)
+        neededPosition = { 8.0, 0.0, -10.0 } -- Сброс нужной позиции
+        currentStage = 1 -- Переход к следующему этапу
+    elseif currentStage == 1 and cubePosition[1] >= neededPosition[1] - 2 and cubePosition[1] <= neededPosition[1] + 2 and
+           cubePosition[2] >= neededPosition[2] - 2 and cubePosition[2] <= neededPosition[2] + 2 and
+           cubePosition[3] >= neededPosition[3] - 2 and cubePosition[3] <= neededPosition[3] + 2 then
+        hideHint()
+        dialogCoroutine = coroutine.create(function()
+            startCubeRotation(3, 270, 80, 10)
+            rotateCamera(-180.0, 130)
+            dialogBox("Editor-in-Chief Mizuno", {"There you are...Amano."}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("#Editor-in-Chief Mizuno", {"Coolest's Editor-in-Chief who hates Maya. An experienced woman who goes by the book. 30-something and still not married."}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            startCubeRotation(3, 90, 80, 10)
+            dialogBox("Editor-in-Chief Mizuno", {"You know why you were called in, right? That interview project you turned in...\"Dream of the Rumored Student\".. was crap.", "It's boring.\n\n\nIt has no impact.\n\n\nWho would want to read about a green brat?"}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("You", {" Who would want to read about a green brat?"}, 0, 0, {"Huh...?", "I thought it was important."})
+            startCubeRotation(3, 270, 80, 10)
+            while isDialogExecuted() do
+                coroutine.yield()
+                answerValue = getAnswerValue()
+            end
+            if answerValue == 0 then
+                dialogBox("Editor-in-Chief Mizuno", {"That's a half hearted answer...It doesn't matter anyway.", "The kids are saying that the recent series of murders are the work of the Joker."}, 0, -1, {""})
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            elseif answerValue == 1 then
+                dialogBox("Editor-in-Chief Mizuno", {"Are you arguing with me?! If you like your job, you better get started on Joker story!", "You know the rumors the kids are telling about how the recent series of bizzare murders are the work of the Joker, right?"}, 0, -1, {""})
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            end
+            dialogBox("Editor-in-Chief Mizuno", {"Get your ass over to Seven Sisters High and get the scoop. I'm taking Mayuzumi off this case, so you'll be on your own."}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            startCubeRotation(3, 90, 80, 10)
+            dialogBox("Editor-in-Chief Mizuno", {"Oh, by the way, you can just forget about this afternoon...the time off you asked for... ", "If you don't like it, I've got plenty of other reporters that would love to take your spot. So what are you waiting for?"}, 0, -1, {""})
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+        end)
+        -- Здесь можно добавить дополнительную логику для нового этапа
+        currentStage = 2 -- Переход к следующему этапу, если необходимо
     end
 
-    -- Проверка, выполняется ли диалог
-    if isDialogExecuted() then
-        local dialogName = getDialogName() -- Получение имени текущего диалога
+    if isDialogExecuted() then -- проверка инициализации диалога
+        local dialogName = getDialogName() -- Получение имени NPC
         if dialogName == previousDialogName then
-            return false, "" -- Если диалог не изменился, возвращаем false
+            return false, "" -- Если диалог не изменился, возвращаем false и показываем что-то другое, либо не показываем ничего
         end
-        if dialogName == "Sergey" then
-            startCubeRotation(sergey, 90, 80, 10) -- Вращение куба Сергея
-            istalked = true -- Установка флага, что с Сергеем поговорили
-        end
-        if dialogName == "Alexey" and istalked == true then
-            updateCubeDialog("Alexey", alexey_dialog) -- Обновление диалога Алексея
-            rotateCamera(180.0, 130.0) -- Поворот камеры
-            startCubeMove(alexey, 6.0, 0.0, 0.0, 0.8) -- Движение куба Алексея
-            startCubeRotation(alexey, 270, 80, 10) -- Вращение куба Алексея
-        end
-        if bad == true then
-            -- Создание новой корутины для негативного диалога Сергея
-            dialogCoroutine = coroutine.create(function()
-                rotateCamera(360, 130)
-                dialogBox("Sergey", {"what must we do now?! Do you know? Ah shit. Things goes as much bad as only this can be!", "If not you two, maybe..."}, 1, 1, {"I know, im sorry.", "..nothing changed, you're an idiot!"})
-                while isDialogExecuted() do
-                    coroutine.yield() -- Ожидание завершения диалога
-                    answerValue = getAnswerValue() -- Получение значения ответа игрока
-                end
-                if answerValue == 0 then
-                    dialogBox("Sergey", {"Argh... Okay, lets go, maybe further will be better?"}, 1, -1, {""})
-                    while isDialogExecuted() do
-                        coroutine.yield() -- Ожидание завершения диалога
-                    end
-                elseif answerValue == 1 then
-                    dialogBox("Sergey", {"Are you SO stupid?!", "I cannot go with you anymore.", "Fuck you and your girlfriend, two fucking freaks! I'm leaving. Fuck yourself you two!"}, 1, -1, {""})
-                    while isDialogExecuted() do
-                        coroutine.yield() -- Ожидание завершения диалога
-                    end
-                    removeCubeModel(sergey) -- Удаление модели куба Сергея
-                    removeCube("Sergey") -- Удаление куба Сергея из игры
-                end
-            end)
-        end
-        
-        previousDialogName = dialogName -- Обновление имени предыдущего диалога
-        return true, dialogName -- Возвращение статуса диалога
     end
     return false, "" -- Если диалог не выполняется, возвращаем false
 end
@@ -185,6 +181,13 @@ function updateDialog()
     end
 end
 
+--[[ КОНЕЦ СИСТЕМНЫХ ФУНКЦИЙ ДВИЖКА ]]--
+
+
+--[[ НАЧАЛО ФУНКЦИЙ ОБЪЯВЛЕНИЯ ОСНОВНЫХ КОМПОНЕНТОВ ]]--
+
+-- Установка безопасной зоны
+setFriendlyZone(1)
 -- Установка модели игрока
 setPlayerModel("res/mc.glb", 3.0)
 -- Настройка позиции камеры
@@ -192,15 +195,16 @@ changeCameraPosition(0.0, 10.0, 10.0)
 changeCameraTarget(0.0, 4.0, 0.0)
 changeCameraUp(0.0, 1.0, 0.0)
 
--- Добавление кубов для Сергея и Алексея
-addCube(-6.0, 0.0, 0.0, "Sergey", {""}, 1, -1) -- Добавление куба Сергея
-updateCubeDialog("Sergey", sergey_dialog) -- Обновление диалога для Сергея
-addCube(2.0, 0.0, 4.0, "Alexey", {""}, 1, -1) -- Добавление куба Алексея
-howMuchModels(2) -- Установка количества моделей в сцене
+-- Добавление кубов
+addCube(-6.0, 0.0, 0.0, "Yuki", globalDialogForNPC1, 1, -1)
+addCube(15.0, 0.0, 10.0, "Rookie Reporter", globalDialogForNPC2, 1, -1)
+addCube(14.0, 0.0, -10.0, "Editor-in-Chief Mizuno", globalDialogForNPC2, 1, -1)
+howMuchModels(3) -- Установка количества моделей в сцене
 
 -- Установка модели кубов для Сергея и Алексея
-setCubeModel(sergey, "res/mc.glb", 3.0) -- Установка модели для куба Сергея
-setCubeModel(alexey, "res/mc.glb", 3.0) -- Установка модели для куба Алексея
-
--- Запуск корутины диалога
+setCubeModel(1, "res/mc.glb", 3.0) -- Установка модели для куба NPC no.1
+setCubeModel(2, "res/mc.glb", 3.0) -- Установка модели для куба NPC no.2
+setCubeModel(3, "res/mc.glb", 3.0) -- Установка модели для куба NPC no.3
 startDialogCoroutine()
+
+--[[ КОНЕЦ ФУНКЦИЙ ОБЪЯВЛЕНИЯ ОСНОВНЫХ КОМПОНЕНТОВ ]]--

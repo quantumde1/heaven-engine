@@ -221,7 +221,7 @@ void fadeEffect(float alpha, bool fadeIn) {
     }
 }
 
-void engine_loader(string window_name, int screenWidth, int screenHeight) {
+void engine_loader(string window_name, int screenWidth, int screenHeight, string lua_exec) {
     // Initialization
     version (linux) {
         gamepadInt = 1;
@@ -269,7 +269,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
     luaL_registerAllLibraries(L);
     // Load Lua Script
     if (!rel) {
-        if (luaL_dofile(L, "scripts/00_script.lua") != LUA_OK) {
+        writeln("Executing next lua file: ", lua_exec);
+        if (luaL_dofile(L, cast(char*)lua_exec) != LUA_OK) {
             lua_pop(L, 1);
             writeln("Lua error: ", lua_tostring(L, -1));
         }
@@ -448,7 +449,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight) {
 
                     // Show Map Prompt
                     showMapPrompt = Vector3Distance(cubePosition, targetPosition) < 4.0f;
-
+                    if (hintNeeded) {
+                        const int posY = GetScreenHeight() - FontSize - 40;
+                        DrawText(toStringz(hint), 40, posY, 20, Colors.BLACK);
+                    }
                     if (showMapPrompt) {
                         const int posY = GetScreenHeight() - FontSize - 40;
                         if (IsGamepadAvailable(gamepadInt)) {

@@ -10,13 +10,10 @@ import std.math;
 import std.string;
 import std.typecons;
 import graphics.cubes;
+import std.array;
+import std.algorithm;
 
 void display_dialog(string character, int emotion, string[] pages, int choicePage) {
-    if (choicePage == 0 && !rel) {
-        writeln("no choice page");
-        return;
-    }
-    
     bool isGamepadConnected = IsGamepadAvailable(gamepadInt);
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -39,8 +36,10 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
     static int currentCharIndex = 0; // Index of the current character being displayed
     static float typingTimer = 0.0f; // Timer for typing effect
     //float typingSpeed = 0.03f; // Time in seconds between each character
+    // Draw the text with typing effect
+    string nameu = "["~character~"]";
     // Format the current page text
-    string currentPageText = formatText(pages[currentPage]);
+    string currentPageText = formatText(pages[currentPage], nameu);
     int lineY = rectY + charPaddingY + 10;
 
     // Update typing effect
@@ -57,22 +56,25 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
     } else {
         currentCharIndex = cast(int)currentPageText.length;
     }
-
-    // Draw the text with typing effect
-    string nameu = "["~character~"]";
-    int nameuWidth = MeasureText(toStringz(nameu), FONT_SIZE+10); // Measure the width of the nameu text
+    
     int xPosition = rectX + charPaddingX + 10;
     int yPosition = lineY;
-
+    int namewidth;
     // Create a Vector2 instance for the position
     Vector2 position = Vector2(xPosition, yPosition);
-
-    // Draw the character name
-    DrawTextEx(fontdialog, toStringz(nameu), position, FONT_SIZE, 1.0f, Colors.BLUE);
-
+    if (nameu[1] == '#') {
+        // Draw the character name
+        namewidth = MeasureText(toStringz(to!string(nameu.filter!(x => x != '#'))), FONT_SIZE+10); // Measure the width of the nameu text
+        DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), position, FONT_SIZE, 1.0f, Colors.GREEN);
+    }
+    else {
+        // Draw the character name
+        namewidth = MeasureText(toStringz(nameu), FONT_SIZE+10); // Measure the width of the nameu text
+        DrawTextEx(fontdialog, toStringz(nameu), position, FONT_SIZE, 1.0f, Colors.BLUE);
+    }
     // Draw the current page text
     DrawTextEx(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), 
-                Vector2(rectX + charPaddingX + 10 + nameuWidth, lineY), 
+                Vector2(rectX + charPaddingX + 10 + namewidth, lineY), 
                 FONT_SIZE, 1.0f, Colors.WHITE);
 
     // Display input prompt
@@ -145,19 +147,34 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
 }
 
 // Helper function to format text
-string formatText(string text) {
-    // Split the text into lines of a maximum of 88 characters
+string formatText(string text, string characterName) {
+    // Define a maximum line length
+    int maxLineLength = 88; // You can adjust this value as needed
+    int nameLength = cast(int)characterName.length; // Get the length of the character's name
+    int adjustedLineLength = maxLineLength - nameLength - 25; // Adjust for the name and some padding
+
+    // Ensure the adjusted line length is positive
+    adjustedLineLength = adjustedLineLength > 0 ? adjustedLineLength : 1;
+
+    // Split the text into lines of the adjusted maximum length
     string formattedText;
     int length = cast(int)text.length;
-    for (int i = 0; i < length; i += 54) {
-        int end = i + 54 < length ? i + 54 : length;
+    for (int i = 0; i < length; i += adjustedLineLength) {
+        int end = i + adjustedLineLength < length ? i + adjustedLineLength : length;
         formattedText ~= text[i .. end];
         
         // Check if the next segment is not the end of the text
         if (end < length) {
+            // Check the last character of the current segment
+            char lastChar = text[end - 1];
             // Check if the next segment starts with a word (not whitespace)
             if (text[end] != ' ' && text[end] != '\n') {
-                formattedText ~= "-\n\n\n"; // Add hyphen and newline if not at the end
+                // Add newlines after punctuation
+                if (lastChar == ',' || lastChar == '!' || lastChar == '?') {
+                    formattedText ~= ""; // Add newlines after punctuation
+                } else {
+                    formattedText ~= "-\n\n\n"; // Just add newline if at the end
+                }
             } else {
                 formattedText ~= "\n\n\n"; // Just add newline if at the end
             }
@@ -168,7 +185,6 @@ string formatText(string text) {
 
 void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl, ref bool showDialog, ref bool allow_exit_dialog, ref string name) {
     bool isCubeNotNull = !collidedCube.isNull;
-    import std.string : toStringz;
     int posY = GetScreenHeight() - 20 - 40;
     // Check if cube collision is not null
     if (isCubeNotNull) {

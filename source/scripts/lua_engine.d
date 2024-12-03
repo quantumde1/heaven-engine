@@ -146,6 +146,20 @@ extern (C) nothrow int luaL_rotateCam(lua_State* L) {
     return 0;
 }
 
+string hint;
+bool hintNeeded;
+
+extern (C) nothrow int luaL_showHint(lua_State *L) {
+    hint = "Hint: "~to!string(luaL_checkstring(L, 1));
+    hintNeeded = true;
+    return 0;
+}
+
+extern (C) nothrow int luaL_hideHint(lua_State *L) {
+    hintNeeded = false;
+    return 0;
+}
+
 extern (C) void luaL_initDialogs(lua_State* L) {
     lua_getglobal(L, "initDialogs");
     lua_pcall(L, 0, 0, 0); // Call the initDialogs function in Lua
@@ -247,6 +261,8 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
     lua_register(L, "getBattleStatus", &lua_getBattleStatus);
     lua_register(L, "getDialogName", &lua_getDialogName);
+    lua_register(L, "showHint", &luaL_showHint);
+    lua_register(L, "hideHint", &luaL_hideHint);
     lua_register(L, "switchToFirstPerson", &lua_switchToFirstPersonLook);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
     lua_register(L, "playVideo", &lua_playVideo);
