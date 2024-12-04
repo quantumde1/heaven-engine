@@ -158,9 +158,11 @@ void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl,
                 DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.RED);
                 DrawText(("B"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
                 DrawText((" to dialog"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
+                hintNeeded = false;
             } else {
                 int fontSize = 20;
                 DrawText(toStringz("Press "~dlg~" for dialog"), 40, posY, fontSize, Colors.BLACK);
+                hintNeeded = false;
             }
         }
 

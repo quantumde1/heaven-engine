@@ -5,8 +5,7 @@ import raylib;
 import std.math;
 import std.conv;
 
-void draw_navigation(float cameraAngle) {
-    Font navFont = LoadFont("res/font_16x16_en.png");
+void draw_navigation(float cameraAngle, Font navFont) {
     const int compassSize = 200;
     const int compassX = GetScreenWidth() - compassSize - 20;
     const int compassY = 20;

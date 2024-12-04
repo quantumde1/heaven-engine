@@ -240,6 +240,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     // Window and Audio Initialization
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
     ToggleFullscreen();
+    Font navFont = LoadFont("res/font_16x16_en.png");
     rel = isReleaseBuild();
     SetTargetFPS(FPS);
     fontdialog = LoadFont("res/font_en.png");
@@ -366,7 +367,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
 
                     drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
                     if (!inBattle && !showInventory) {
-                        draw_navigation(cameraAngle);
+                        draw_navigation(cameraAngle, navFont);
                     }
                     if (show_sec_dialog && showDialog) {
                         allow_exit_dialog = allowControl = false;

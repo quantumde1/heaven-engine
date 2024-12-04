@@ -11,7 +11,7 @@ local sergey_dialog = {
     "What the hell is going on here?...",
     "What these demons doing here?! Where are they from?",
     "I'm pretty scared guys...",
-    "1234567890-+=_!@#$%^&()[], testing \n\n\nfont and UI"
+    "1234567890-+=_!@#$%^&()[], testing font and UI"
 }
 local alexey_dialog = {
     "I don't know what's going on, but we must get rid of these shit in our city...",
@@ -114,6 +114,7 @@ function startDialogCoroutine()
                     updateCubeDialog("Sergey", sergey_dialog_bad) -- Обновление диалога Сергея на негативный
                     bad = true -- Установка флага, что ситуация плохая
                     setFriendlyZone(1) -- Установка зоны дружбы
+                    showHint("Go to Sergey")
                 end
             end
         end
@@ -150,6 +151,7 @@ function checkDialogStatus()
         if bad == true then
             -- Создание новой корутины для негативного диалога Сергея
             dialogCoroutine = coroutine.create(function()
+                hideHint()
                 rotateCamera(360, 130)
                 dialogBox("Sergey", {"what must we do now?! Do you know? Ah shit. Things goes as much bad as only this can be!", "If not you two, maybe..."}, 1, 1, {"I know, im sorry.", "..nothing changed, you're an idiot!"})
                 while isDialogExecuted() do
@@ -168,6 +170,7 @@ function checkDialogStatus()
                     end
                     removeCubeModel(sergey) -- Удаление модели куба Сергея
                     removeCube("Sergey") -- Удаление куба Сергея из игры
+                    
                 end
             end)
         end

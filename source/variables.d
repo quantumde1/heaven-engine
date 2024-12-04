@@ -36,6 +36,7 @@ float duration; // = cast(float) luaL_checknumber(L, 4);
 bool runRotationCube;
 
 /* character & npc */
+bool hintNeeded;
 Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 Vector3 originalCubePosition;
 Cube[] cubes; //massive of cubes
