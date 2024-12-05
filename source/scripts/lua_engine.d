@@ -271,28 +271,27 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
 
 // Music functions
 extern (C) nothrow int lua_LoadMusic(lua_State *L) {
-    if (lua_gettop(L) == 1) {
-        meow:
-        try {
-            musicpath = cast(char*)luaL_checkstring(L, 1);
-            uint audio_size;
-            char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
-            
-            if (audioEnabled) {
-                UnloadMusicStream(music);
-                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-            }
-        } catch (Exception e) {
-        }
-    } else if (lua_gettop(L) == 2) {
-        if (luaL_checkstring(L, 2) == "internal") {
-            goto meow;
-        } else if (luaL_checkstring(L, 2) == "external") {
-            if (!rel) debug_print("Using external. Write path from binary dir.");
-            musicpath = cast(char*)luaL_checkstring(L, 1);
+    meow:
+    try {
+        musicpath = cast(char*)luaL_checkstring(L, 1);
+        uint audio_size;
+        char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
+        
+        if (audioEnabled) {
             UnloadMusicStream(music);
-            music = LoadMusicStream(musicpath);
+            music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
         }
+    } catch (Exception e) {
+    }
+    return 0;
+}
+
+extern (C) nothrow int lua_LoadMusicExternal(lua_State *L) {
+    meow:
+    try {
+        musicpath = cast(char*)luaL_checkstring(L, 1);
+        music = LoadMusicStream(musicpath);
+    } catch (Exception e) {
     }
     return 0;
 }
@@ -488,6 +487,7 @@ extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "loadMusic", &lua_LoadMusic);
     lua_register(L, "playMusic", &lua_PlayMusic);
     lua_register(L, "stopMusic", &lua_StopMusic);
+    lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);
 }
 
 // Initialization function to register all libraries
