@@ -162,10 +162,11 @@ void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float ca
     // Draw player model with rotation
     Vector3 playerPosition = cubePosition;
     float additionalRotation = 270.0f * std.math.PI / 180.0f; 
-    float playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation; 
-    DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
-    Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
-
+    float playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation;
+    if (drawPlayer == true) {
+        DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
+        Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
+    }
     // Draw floor model
     DrawModel(floorModel, Vector3(0.0f, 0.0f, 0.0f), modelLocationSize, Colors.WHITE);
     EndMode3D();

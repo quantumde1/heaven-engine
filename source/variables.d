@@ -161,7 +161,8 @@ enum GameState {
     MainMenu,
     InGame,
     Options,
-    Exit
+    Exit,
+    LuaReload
 }
 GameState currentGameState = GameState.MainMenu;
 bool videoFinished;
@@ -175,6 +176,7 @@ float modelLocationSize;
 string location_name;
 bool friendlyZone;
 float modelCharacterSize;
+bool drawPlayer;
 float modelCubeSize;
 int FPS = 60;
 Shader shader;

@@ -73,7 +73,6 @@ function startDialogCoroutine()
             coroutine.yield() -- Ожидание завершения диалога
             answerValue = getAnswerValue() -- Получение значения ответа игрока    
         end
-        
         -- Обработка ответа игрока
         if answerValue == 0 then
             dialogBox("Alexey", {"Okay, so, let's go and see what the hell is going on there..."}, 1, 1, {""})
@@ -191,10 +190,10 @@ end
 -- Установка модели игрока
 setPlayerModel("res/mc.glb", 3.0)
 -- Настройка позиции камеры
-changeCameraPosition(0.0, 10.0, 10.0)
-changeCameraTarget(0.0, 4.0, 0.0)
+changeCameraPosition(0.0, 5.0, 0.1)
+changeCameraTarget(0.0, 5.0, 0.0)
 changeCameraUp(0.0, 1.0, 0.0)
-
+drawPlayerModel(0);
 -- Добавление кубов для Сергея и Алексея
 addCube(-6.0, 0.0, 0.0, "Sergey", {""}, 1, -1) -- Добавление куба Сергея
 updateCubeDialog("Sergey", sergey_dialog) -- Обновление диалога для Сергея

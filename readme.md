@@ -2,8 +2,6 @@
 
 ![build passing](https://github.com/quantumde1/heaven-engine/actions/workflows/main.yml/badge.svg?event=push)
 
-![lines of code](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/quantumde1/heaven-engine/badge)
-
 ## Features
 
 - [x] Simple source code with comments(based on raylib by @raysan5)
@@ -12,7 +10,7 @@
 - [x] Audio playing
 - [x] Battle system
 - [x] Main menu
-- [ ] Personas, skills, load, etc menus
+- [x] Personas, skills, load, etc menus
 - [x] Loading models and sprites(partially)
 - [x] video playback (without sound at this moment)
 

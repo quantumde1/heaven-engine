@@ -10,21 +10,7 @@ import std.string;
 import graphics.main_loop;
 
 void showMainMenu(ref GameState currentGameState) {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-    
-    float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
-    Texture2D logoTexture = LoadTexture("res/logo.png");
-    
-    int logoX = (screenWidth - logoTexture.width) / 2;
-    int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
-
-    int selectedMenuIndex = 0;
-    float scaleX = 1.0f;
     string[] menuOptions;
-    // Language toggle variable
-    bool isEnglish = true;
-    
     if (isAudioEnabled()) {
         audioEnabled = true;
         menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
@@ -32,34 +18,63 @@ void showMainMenu(ref GameState currentGameState) {
         audioEnabled = false;
         menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "FPS: 60", "Exit Game"];
     }
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    char* musicpathMenu = cast(char*)("main_menu.mp3");
+    Music musicMenu;
+    uint audio_size;
+    char *audio_data = get_file_data_from_archive("res/data.bin", musicpathMenu, &audio_size);
+    musicMenu = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+    PlayMusicStream(musicMenu);
+    float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
+    uint image_size;
+    char *image_data_logo = get_file_data_from_archive("res/data.bin", "logo.png", &image_size);
+    Texture2D logoTexture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+    char *image_data = get_file_data_from_archive("res/data.bin", "logo_background.png", &image_size);
+    Texture2D logoBackTexture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     
+    int logoX = (screenWidth - logoTexture.width) / 2;
+    int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
+    // Calculate the center position for the logo and background
+    int logoXback = (screenWidth - logoBackTexture.width) / 2; // Center the background
+    int logoYback = (screenHeight - logoBackTexture.height) / 2 - 50; // Center the background
+
+    int selectedMenuIndex = 0;
+    float scaleX = 1.0f;
+    // Language toggle variable
+    bool isEnglish = true;
+
+    Color darkTint = Color( 80, 80, 80, 255 ); // Dark gray color
     // Fade-in effect
     while (fadeAlpha < 1.0f) {
         fadeAlpha += 0.02f; // Increase alpha value for fading in
         if (fadeAlpha > 1.0f) fadeAlpha = 1.0f; // Clamp to 1.0
-
         BeginDrawing();
         ClearBackground(Colors.BLACK);
-
         // Draw the logo with fading
+        DrawTextureEx(logoBackTexture, Vector2(logoXback, logoYback), 0.0f, scaleX, Fade(darkTint, fadeAlpha));
         DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-
         // Draw the menu options with fading
         for (int i = 0; i < menuOptions.length; i++) {
             Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
             int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
             int textX = (screenWidth - textWidth) / 2; // Center the text
-            int textY = logoY + logoTexture.height + 30 + (30 * i); // Position below the logo
+            int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
 
             // Apply fading to the text color
             Color fadedTextColor = Fade(textColor, fadeAlpha);
             DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
         }
-
+        int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
+        int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
+        int textX = (screenWidth - textWidth) / 2; // Center the text
+        DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2(textX, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
         EndDrawing();
     }
     while (!WindowShouldClose()) {
-
+        UpdateMusicStream(musicMenu);
         BeginDrawing();
         ClearBackground(Colors.BLACK);
         if (IsKeyPressed(KeyboardKey.KEY_F3) && !rel) {
@@ -71,6 +86,7 @@ void showMainMenu(ref GameState currentGameState) {
             encounterThreshold, inBattle);
         }
         // Draw the logo
+        DrawTexture(logoBackTexture, logoXback, logoYback, darkTint);
         DrawTexture(logoTexture, logoX, logoY, Colors.WHITE);
 
         // Draw the menu options
@@ -78,11 +94,14 @@ void showMainMenu(ref GameState currentGameState) {
             Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
             int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
             int textX = (screenWidth - textWidth) / 2; // Center the text
-            int textY = logoY + logoTexture.height + 30 + (30 * i); // Position below the logo
+            int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
 
             DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, textColor);
         }
-
+        int textWidthLol = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
+        int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
+        
+        DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2((screenWidth - textWidthLol) /2, textYlol), 20, 0, Colors.WHITE);
         // Handle input for menu navigation
         if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, 
         GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
@@ -155,7 +174,7 @@ void showMainMenu(ref GameState currentGameState) {
                     // Calculate the positions for the menu options
                     int[] menuOptionYPositions = new int[menuOptions.length];
                     for (int i = 0; i < menuOptions.length; i++) {
-                        menuOptionYPositions[i] = logoY + logoTexture.height + 30 + (30 * i);
+                        menuOptionYPositions[i] = logoY + logoTexture.height + 100 + (30 * i);
                     }
 
                     // Fade out effect when starting the game
@@ -167,9 +186,8 @@ void showMainMenu(ref GameState currentGameState) {
                         ClearBackground(Colors.BLACK);
 
                         // Draw the logo at its stored position with fading
+                        DrawTextureEx(logoBackTexture, Vector2(logoXback, logoYback), 0.0f, scaleX, Fade(darkTint, fadeAlpha));
                         DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-
-                        // Draw the menu options at their stored positions with fading
                         for (int i = 0; i < menuOptions.length; i++) {
                             Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
                             int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
@@ -180,14 +198,20 @@ void showMainMenu(ref GameState currentGameState) {
                             Color fadedTextColor = Fade(textColor, fadeAlpha);
                             DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
                         }
-
+                        DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2((screenWidth - textWidthLol)/2, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
                         EndDrawing();
                     }
+                    UnloadTexture(logoTexture);
+                    UnloadTexture(logoBackTexture);
+                    UnloadMusicStream(musicMenu);
                     currentGameState = GameState.InGame;
                     return;
                 
                 case 5:
                     currentGameState = GameState.Exit;
+                    UnloadTexture(logoTexture);
+                    UnloadTexture(logoBackTexture);
+                    UnloadMusicStream(musicMenu);
                     return;
                 default:
                     break;
@@ -197,4 +221,6 @@ void showMainMenu(ref GameState currentGameState) {
         EndDrawing();
     }
     UnloadTexture(logoTexture);
+    UnloadMusicStream(musicMenu);
+    UnloadTexture(logoBackTexture);
 }

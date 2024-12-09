@@ -217,7 +217,8 @@ setPlayerModel("res/mc.glb", 3.0)
 changeCameraPosition(0.0, 10.0, 10.0)
 changeCameraTarget(0.0, 4.0, 0.0)
 changeCameraUp(0.0, 1.0, 0.0)
-
+-- 0 значит скрыть модель гг, 1 - показать
+drawPlayerModel(1);
 -- Добавление кубов
 -- сначала идут X, Y, Z, потом имя куба, потом его диалог, потом хуй знает что, наверное дефолтная эмоция и что-то еще
 addCube(-6.0, 0.0, 0.0, "Yuki", globalDialogForNPC1, 1, -1)

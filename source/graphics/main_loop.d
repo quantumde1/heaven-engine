@@ -285,7 +285,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     initWindowAndCamera(camera);
     // Load Models
     float cameraSpeed = 5.0f;
-    float rotationStep = 1.3f;
+    float rotationStep = 1.6f;
     float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
     
@@ -356,8 +356,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (isNewLocationNeeded) {
                         playerStepCounter = 0;
                         cubePosition = Vector3(0, 0, 0);
-                        camera.position = Vector3(0, 10, 10);
-                        camera.target = Vector3(0, 4, 0);
+                        camera.position = Vector3(0, 5, 0.1);
+                        camera.target = Vector3(0, 5, 0);
                         cameraAngle = 90.0f;
                         UnloadModel(floorModel);
                         floorModel = LoadModel(model_location_path);

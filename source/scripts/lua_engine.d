@@ -124,6 +124,16 @@ extern (C) nothrow int lua_changeCameraTarget(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_drawPlayerModel(lua_State *L) {
+    if (luaL_checkinteger(L, 1) == 0) {
+        drawPlayer = false;
+    }
+    if (luaL_checkinteger(L, 1) == 1) {
+        drawPlayer = true;
+    }
+    return 0;
+}
+
 extern (C) nothrow int lua_getDialogName(lua_State *L) {
     lua_pushstring(L, name_global.toStringz());
     return 1; // Number of return values
@@ -246,11 +256,6 @@ extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_switchToFirstPersonLook(lua_State *L) {
-    try {  } catch (Exception e) {}
-    return 0;
-}
-
 // Register the dialog functions
 extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dialogBox", &luaL_dialogBox);
@@ -262,9 +267,9 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "showHint", &luaL_showHint);
     lua_register(L, "hideHint", &luaL_hideHint);
-    lua_register(L, "switchToFirstPerson", &lua_switchToFirstPersonLook);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
     lua_register(L, "playVideo", &lua_playVideo);
+    lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
     lua_register(L, "clearChoice", &luaL_dialogClearChoice);
 }
@@ -365,6 +370,11 @@ extern (C) nothrow int lua_getPlayerZPos(lua_State *L) {
     return 1;
 }
 
+extern (C) nothrow int lua_setPlayerXYZPos(lua_State *L) {
+    cubePosition = Vector3(luaL_checknumber(L,1), luaL_checknumber(L,2), luaL_checknumber(L, 3));
+    return 1;
+}
+
 extern (C) nothrow int lua_getCubeXPos(lua_State *L) {
     lua_pushnumber(L, cubes[luaL_checkinteger(L, 1)-1].boundingBox.min.x);
     return 1;
@@ -461,6 +471,7 @@ extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "getPlayerX", &lua_getPlayerXPos);
     lua_register(L, "getPlayerY", &lua_getPlayerYPos);
     lua_register(L, "getPlayerZ", &lua_getPlayerZPos);
+    lua_register(L, "setPlayerXYZ", &lua_setPlayerXYZPos);
     lua_register(L, "getCubeX", &lua_getCubeXPos);
     lua_register(L, "getCubeY", &lua_getCubeYPos);
     lua_register(L, "getCubeZ", &lua_getCubeZPos);
