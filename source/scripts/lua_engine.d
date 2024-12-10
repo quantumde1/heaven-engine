@@ -51,6 +51,15 @@ extern (C) nothrow lua_getBattleStatus(lua_State *L) {
     return 1;
 }
 
+extern (C) nothrow lua_setRotationCrowler(lua_State *L) {
+    if (luaL_checkinteger(L, 1) == 1) {
+        dungeonCrawlerMode = 1;
+    } else if (luaL_checkinteger(L, 1) == 0) {
+        dungeonCrawlerMode = 0;
+    }
+    return 0;
+}
+
 extern (C) nothrow int lua_getAnswerValue(lua_State *L) {
     lua_pushinteger(L, answer_num);
     return 1;
@@ -201,7 +210,7 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     }
     
     pageChoice_glob = cast(int)luaL_checkinteger(L, 4);
-    emotion_global = cast(int)luaL_checkinteger(L, 3);
+    emotion_global = cast(char*)luaL_checkstring(L, 3);
     
     // Get the choices array from the Lua stack
     luaL_checktype(L, 5, LUA_TTABLE);
@@ -267,6 +276,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "showHint", &luaL_showHint);
     lua_register(L, "hideHint", &luaL_hideHint);
+    lua_register(L, "dungeonCrawlerMode", &lua_setRotationCrowler);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
     lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
@@ -408,7 +418,7 @@ extern (C) nothrow int lua_getCameraZPos(lua_State *L) {
 // Cube management functions
 extern (C) nothrow int lua_addCube(lua_State *L) {
     auto name = luaL_checkstring(L, 4);
-    int emotion = cast(int) luaL_checkinteger(L, 6);
+    char* emotion = cast(char*)luaL_checkstring(L, 6);
     Vector3 position = {
         cast(float) luaL_checknumber(L, 1),
         cast(float) luaL_checknumber(L, 2),

@@ -10,7 +10,7 @@ import std.stdio;
 struct Cube {
     string name;
     string[] text;
-    int emotion;
+    char* emotion;
     int choicePage;
     BoundingBox boundingBox;
     Vector3 startPosition;
@@ -87,7 +87,7 @@ void rotateCube(ref Cube cube, float targetAngle, float rotationSpeed, float del
 }
 
 //adding cubes to map
-nothrow addCube(Vector3 position, string name, string[] text, int emotion, int choicePage) {
+nothrow addCube(Vector3 position, string name, string[] text, char* emotion, int choicePage) {
     //adding all needed for cube struct
     Cube cube;
     cube.name = name;

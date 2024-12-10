@@ -58,8 +58,14 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     if (IsKeyDown(rgt) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) movement += right;
 
     if (!Vector3Equals(movement, Vector3Zero())) {
-        movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
-        
+        if (dungeonCrawlerMode) {
+            // Normalize movement to ensure it only moves in increments of 2.0
+            movement = Vector3Normalize(movement);
+            movement = Vector3Scale(movement, 1.0f); // Move exactly 2.0 units
+        } else {
+            movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
+        }
+
         // Check for collisions before moving
         BoundingBox cubeBoundingBox;
         Nullable!Cube collidedCube = handleCollisions(cubePosition + movement, cubes, cubeBoundingBox);
@@ -72,8 +78,6 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
             if (!friendlyZone) playerStepCounter++;
         } else {
             // Collision detected, handle response (e.g., stop movement or slide)
-            // Here you can implement a simple response, like stopping the movement
-            // or adjusting the position based on the collision normal.
             // For simplicity, we will just not move the cube in this example.
         }
     }
@@ -118,10 +122,17 @@ void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float
 void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, 
 float rotationStep, float radius) {
     if (allowControl) {
-        if (IsKeyDown(KeyboardKey.KEY_LEFT)) {
+        if (IsKeyDown(KeyboardKey.KEY_LEFT) && !dungeonCrawlerMode) {
             cameraAngle = (cameraAngle - rotationStep + FULL_ROTATION) % FULL_ROTATION;
-        } else if (IsKeyDown(KeyboardKey.KEY_RIGHT)) {
+        }
+        if (IsKeyDown(KeyboardKey.KEY_RIGHT) && !dungeonCrawlerMode) {
             cameraAngle = (cameraAngle + rotationStep) % FULL_ROTATION;
+        }
+        if (IsKeyPressed(KeyboardKey.KEY_LEFT) && dungeonCrawlerMode) {
+            cameraAngle = (cameraAngle - 90.0f + FULL_ROTATION) % FULL_ROTATION;
+        }
+        if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && dungeonCrawlerMode) {
+            cameraAngle = (cameraAngle + 90.0f) % FULL_ROTATION;
         }
         if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
             cameraAngle = (cameraAngle - 45.0f + FULL_ROTATION) % FULL_ROTATION;

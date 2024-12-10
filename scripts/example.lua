@@ -58,7 +58,7 @@ function startDialogCoroutine()
         startCubeRotation(1, 90, 80, 10)
         -- напишите сюда код, который будет инициализироваться сразу после входа в локацию. Пример:
         -- "Yukino" - имя, после нее в фигурных скобках диалоговый текст, страницы разделены запятой. После идет эмоция, заготовка для показа реакции персонажа над диалоговым окном, потом страница на которой должен быть выбор(отсутствие выбора - -1), после идут варианты выбора в фигур. скобках, разделены запятой, показываются друг над другом
-        dialogBox("Yukino", {" Good job on the coverage. There's a letter for you, Maya. But there's no return address on it..."}, 0, -1, {""})
+        dialogBox("Yukino", {" Good job on the coverage. There's a letter for you, Maya. But there's no return address on it..."}, "res/Maya_1.png", -1, {""})
         -- необходимо, чтобы диалог не начинался до того как закончится прошлый
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога

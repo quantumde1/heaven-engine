@@ -185,7 +185,7 @@ void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraA
         Vector3 enemyCubePosition = Vector3Add(cubePosition, enemyCubeOffset);
         EnemyCube enemyCube = {enemyCubePosition, "debug" ~ (i + 1).to!string(), 20, enemyModel};
         enemyCubes ~= enemyCube;
-        addCube(enemyCube.position, enemyCube.name, [""], 0, 0);
+        addCube(enemyCube.position, enemyCube.name, [""], cast(char*)(""), 0);
     }
     battleState.playerTurns = 1;
     battleState.enemyTurns = cast(int)enemyCubes.length;
@@ -258,6 +258,10 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         int textY = barHeight - 40; // Adjust this value for vertical positioning
         DrawTextEx(fontdialog, toStringz(menuTabs[i]), Vector2(i * tabWidth + 10, textY), 40, 1.0f, Colors.WHITE);
     }
+    // Draw enemy model
+    BeginMode3D(camera);
+    drawEnemyCubes();
+    EndMode3D();
     int buttonHeight = 50;
     int buttonMargin = 10;
     if (!battleDialog) {
@@ -298,7 +302,6 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
                 showRunMessage = false; // Hide the message after 3 seconds
             }
         }
-        
         // Draw the message if the flag is true
         if (showRunMessage) {
             DrawTextEx(fontdialog, "You cannot run!", 
@@ -333,12 +336,9 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
             selectingEnemy = false;
         }
     }
-
-    // Draw enemy model
-    BeginMode3D(camera);
-    drawEnemyCubes();
-    EndMode3D();
-
+    if (battleDialog == true) {
+        display_dialog(name_global, emotion_global, message_global, -1);
+    }
     if (selectingEnemy) {
         foreach (index, enemyCube; enemyCubes) {
             if (enemyCube.health > 0) {

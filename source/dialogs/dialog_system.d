@@ -18,7 +18,11 @@ int namewidth;
 static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint);   // Draw text using font inside rectangle limits
 static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint);    // Draw text using font inside rectangle limits with support for text selection
 
-void display_dialog(string character, int emotion, string[] pages, int choicePage) {
+void display_dialog(string character, char* emotion, string[] pages, int choicePage) {
+    uint image_size;
+    char *image_data = get_file_data_from_archive("res/faces.bin", "test_good.png", &image_size);
+    Texture2D dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     bool isGamepadConnected = IsGamepadAvailable(gamepadInt);
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -77,6 +81,10 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
     Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
     DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), textBox, FONT_SIZE, 1.0f, true, Colors.WHITE);
 
+    // Draw the image at the top right corner of the dialog box
+    int imageX = cast(int)(rectX + rectWidth - (dialogImage.width * 3.5f) - 15); // Adjust the X position to the right corner
+    int imageY = rectY - 337; // Adjust the Y position as needed
+    DrawTextureEx(dialogImage, Vector2(imageX, imageY), 0.0f, 3.5f, Colors.WHITE);
     // Display input prompt
     int posY = GetScreenHeight() - 20 - 40;
     if (isGamepadConnected) {
@@ -138,6 +146,7 @@ void display_dialog(string character, int emotion, string[] pages, int choicePag
         // If the text is not fully displayed, pressing Enter will show the full text
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             isTextFullyDisplayed = true; // Set the flag to indicate the text is fully displayed
+            isTextureImageLoaded = false;
         }
     }
 
