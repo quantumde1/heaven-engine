@@ -70,12 +70,12 @@ void openMap(string location) {
         [screenHeight / 7, screenWidth / 8] // Home
     ];
 
-// Initialize Camera2D
-Camera2D camera;
-camera.target = Vector2(screenWidth / 2.0f, screenHeight / 2.0f);
-camera.offset = Vector2(screenWidth / 2.0f, screenHeight / 2.0f);
-camera.rotation = 0.0f;
-camera.zoom = 1.0f; // Default zoom level
+    // Initialize Camera2D
+    Camera2D camera;
+    camera.target = Vector2(screenWidth / 2.0f, screenHeight / 2.0f);
+    camera.offset = Vector2(screenWidth / 2.0f, screenHeight / 2.0f);
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f; // Default zoom level
     rectX = menuPositions[selectedMenuIndex][0];
     rectY = menuPositions[selectedMenuIndex][1];
     Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha

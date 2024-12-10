@@ -259,7 +259,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
     EndDrawing();
-    DisableCursor();
     // Load Control Configuration and Initialize Audio
     immutable ControlConfig controlConfig = loadControlConfig();
     showMainMenu(currentGameState);
@@ -318,7 +317,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     //modelCharacterSize = 5.0f;
     lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
     luaL_initDialogs(L);
-
+    DisableCursor();
     // Gamepad Mappings
     SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,    dpright:h0.2;
         030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
@@ -339,7 +338,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
                     UpdateLightValues(shader, lights[0]);    
                     luaL_updateDialog(L);
-                    
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
                         controlConfig.forward_button,
@@ -366,7 +364,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
 
                     drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
-                    if (!inBattle && !showInventory) {
+                    if (neededDraw2D) {
+                        DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                        DrawTextureEx(texture_character, Vector2(posX_tex_char, posY_tex_char), 0.0, scaleUp_char, Colors.WHITE);
+                    }
+                    if (!inBattle && !showInventory && !showDialog) {
                         draw_navigation(cameraAngle, navFont);
                     }
                     if (show_sec_dialog && showDialog) {

@@ -238,6 +238,36 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
+    texture_background = LoadTexture(luaL_checkstring(L,1));
+    neededDraw2D = true;
+    return 0;
+}
+
+extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
+    texture_character = LoadTexture(luaL_checkstring(L,1));
+    posX_tex_char = cast(int)luaL_checkinteger(L, 2);
+    posY_tex_char = cast(int)luaL_checkinteger(L, 3);
+    scaleUp_char = luaL_checknumber(L, 4);
+    return 0;
+}
+
+extern (C) nothrow int lua_getScreenWidth(lua_State *L) {
+    lua_pushinteger(L, GetScreenWidth());
+    return 1;
+}
+
+extern (C) nothrow int lua_getScreenHeight(lua_State *L) {
+    lua_pushinteger(L, GetScreenHeight());
+    return 1;
+}
+
+extern (C) nothrow int lua_stop2Dbackground(lua_State *L) {
+    UnloadTexture(texture_background);
+    neededDraw2D = false;
+    return 0;
+}
+
 extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
     auto name = luaL_checkstring(L, 1).to!string;
     luaL_checktype(L, 2, LUA_TTABLE);
@@ -283,6 +313,11 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "hideHint", &luaL_hideHint);
     lua_register(L, "dungeonCrawlerMode", &lua_setRotationCrowler);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
+    lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
+    lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
+    lua_register(L, "getScreenHeight", &lua_getScreenHeight);
+    lua_register(L, "getScreenWidth", &lua_getScreenWidth);
+    lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
     lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
