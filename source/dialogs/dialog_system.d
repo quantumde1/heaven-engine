@@ -19,10 +19,6 @@ static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float font
 static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint);    // Draw text using font inside rectangle limits with support for text selection
 
 void display_dialog(string character, char* emotion, string[] pages, int choicePage) {
-    uint image_size;
-    char *image_data = get_file_data_from_archive("res/faces.bin", "test_good.png", &image_size);
-    Texture2D dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     bool isGamepadConnected = IsGamepadAvailable(gamepadInt);
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();

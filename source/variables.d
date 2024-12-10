@@ -178,6 +178,7 @@ float modelLocationSize;
 string location_name;
 bool friendlyZone;
 float modelCharacterSize;
+Texture2D dialogImage;
 bool drawPlayer;
 float modelCubeSize;
 int FPS = 60;

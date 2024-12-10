@@ -54,7 +54,7 @@ local cubeMoving
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
-        dialogBox("Tomoko", {"What the hell is going on here?...","What these demons doing here?! Where are they from?","I'm pretty scared guys...","1234567890-+=_!@#$%^&()[], testing font and UI"}, "res/test_good.png", 3, {"Testing", "debug answer"})
+        dialogBox("Tomoko", {"What the hell is going on here?...","What these demons doing here?! Where are they from?","I'm pretty scared guys...","1234567890-+=_!@#$%^&()[], testing font and UI"}, "test_good.png", 3, {"Testing", "debug answer"})
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
         end
@@ -62,19 +62,19 @@ function startDialogCoroutine()
         -- Поворот камеры
         rotateCamera(180.0, 130.0)
         -- Диалог с Алексеем
-        dialogBox("Alexey", alexey_dialog, "res/test_good.png", 2, {"Yes, i think so too...", "No, you're fucking freak!"})
+        dialogBox("Alexey", alexey_dialog, "test_good.png", 2, {"Yes, i think so too...", "No, you're fucking freak!"})
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
             answerValue = getAnswerValue() -- Получение значения ответа игрока    
         end
         -- Обработка ответа игрока
         if answerValue == 0 then
-            dialogBox("Alexey", {"Okay, so, let's go and see what the hell is going on there..."}, "res/test_good.png", 1, {""})
+            dialogBox("Alexey", {"Okay, so, let's go and see what the hell is going on there..."}, "test_good.png", 1, {""})
             while isDialogExecuted() do
                 coroutine.yield() -- Ожидание завершения диалога
             end
         elseif answerValue == 1 then
-            dialogBox("Alexey", {"So, u think will be better to sit and do nothing?!", "You are an idiot! Come here, i will show you some lessons of good manners!"}, "res/test_good.png", 1, {""})
+            dialogBox("Alexey", {"So, u think will be better to sit and do nothing?!", "You are an idiot! Come here, i will show you some lessons of good manners!"}, "test_good.png", 1, {""})
             while isDialogExecuted() do
                 coroutine.yield()
             end
@@ -85,7 +85,7 @@ function startDialogCoroutine()
                 battleRunning = getBattleStatus()
             end
             if not battleRunning then
-                dialogBox("Alexey", {"Okay, i got it...", "You want problems - you will have it.", "I'm leaving your bullshit team. arividerchi!"}, "res/test_good.png", 2, {"Go fuck yourself", "Good luck."})
+                dialogBox("Alexey", {"Okay, i got it...", "You want problems - you will have it.", "I'm leaving your bullshit team. arividerchi!"}, "test_good.png", 2, {"Go fuck yourself", "Good luck."})
                 while isDialogExecuted() do
                     coroutine.yield()
                     answerValue = getAnswerValue() -- Получение значения ответа игрока 
@@ -121,7 +121,7 @@ function checkDialogStatus()
     -- Проверка, достиг ли куб нужной позиции
     if tablesEqual(cubePosition, neededPosition) then
         rotateCamera(90.0, 130.0) -- Поворот камеры
-        dialogBox("Text", {"Oh shit. How you find me?", "Go ahead, please. I dont wanna see you."}, "res/test_good.png", -1, {""})
+        dialogBox("Text", {"Oh shit. How you find me?", "Go ahead, please. I dont wanna see you."}, "test_good.png", -1, {""})
         neededPosition = { } -- Сброс нужной позиции
     end
 
@@ -146,18 +146,18 @@ function checkDialogStatus()
             dialogCoroutine = coroutine.create(function()
                 hideHint()
                 rotateCamera(360, 130)
-                dialogBox("Sergey", {"what must we do now?! Do you know? Ah shit. Things goes as much bad as only this can be!", "If not you two, maybe..."}, "res/test_good.png", 1, {"I know, im sorry.", "..nothing changed, you're an idiot!"})
+                dialogBox("Sergey", {"what must we do now?! Do you know? Ah shit. Things goes as much bad as only this can be!", "If not you two, maybe..."}, "test_good.png", 1, {"I know, im sorry.", "..nothing changed, you're an idiot!"})
                 while isDialogExecuted() do
                     coroutine.yield() -- Ожидание завершения диалога
                     answerValue = getAnswerValue() -- Получение значения ответа игрока
                 end
                 if answerValue == 0 then
-                    dialogBox("Sergey", {"Argh... Okay, lets go, maybe further will be better?"}, "res/test_good.png", -1, {""})
+                    dialogBox("Sergey", {"Argh... Okay, lets go, maybe further will be better?"}, "test_good.png", -1, {""})
                     while isDialogExecuted() do
                         coroutine.yield() -- Ожидание завершения диалога
                     end
                 elseif answerValue == 1 then
-                    dialogBox("Sergey", {"Are you SO stupid?!", "I cannot go with you anymore.", "Fuck you and your girlfriend, two fucking freaks! I'm leaving. Fuck yourself you two!"}, "res/test_good.png", -1, {""})
+                    dialogBox("Sergey", {"Are you SO stupid?!", "I cannot go with you anymore.", "Fuck you and your girlfriend, two fucking freaks! I'm leaving. Fuck yourself you two!"}, "test_good.png", -1, {""})
                     while isDialogExecuted() do
                         coroutine.yield() -- Ожидание завершения диалога
                     end
@@ -189,14 +189,14 @@ changeCameraUp(0.0, 1.0, 0.0)
 drawPlayerModel(0);
 dungeonCrawlerMode(1);
 -- Добавление кубов для Сергея и Алексея
-addCube(-6.0, 0.0, 0.0, "Sergey", {""}, "res/test_good.png", -1) -- Добавление куба Сергея
+addCube(-6.0, 0.0, 0.0, "Sergey", {""}, "test_good.png", -1) -- Добавление куба Сергея
 updateCubeDialog("Sergey", {
     "What the hell is going on here?...",
     "What these demons doing here?! Where are they from?",
     "I'm pretty scared guys...",
     "1234567890-+=_!@#$%^&()[], testing font and UI"
 }) -- Обновление диалога для Сергея
-addCube(2.0, 0.0, 4.0, "Alexey", {""}, "res/test_good.png", -1) -- Добавление куба Алексея
+addCube(2.0, 0.0, 4.0, "Alexey", {""}, "test_good.png", -1) -- Добавление куба Алексея
 howMuchModels(2) -- Установка количества моделей в сцене
 
 -- Установка модели кубов для Сергея и Алексея

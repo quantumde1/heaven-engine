@@ -211,7 +211,12 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     
     pageChoice_glob = cast(int)luaL_checkinteger(L, 4);
     emotion_global = cast(char*)luaL_checkstring(L, 3);
-    
+    try {
+    uint image_size;
+    char *image_data = get_file_data_from_archive("res/faces.bin", emotion_global, &image_size);
+    dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    } catch (Exception e) {}
     // Get the choices array from the Lua stack
     luaL_checktype(L, 5, LUA_TTABLE);
     int choicesLength = cast(int)lua_objlen(L, 5);
