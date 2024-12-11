@@ -55,8 +55,6 @@ function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
         draw2Dtexture("res/test_background.png");
-        print(getScreenHeight())
-        print(getScreenWidth())
         draw2Dcharacter("res/test_second.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 100, 5.0);
         dialogBox("Tomoko", {"What the hell is going on here?...","What these demons doing here?! Where are they from?","I'm pretty scared guys...","1234567890-+=_!@#$%^&()[], testing font and UI"}, "test_good.png", 3, {"Testing", "debug answer"})
         while isDialogExecuted() do
