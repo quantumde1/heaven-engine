@@ -61,7 +61,7 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
         if (dungeonCrawlerMode) {
             // Normalize movement to ensure it only moves in increments of 2.0
             movement = Vector3Normalize(movement);
-            movement = Vector3Scale(movement, 1.0f); // Move exactly 2.0 units
+            movement = Vector3Scale(movement, 0.5f); // Move exactly 2.0 units
         } else {
             movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
         }
