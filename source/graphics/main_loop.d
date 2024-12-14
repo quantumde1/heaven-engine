@@ -251,10 +251,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     BeginDrawing();
     InitAudioDevice();
     version (Windows) {
-        playVideo(cast(char*)("/"~getcwd()~"/res/opening.mp4"));
+        playVideo(cast(char*)("/"~getcwd()~"/res/opening.pmf"));
     }
     version (Posix) {
-        playVideo(cast(char*)(getcwd()~"/res/opening.mp4"));
+        playVideo(cast(char*)(getcwd()~"/res/opening.pmf"));
     }
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
@@ -368,7 +368,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                         DrawTextureEx(texture_character, Vector2(posX_tex_char, posY_tex_char), 0.0, scaleUp_char, Colors.WHITE);
                     }
-                    if (!inBattle && !showInventory && !showDialog) {
+                    if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
                         draw_navigation(cameraAngle, navFont);
                     }
                     if (show_sec_dialog && showDialog) {
@@ -477,7 +477,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     } else {
                         // Flickering Effect
                         int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
-                        if (!inBattle && !friendlyZone) {
+                        if (!inBattle && !friendlyZone && !hideNavigation) {
                             draw_flickering_rhombus(colorChoice, colorIntensity);
                         }
                     }

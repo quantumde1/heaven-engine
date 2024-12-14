@@ -195,6 +195,11 @@ extern (C) nothrow int luaL_dialogClearChoice(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int luaL_hideUI(lua_State *L) {
+    hideNavigation = true;
+    return 0;
+}
+
 extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     name_global = luaL_checkstring(L, 1).to!string;  // Update dialog name
     event_initialized = true;
@@ -226,8 +231,15 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
         choices[i] = luaL_checkstring(L, -1).to!string;
         lua_pop(L, 1);
     }
-    if (lua_gettop(L) == 6) {
-        typingSpeed = cast(float)luaL_checknumber(L, 6);
+    int x_pos = cast(int)luaL_checkinteger(L, 6);
+    if (x_pos == 0) {
+        pos = false;
+    }
+    if (x_pos == 1) {
+        pos = true;
+    }
+    if (lua_gettop(L) == 7) {
+        typingSpeed = cast(float)luaL_checknumber(L, 7);
     } else {
         typingSpeed = 0.03f;
     }
@@ -239,16 +251,30 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
 }
 
 extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
-    texture_background = LoadTexture(luaL_checkstring(L,1));
+    uint image_size;
+    try {
+    char *image_data = get_file_data_from_archive("res/bg.bin", luaL_checkstring(L, 1), &image_size);
+    texture_background = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     neededDraw2D = true;
+    } catch (Exception e) {
+
+    }
     return 0;
 }
 
 extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
-    texture_character = LoadTexture(luaL_checkstring(L,1));
+    uint image_size;
+    try {
+    char *image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
+    texture_character = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     posX_tex_char = cast(int)luaL_checkinteger(L, 2);
     posY_tex_char = cast(int)luaL_checkinteger(L, 3);
     scaleUp_char = luaL_checknumber(L, 4);
+    } catch (Exception e) {
+        
+    }
     return 0;
 }
 
@@ -549,6 +575,7 @@ extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "playMusic", &lua_PlayMusic);
     lua_register(L, "stopMusic", &lua_StopMusic);
     lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);
+    lua_register(L, "hideUI", &luaL_hideUI);
 }
 
 // Initialization function to register all libraries

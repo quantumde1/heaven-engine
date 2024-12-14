@@ -58,12 +58,12 @@ function startDialogCoroutine()
         startCubeRotation(1, 90, 80, 10)
         -- напишите сюда код, который будет инициализироваться сразу после входа в локацию. Пример:
         -- "Yukino" - имя, после нее в фигурных скобках диалоговый текст, страницы разделены запятой. После идет эмоция, заготовка для показа реакции персонажа над диалоговым окном, потом страница на которой должен быть выбор(отсутствие выбора - -1), после идут варианты выбора в фигур. скобках, разделены запятой, показываются друг над другом
-        dialogBox("Yukino", {" Good job on the coverage. There's a letter for you, Maya. But there's no return address on it..."}, "res/Maya_1.png", -1, {""})
+        dialogBox("Yukino", {" Good job on the coverage. There's a letter for you, Maya. But there's no return address on it..."}, "", -1, {""},1)
         -- необходимо, чтобы диалог не начинался до того как закончится прошлый
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
         end
-        dialogBox("You", {" But there's no return address on it..."}, 0, 0, {"Thanks, Yukki!--", "Thanks. But who could it be from?"})
+        dialogBox("You", {" But there's no return address on it..."}, "", 0, {"Thanks, Yukki!--", "Thanks. But who could it be from?"},1)
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
             -- getAnswerValue() получает ответ игрока и пишется в переменную answerName, которая после выхода из цикла содержит конечный ответ
@@ -74,7 +74,7 @@ function startDialogCoroutine()
         -- 0 - это первый вариант ответа, так как массивы начинаются с нуля, а ответ - массив двух строк.
         if answerValue == 0 then
             -- # в имени нужен, чтобы имя сменило цвет. Это удобно когда нужно написать справку о персонаже, как на примере ниже.
-            dialogBox("#Maya Amano", {"Editor of Kismet Publishing's teen Magazine, Coolest. The game's main character."}, 0, -1, {""})
+            dialogBox("#Maya Amano", {"Editor of Kismet Publishing's teen Magazine, Coolest. The game's main character."}, "", -1, {""},1)
             while isDialogExecuted() do
                 coroutine.yield() -- Ожидание завершения диалога
             end
@@ -85,7 +85,7 @@ function startDialogCoroutine()
         elseif answerValue == 1 then
             -- просто отладочная информация
             print("answer 1")
-            dialogBox("Yukino", {" Yeah. No return address.", " Maybe, some your fan? xD"}, 0, -1, {""})
+            dialogBox("Yukino", {" Yeah. No return address.", " Maybe, some your fan? xD"}, "", -1, {""},1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
@@ -107,7 +107,7 @@ function checkDialogStatus()
             -- скрытие подсказки
             hideHint()
             dialogCoroutine = coroutine.create(function()
-            dialogBox("#Letter", {"yOu'rE nEXt...                                   JOKER"}, 0, -1, {""})
+            dialogBox("#Letter", {"yOu'rE nEXt...                                   JOKER"}, "", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
@@ -121,11 +121,11 @@ function checkDialogStatus()
             startCubeRotation(2, 270, 80, 10)
             -- поворот камеры
             rotateCamera(-180.0, 130)
-            dialogBox("Rookie Reporter", {"Miss Amano, the chief wants to see you.", "It must be rough, always getting the difficult jobs...", "Even if I work hard, it does no good. Dreams and reality are such...(sigh) Maybe I should just quit."}, 0, -1, {""})
+            dialogBox("Rookie Reporter", {"Miss Amano, the chief wants to see you.", "It must be rough, always getting the difficult jobs...", "Even if I work hard, it does no good. Dreams and reality are such...(sigh) Maybe I should just quit."}, "", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
-            dialogBox("You", {" Everything will be OK. Don't worry about it!"}, 0, -1, {""})
+            dialogBox("You", {" Everything will be OK. Don't worry about it!"}, "", -1, {""},1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
@@ -142,16 +142,16 @@ function checkDialogStatus()
         dialogCoroutine = coroutine.create(function()
             startCubeRotation(3, 270, 80, 10)
             rotateCamera(-180.0, 130)
-            dialogBox("Mizuno", {"There you are...Amano."}, 0, -1, {""})
+            dialogBox("Mizuno", {"There you are...Amano."}, "", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
-            dialogBox("#Editor-in-Chief Mizuno", {"Coolest's Editor-in-Chief who hates Maya. An experienced woman who goes by the book. 30-something and still not married."}, 0, -1, {""})
+            dialogBox("#Editor-in-Chief Mizuno", {"Coolest's Editor-in-Chief who hates Maya. An experienced woman who goes by the book. 30-something and still not married."}, "", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
             startCubeRotation(3, 90, 80, 10)
-            dialogBox("Mizuno", {"You know why you were called in, right? That interview project you turned in...\"Dream of the Rumored Student\".. was crap.", "It's boring. It has no impact. Who would want to read about a green brat?"}, 0, -1, {""})
+            dialogBox("Mizuno", {"You know why you were called in, right? That interview project you turned in...\"Dream of the Rumored Student\".. was crap.", "It's boring. It has no impact. Who would want to read about a green brat?"}, "", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
@@ -162,22 +162,22 @@ function checkDialogStatus()
                 answerValue = getAnswerValue()
             end
             if answerValue == 0 then
-                dialogBox("Mizuno", {"That's a half hearted answer...It doesn't matter anyway.", "The kids are saying that the recent series of murders are the work of the Joker."}, 0, -1, {""})
+                dialogBox("Mizuno", {"That's a half hearted answer...It doesn't matter anyway.", "The kids are saying that the recent series of murders are the work of the Joker."}, "", -1, {""}, 1)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
             elseif answerValue == 1 then
-                dialogBox("Mizuno", {"Are you arguing with me?! If you like your job, you better get started on Joker story!", "You know the rumors the kids are telling about how the recent series of bizzare murders are the work of the Joker, right?"}, 0, -1, {""})
+                dialogBox("Mizuno", {"Are you arguing with me?! If you like your job, you better get started on Joker story!", "You know the rumors the kids are telling about how the recent series of bizzare murders are the work of the Joker, right?"}, "", -1, {""}, 1)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
             end
-            dialogBox("Mizuno", {"Get your ass over to Seven Sisters High and get the scoop. I'm taking Mayuzumi off this case, so you'll be on your own."}, 0, -1, {""})
+            dialogBox("Mizuno", {"Get your ass over to Seven Sisters High and get the scoop. I'm taking Mayuzumi off this case, so you'll be on your own."}, "", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
             end
             startCubeRotation(3, 90, 80, 10)
-            dialogBox("Mizuno", {"Oh, by the way, you can just forget about this afternoon...the time off you asked for... ", "If you don't like it, I've got plenty of other reporters that would love to take your spot. So what are you waiting for?"}, 0, -1, {""})
+            dialogBox("Mizuno", {"Oh, by the way, you can just forget about this afternoon...the time off you asked for... ", "If you don't like it, I've got plenty of other reporters that would love to take your spot. So what are you waiting for?"}, "", -1, {""}), 1
             while isDialogExecuted() do
                 coroutine.yield()
             end

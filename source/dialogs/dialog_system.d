@@ -63,6 +63,12 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
     int xPosition = rectX + charPaddingX + 10;
     int yPosition = lineY;
     Vector2 position = Vector2(xPosition, yPosition);
+    bool isI = false;
+    if (nameu[nameu.length-2] == 'i') {
+        isI = true;
+    } else {
+        isI = false;
+    }
     if (nameu[1] == '#') {
         // Draw the character name
         namewidth = MeasureText(toStringz(to!string(nameu.filter!(x => x != '#'))), FONT_SIZE+10); // Measure the width of the nameu text
@@ -73,14 +79,26 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
         namewidth = MeasureText(toStringz(nameu), FONT_SIZE+10); // Measure the width of the nameu text
         DrawTextEx(fontdialog, toStringz(nameu), position, FONT_SIZE, 1.0f, Colors.BLUE);
     }
-    // Draw the current page text with wrapping
-    Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
-    DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), textBox, FONT_SIZE, 1.0f, true, Colors.WHITE);
 
+    // Draw the current page text with wrapping
+    if (isI) {
+        Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth + 30, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
+        DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), textBox, FONT_SIZE, 1.0f, true, Colors.WHITE);
+    } else {
+        Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
+        DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), textBox, FONT_SIZE, 1.0f, true, Colors.WHITE);
+    }
     // Draw the image at the top right corner of the dialog box
-    int imageX = cast(int)(rectX + rectWidth - (dialogImage.width * 3.5f) - 15); // Adjust the X position to the right corner
-    int imageY = rectY - 337; // Adjust the Y position as needed
-    DrawTextureEx(dialogImage, Vector2(imageX, imageY), 0.0f, 3.5f, Colors.WHITE);
+    if (pos == true) {
+        int imageX = cast(int)(rectX + rectWidth - (dialogImage.width * 3.5f) - 30); // Adjust the X position to the right corner
+        int imageY = rectY - 337; // Adjust the Y position as needed
+        DrawTextureEx(dialogImage, Vector2(imageX, imageY), 0.0f, 3.5f, Colors.WHITE);
+    } 
+    if (pos == false) {
+        int imageY = rectY - 337; // Adjust the Y position as needed
+        int imageX = cast(int)(rectX+30);
+        DrawTextureEx(dialogImage, Vector2(imageX, imageY), 0.0f, 3.5f, Colors.WHITE);
+    }
     // Display input prompt
     int posY = GetScreenHeight() - 20 - 40;
     if (isGamepadConnected) {
@@ -135,6 +153,7 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
                     allowControl = true;
                     allow_exit_dialog = true;
                 }
+                UnloadTexture(dialogImage);
                 currentPage = 0; // Reset to the first page if needed
             }
         }
