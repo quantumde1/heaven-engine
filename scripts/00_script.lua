@@ -23,7 +23,6 @@ function startDialogCoroutine()
         loadMusic("prologue_1.mp3")
         hideUI()
         playMusic()
-        --[[
         draw2Dtexture("epilogue_1.png")
         local startTime = os.clock() -- Get the current time
         while os.clock() - startTime < 0.29 do
@@ -76,7 +75,7 @@ function startDialogCoroutine()
         draw2Dtexture("epilogue_3.png")
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
-        end]]--
+        end
         draw2Dtexture("background_news_paradigm_x.png")
         dialogBox("Announcer", {
             "Our next story tonight concerns the upcoming virtual city, \"Paradigm X\"",
