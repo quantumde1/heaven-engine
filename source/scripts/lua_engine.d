@@ -215,13 +215,13 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     }
     
     pageChoice_glob = cast(int)luaL_checkinteger(L, 4);
-    emotion_global = cast(char*)luaL_checkstring(L, 3);
-    try {
-    uint image_size;
-    char *image_data = get_file_data_from_archive("res/faces.bin", emotion_global, &image_size);
-    dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    } catch (Exception e) {}
+        emotion_global = cast(char*)luaL_checkstring(L, 3);
+        try {
+            uint image_size;
+            char *image_data = get_file_data_from_archive("res/faces.bin", emotion_global, &image_size);
+            dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+            UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+        } catch (Exception e) {}
     // Get the choices array from the Lua stack
     luaL_checktype(L, 5, LUA_TTABLE);
     int choicesLength = cast(int)lua_objlen(L, 5);
@@ -265,6 +265,7 @@ extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
 
 extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
     uint image_size;
+    neededCharacterDrawing = true;
     try {
     char *image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
     texture_character = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
@@ -274,6 +275,21 @@ extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
     scaleUp_char = luaL_checknumber(L, 4);
     } catch (Exception e) {
         
+    }
+    return 0;
+}
+
+extern (C) nothrow int lua_stopDraw2Dobject(lua_State *L) {
+    UnloadTexture(texture_character);
+    neededCharacterDrawing = false;
+    return 0;
+}
+
+extern (C) nothrow int lua_showNameInput(lua_State *L) {
+    try {
+        showCharacterNameInputMenu = true;
+    } catch (Exception e) {
+
     }
     return 0;
 }
@@ -333,6 +349,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "loadLocation", &luaL_loadlocation);
     lua_register(L, "initBattle", &lua_initBattle);
     lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
+    lua_register(L, "inputName", &lua_showNameInput);
     lua_register(L, "getBattleStatus", &lua_getBattleStatus);
     lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "showHint", &luaL_showHint);
@@ -415,6 +432,7 @@ extern (C) nothrow void luaL_openmovelib(lua_State* L) {
     lua_register(L, "startCubeMove", &lua_startCubeMove);
     lua_register(L, "startCubeRotation", &lua_startCubeRotation);
     lua_register(L, "changeCameraUp", &lua_changeCameraUp);
+    lua_register(L, "stopDraw2Dcharacter", &lua_stopDraw2Dobject);
     lua_register(L, "setFriendlyZone", &lua_setFriendlyZone);
     lua_register(L, "changeCameraTarget", &lua_changeCameraTarget);
     lua_register(L, "changeCameraPosition", &lua_changeCameraPosition);
@@ -569,9 +587,15 @@ extern (C) nothrow int luaL_loadScript(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int luaL_openInputNameMenu(lua_State *L) {
+    showCharacterNameInputMenu = true;
+    return 0;
+}
+
 // Register functions in Lua
 extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "loadMusic", &lua_LoadMusic);
+    lua_register(L, "showNameInput", &luaL_openInputNameMenu);
     lua_register(L, "playMusic", &lua_PlayMusic);
     lua_register(L, "stopMusic", &lua_StopMusic);
     lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);

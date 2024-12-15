@@ -30,8 +30,10 @@ string check_build_settings(string filename, string checked_what) nothrow {
 
 nothrow bool isReleaseBuild() {
     try {
-        auto buildType = check_build_settings("conf/build_type.conf", "build");
-        return buildType == "RELEASE";
+        debug {
+            return false;
+        }
+        return true;
     } catch (Exception e) {
         debug_print("Error checking release build: " ~ e.msg);
     }

@@ -196,7 +196,6 @@ extern (C) int playVideo(char* argv) {
     video_list ~= new_video;
     libvlc_media_player_play(new_video.player);
     if (!rel) writeln("Video started playing");
-    DisableCursor();
     while (!WindowShouldClose()) {
         if (videoFinished) {
             break;

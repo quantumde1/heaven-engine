@@ -207,17 +207,29 @@ void closeAudio() {
 }
 
 void fadeEffect(float alpha, bool fadeIn) {
-    if (rel) {
-        while (fadeIn ? alpha < 2.0f : alpha > 0.0f) {
-            alpha += fadeIn ? FadeIncrement : -FadeIncrement;
-            BeginDrawing();
-            ClearBackground(Colors.BLACK);
-            DrawTextEx(GetFontDefault(), "powered by\n\n\nHeaven Engine", 
-                Vector2(GetScreenWidth() / 2 - MeasureText("powered by\n\n\nHeaven Engine", 40) / 2, 
-                GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
-            );
-            EndDrawing();
-        }
+    while (fadeIn ? alpha < 2.0f : alpha > 0.0f) {
+        alpha += fadeIn ? FadeIncrement : -FadeIncrement;
+        BeginDrawing();
+        ClearBackground(Colors.BLACK);
+        DrawTextEx(fontdialog, "powered by\n\n\nHeaven Engine", 
+            Vector2(GetScreenWidth() / 2 - MeasureText("powered by\n\n\nHeaven Engine", 40) / 2, 
+            GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
+        );
+        EndDrawing();
+    }
+}
+
+void fadeEffectLogoAtlus(float alpha, bool fadeIn) {
+    while (fadeIn ? alpha < 2.0f : alpha > 0.0f) {
+        alpha += fadeIn ? FadeIncrement : -FadeIncrement;
+        uint image_size;
+        char *image_data_logo = get_file_data_from_archive("res/data.bin", "atlus_logo.png", &image_size);
+        Texture2D atlus = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+        BeginDrawing();
+        ClearBackground(Colors.BLACK);
+        DrawTexturePro(atlus, Rectangle(0, 0, cast(float)atlus.width, cast(float)atlus.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Fade(Colors.WHITE, alpha));
+        EndDrawing();
     }
 }
 
@@ -239,6 +251,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     
     // Window and Audio Initialization
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
+    DisableCursor();
     ToggleFullscreen();
     Font navFont = LoadFont("res/font_16x16_en.png");
     rel = isReleaseBuild();
@@ -247,14 +260,16 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     // Fade In and Out Effects
     fadeEffect(0.0f, true);
     fadeEffect(fadeAlpha, false);
+    fadeEffectLogoAtlus(0.0f, true);
+    fadeEffectLogoAtlus(fadeAlpha, false);
     // Play Opening Video
     BeginDrawing();
     InitAudioDevice();
     version (Windows) {
-        playVideo(cast(char*)("/"~getcwd()~"/res/opening.pmf"));
+        playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
     }
     version (Posix) {
-        playVideo(cast(char*)(getcwd()~"/res/opening.pmf"));
+        playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
     }
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
@@ -325,7 +340,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         cubes[i].rotation = 0.0f;
     }
     // Main Game Loop
-    while (!WindowShouldClose()) {
+    while (WindowShouldClose() == false) {
         if (videoFinished) {
             switch (currentGameState) {
                 case GameState.MainMenu:
@@ -362,10 +377,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         isNewLocationNeeded = false;
                         assignShaderToModel(floorModel);
                     }
-
-                    drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                    if (!showCharacterNameInputMenu && !neededDraw2D)                     drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
                     if (neededDraw2D) {
                         DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                    }
+                    if (neededCharacterDrawing) {
                         DrawTextureEx(texture_character, Vector2(posX_tex_char, posY_tex_char), 0.0, scaleUp_char, Colors.WHITE);
                     }
                     if (!inBattle && !showInventory && !showDialog && !hideNavigation) {

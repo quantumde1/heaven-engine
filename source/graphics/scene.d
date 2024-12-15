@@ -41,6 +41,68 @@ void initWindowAndCamera(ref Camera3D camera) {
     camera = createCamera();
 }
 
+void inputName() {
+    char[8] name;
+    char[8] surname;
+    int currentField = 0; // 0 for Name, 1 for Surname
+    int letterCount = 0; // To track the number of letters in the input
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER)) {
+            if (currentField == 0) {
+                currentField = 1; // Move to Surname field
+                letterCount = 0; // Reset letter count for surname
+            } else {
+                // Optionally handle submission of both fields
+                // For example, print to console
+                // Reset fields
+                currentField = 0;
+                letterCount = 0;
+                name[0] = '\0';
+                surname[0] = '\0';
+            }
+        }
+
+        if (currentField == 0) {
+            // Input for Name
+            if (letterCount < 8 - 1) {
+                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE)) {
+                    name[--letterCount] = '\0'; // Remove last character
+                } else {
+                    for (int key = 32; key < 126; key++) {
+                        if (IsKeyPressed(key)) {
+                            name[letterCount++] = cast(char)key; // Add character
+                            name[letterCount] = '\0'; // Null-terminate string
+                        }
+                    }
+                }
+            }
+        } else {
+            // Input for Surname
+            if (letterCount < 8 - 1) {
+                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE)) {
+                    surname[--letterCount] = '\0'; // Remove last character
+                } else {
+                    for (int key = 32; key < 126; key++) {
+                        if (IsKeyPressed(key)) {
+                            surname[letterCount++] = cast(char)key; // Add character
+                            surname[letterCount] = '\0'; // Null-terminate string
+                        }
+                    }
+                }
+            }
+        }
+        ClearBackground(Colors.RAYWHITE);
+
+        DrawText("Enter your Name:", 10, 10, 20, Colors.DARKGRAY);
+        DrawText(cast(char*)name, 10, 40, 20, Colors.BLACK);
+        DrawText("Press Enter to continue to Surname", 10, 70, 20, Colors.DARKGRAY);
+
+        if (currentField == 1) {
+            DrawText("Enter your Surname:", 10, 100, 20,Colors.DARKGRAY);
+            DrawText(cast(char*)surname, 10, 130, 20, Colors.BLACK);
+            DrawText("Press Enter to submit", 10, 160, 20, Colors.DARKGRAY);
+        }
+}
+
 void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, float cameraSpeed, float deltaTime,
                                  char fwd, char bkd, char lft, char rgt, bool allowControl, Cube[] cubes) {
     if (!allowControl || isCubeMoving) return;
