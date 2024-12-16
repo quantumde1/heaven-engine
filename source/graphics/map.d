@@ -61,7 +61,7 @@ void openMap(string location, string area) {
     
     int currentFrame = 0;
     string currentArea = "Akenadai"; // Default area
-    string secondArea;
+    string secondArea = "Shibahama";
     string[] currentMenuOptions = menuOptions_akenadai;
     string[] currentLocationNames = locationNames_akenadai;
 
@@ -100,7 +100,22 @@ void openMap(string location, string area) {
         }
 
         // Handle area switching
-        if (IsKeyPressed(KeyboardKey.KEY_TAB)) {
+        if (IsKeyPressed(KeyboardKey.KEY_TAB) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
+            currentArea = (currentArea == "Akenadai") ? "Shibahama" : "Akenadai";
+            secondArea = (currentArea == "Shibahama") ?  "Akenadai" : "Shibahama";
+            // Update current menu options based on the selected area
+            if (currentArea == "Akenadai") {
+                currentMenuOptions = menuOptions_akenadai;
+                currentLocationNames = locationNames_akenadai;
+            } else {
+                currentMenuOptions = menuOptions_shibahama;
+                currentLocationNames = locationNames_shibahama;
+            }
+            selectedMenuIndex = 0; // Reset selection when switching areas
+        }
+
+        // Handle area switching with L1 and R1 buttons
+        if (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
             currentArea = (currentArea == "Akenadai") ? "Shibahama" : "Akenadai";
             secondArea = (currentArea == "Shibahama") ?  "Akenadai" : "Shibahama";
             // Update current menu options based on the selected area
@@ -159,7 +174,14 @@ void openMap(string location, string area) {
             0.0,
             Colors.WHITE
         );
-
+        int posY = GetScreenHeight() - 20 - 40;
+        if (IsGamepadAvailable(gamepadInt)) {
+            int fontSize = 20;
+            DrawText(toStringz("Press L1/R1/RB/LB for switching area"), 40, posY, fontSize, Colors.BLACK);
+        } else {
+            int fontSize = 20;
+            DrawText(toStringz("Press TAB for switching area"), 40, posY, fontSize, Colors.BLACK);
+        }
         // End drawing with the camera
         EndMode2D();
         EndDrawing();

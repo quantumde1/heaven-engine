@@ -77,7 +77,6 @@ function startDialogCoroutine()
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end]]--
-        --[[
         draw2Dtexture("background_news_paradigm_x.png")
         dialogBox("Announcer", {
             "Our next story tonight concerns the upcoming virtual city, \"Paradigm X\"",
@@ -340,7 +339,7 @@ function startDialogCoroutine()
         dialogBox("Hitomi", {"Anyway, we should get to the South Parking Garage in Shibahama. Paradigm X is just going to have to wait. Too bad."}, "hitomi_sad.png", -1, {""}, 1)
         while isDialogExecuted() do
             coroutine.yield()
-        end]]--
+        end
         openMap("home", "akenadai");
     end)
 end
