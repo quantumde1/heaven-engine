@@ -100,22 +100,7 @@ void openMap(string location, string area) {
         }
 
         // Handle area switching
-        if (IsKeyPressed(KeyboardKey.KEY_TAB) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
-            currentArea = (currentArea == "Akenadai") ? "Shibahama" : "Akenadai";
-            secondArea = (currentArea == "Shibahama") ?  "Akenadai" : "Shibahama";
-            // Update current menu options based on the selected area
-            if (currentArea == "Akenadai") {
-                currentMenuOptions = menuOptions_akenadai;
-                currentLocationNames = locationNames_akenadai;
-            } else {
-                currentMenuOptions = menuOptions_shibahama;
-                currentLocationNames = locationNames_shibahama;
-            }
-            selectedMenuIndex = 0; // Reset selection when switching areas
-        }
-
-        // Handle area switching with L1 and R1 buttons
-        if (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
+        if (IsKeyPressed(KeyboardKey.KEY_TAB) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
             currentArea = (currentArea == "Akenadai") ? "Shibahama" : "Akenadai";
             secondArea = (currentArea == "Shibahama") ?  "Akenadai" : "Shibahama";
             // Update current menu options based on the selected area
