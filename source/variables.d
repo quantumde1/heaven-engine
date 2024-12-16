@@ -146,6 +146,15 @@ Music music;
 char* musicpath;
 Music musicBattle;
 
+struct TextureShow {
+    float x;
+    float y;
+    Texture2D texture;
+    float scale;
+}
+
+TextureShow[5] tex2d;
+
 /* controls */
 struct ControlConfig {
     immutable char right_button;

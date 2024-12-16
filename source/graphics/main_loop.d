@@ -233,7 +233,7 @@ void fadeEffectLogoAtlus(float alpha, bool fadeIn) {
     }
 }
 
-void engine_loader(string window_name, int screenWidth, int screenHeight, string lua_exec) {
+void engine_loader(string window_name, int screenWidth, int screenHeight, string lua_exec, bool play) {
     // Initialization
     version (linux) {
         gamepadInt = 1;
@@ -258,19 +258,23 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     SetTargetFPS(FPS);
     fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
+    InitAudioDevice();
+    if (!rel && play == false) { videoFinished = true; goto debug_lab; }
+    else {
     fadeEffect(0.0f, true);
     fadeEffect(fadeAlpha, false);
     fadeEffectLogoAtlus(0.0f, true);
     fadeEffectLogoAtlus(fadeAlpha, false);
     // Play Opening Video
     BeginDrawing();
-    InitAudioDevice();
     version (Windows) {
         playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
     }
     version (Posix) {
         playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
     }
+    }
+    debug_lab:
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
     EndDrawing();
@@ -377,12 +381,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         isNewLocationNeeded = false;
                         assignShaderToModel(floorModel);
                     }
-                    if (!showCharacterNameInputMenu && !neededDraw2D)                     drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                    if (!showCharacterNameInputMenu && !neededDraw2D) drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
                     if (neededDraw2D) {
                         DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                     }
                     if (neededCharacterDrawing) {
-                        DrawTextureEx(texture_character, Vector2(posX_tex_char, posY_tex_char), 0.0, scaleUp_char, Colors.WHITE);
+                        for (int i = 0; i < tex2d.length; i++) {
+                            DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors.WHITE);
+                        }
                     }
                     if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
                         draw_navigation(cameraAngle, navFont);
@@ -485,7 +491,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
 
                         if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                             StopMusicStream(music);
-                            openMap(location_name);
+                            openMap(location_name, "akenadai");
                         }
                     }
                     if (showDialog) {

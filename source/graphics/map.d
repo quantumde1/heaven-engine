@@ -11,31 +11,29 @@ import std.conv;
 import std.algorithm;
 import std.uni: isWhite;
 
-void openMap(string location) {
+void openMap(string location, string area) {
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
     const int rectWidth = 100;
     const int rectHeight = 100;
     int selectedMenuIndex = 0;
     int rectX, rectY;
-
+    float timeElapsed = 0.0f;
+    float animationSpeed = 0.07f;
     // Define menu options and their corresponding positions
-    string[] menuOptions = ["Area 1", "Area 2", "School", "Home"];
-    string[] locationNames = ["area1", "area2", "schl", "home"];
+    string[] menuOptions_akenadai = ["Home", "Astro Museum", "Akane Mall"];
+    string[] menuOptions_shibahama = ["Shibahama Core", "Goumaden"];
+    string[] locationNames_akenadai = ["home", "planetarium", "akanemall"];
+    string[] locationNames_shibahama = ["core", "goumaden"];
 
     // Set initial rectangle position based on location
     switch (location) {
-        case "area1": selectedMenuIndex = 0; break;
-        case "area2": selectedMenuIndex = 1; break;
-        case "schl": selectedMenuIndex = 2; break;
-        case "home": selectedMenuIndex = 3; break;
+        case "home": selectedMenuIndex = 0; break;
+        case "planetarium": selectedMenuIndex = 1; break;
+        case "akanemall": selectedMenuIndex = 2; break;
         default: break;
     }
-    rectX = 50; // Fixed position for the arrow
-    rectY = 50 + selectedMenuIndex * (rectHeight + 10); // Adjusted for spacing
-
-    // Load font from file
-
+    
     // Load textures and music
     uint image_size;
     char *image_data = get_file_data_from_archive("res/data.bin", "map_back.png", &image_size);
@@ -62,27 +60,18 @@ void openMap(string location) {
     }
     
     int currentFrame = 0;
-    
-    int[][] menuPositions = [
-        [(screenWidth - screenHeight) / 2, screenWidth / 8], // Area 1
-        [screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3, screenWidth / 5 + screenHeight / 25], // Area 2
-        [screenHeight - rectWidth - screenHeight / 4 + screenWidth / 3, screenWidth / 4 + screenHeight / 4], // School
-        [screenHeight / 7, screenWidth / 8] // Home
-    ];
+    string currentArea = "Akenadai"; // Default area
+    string secondArea;
+    string[] currentMenuOptions = menuOptions_akenadai;
+    string[] currentLocationNames = locationNames_akenadai;
 
     // Initialize Camera2D
     Camera2D camera;
     camera.target = Vector2(screenWidth / 2.0f, screenHeight / 2.0f);
     camera.offset = Vector2(screenWidth / 2.0f, screenHeight / 2.0f);
     camera.rotation = 0.0f;
-    camera.zoom = 1.0f; // Default zoom level
-    rectX = menuPositions[selectedMenuIndex][0];
-    rectY = menuPositions[selectedMenuIndex][1];
-    Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
-    float animationSpeed = 0.07f;
-    float timeElapsed = 0.0f;
-    int posY = GetScreenHeight() - 20 - 40;
     camera.zoom = 1.0f;
+
     // Fade-in effect
     float fadeAlpha = 255.0f; // Start fully opaque
     while (fadeAlpha > 0) {
@@ -95,117 +84,70 @@ void openMap(string location) {
         // Draw the map texture
         DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.width, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
         
-        // Draw the interface elements (e.g., menu options)
-        DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
-        DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
-        
-        for (int i = 0; i < menuOptions.length; i++) {
-            Color buttonColor = (i == selectedMenuIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
-            DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
-            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
-        }
-        DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * menuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Red color
-
         // Draw fade rectangle
         DrawRectangle(0, 0, screenWidth, screenHeight, Color(0, 0, 0, cast(ubyte)fadeAlpha)); // Draw fade rectangle
         EndDrawing();
     }
 
-float currentZoom = 1.0f; // Variable to control zoom level
-
-// Main game loop
-while (!WindowShouldClose()) {
-    UpdateMusicStream(musicMenu);
-    
-    // Update animation frame
-    timeElapsed += GetFrameTime();
-    if (timeElapsed >= animationSpeed) {
-        currentFrame = cast(int)((currentFrame + 1) % arrowTextures.length);
-        timeElapsed = 0.0f;
-    }
-
-    // Handle input
-    if (IsGamepadAvailable(gamepadInt)) {
-        DrawCircle(40 + 15, posY + 15, 15, Colors.RED);
-        DrawText("B", 40 + 15 - 5, posY + 15 - 7, 20, Colors.BLACK);
-        DrawText(" go to location", 40 + 30 + 5, posY, 20, Colors.BLACK);
-    } else {
-        DrawText("Press enter to go to location", 40, posY, 20, Colors.BLACK);
-    }
-
-    if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
-        selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
-    }
-    if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
-        selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
-    }
-
-    // Update the camera's zoom level
-    camera.zoom = currentZoom;
-    // Update rectangle position based on selected menu index
-        rectX = menuPositions[selectedMenuIndex][0];
-        rectY = menuPositions[selectedMenuIndex][1];
-        
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-            
-            string location_name = locationNames[selectedMenuIndex]; // Convert to lowercase and remove whitespace for location name
-            if (!rel) { writeln("Going to " ~ location_name); }
-            float fadeOutAlpha = 0.0f; // Start fully transparent
-            while (fadeOutAlpha < 255) {
-                
-                fadeOutAlpha += 5; // Increase alpha
-                if (fadeOutAlpha > 255) fadeOutAlpha = 255;
-
-                BeginDrawing();
-                ClearBackground(Colors.RAYWHITE);
-                
-                // Draw the map texture
-                DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.width, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
-                
-                // Draw the interface elements (e.g., menu options)
-                DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
-                DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
-                
-                for (int i = 0; i < menuOptions.length; i++) {
-                    Color buttonColor = (i == selectedMenuIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
-                    DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
-                    DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
-                }
-                DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * menuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Red color
-                
-                // Draw fade rectangle
-                DrawRectangle(0, 0, screenWidth, screenHeight, Color(0, 0, 0, cast(ubyte)fadeOutAlpha)); // Draw fade rectangle
-                EndDrawing();
-            }
-            loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"), 19.0f);
-            isNewLocationNeeded = true;
-            break; // Exit the loop after loading the location
+    // Main game loop
+    while (!WindowShouldClose()) {
+        UpdateMusicStream(musicMenu);
+        // Update animation frame
+        timeElapsed += GetFrameTime();
+        if (timeElapsed >= animationSpeed) {
+            currentFrame = cast(int)((currentFrame + 1) % arrowTextures.length);
+            timeElapsed = 0.0f;
         }
 
-        // Begin drawing with the camera
-        BeginMode2D(camera);
-        
-        // Clear the background
-        ClearBackground(Colors.RAYWHITE);
-        
+        // Handle area switching
+        if (IsKeyPressed(KeyboardKey.KEY_TAB)) {
+            currentArea = (currentArea == "Akenadai") ? "Shibahama" : "Akenadai";
+            secondArea = (currentArea == "Shibahama") ?  "Akenadai" : "Shibahama";
+            // Update current menu options based on the selected area
+            if (currentArea == "Akenadai") {
+                currentMenuOptions = menuOptions_akenadai;
+                currentLocationNames = locationNames_akenadai;
+            } else {
+                currentMenuOptions = menuOptions_shibahama;
+                currentLocationNames = locationNames_shibahama;
+            }
+            selectedMenuIndex = 0; // Reset selection when switching areas
+        }
+
+        // Draw area name
+        DrawTextEx(fontdialog, toStringz(currentArea), Vector2(screenWidth / 2 - MeasureText(toStringz(currentArea), 30) / 2, 10), 30, 0, Colors.WHITE);
+
+        // Handle input for menu navigation
+        if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+            selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % currentMenuOptions.length);
+        }
+        if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+            selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + currentMenuOptions.length) % currentMenuOptions.length);
+        }
+
+        // Update rectangle position based on selected menu index
+        rectX = 50; // Fixed position for the arrow
+        rectY = 60 + selectedMenuIndex * (rectHeight + 10); // Adjusted for spacing
+
         // Draw the map texture
+        BeginMode2D(camera);
+        ClearBackground(Colors.RAYWHITE);
         DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.width, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
         
-        // Draw gray panel
-        DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
+        DrawRectangle(0, 0, screenWidth / 2, 50, Color(100, 54, 65, 255));
+        DrawTextEx(fontdialog, toStringz(currentArea), Vector2(20, 10), 30, 0, Colors.WHITE);
 
-        // Draw the "Select destination" text on the gray panel
-        DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
+        // Draw the second rectangle in the second half of the screen
+        DrawRectangle(screenWidth / 2, 0, screenWidth / 2, 50, Color(80, 54, 65, 255));
+        DrawTextEx(fontdialog, toStringz(secondArea), Vector2(screenWidth / 2 + 20, 10), 30, 0, Colors.GRAY);
 
         // Draw allowed locations
-        for (int i = 0; i < menuOptions.length; i++) {
-            Color buttonColor = (i == selectedMenuIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
+        for (int i = 0; i < currentMenuOptions.length; i++) {
+            Color buttonColor = (i == selectedMenuIndex) ? Color(0, 0, 0, 210) : Color(0, 0, 0, 150);
             DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
-            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
+            DrawTextEx(fontdialog, toStringz(currentMenuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
         }
-
-        // Draw outline for the entire button area
-        DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * menuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Red color
+        DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * currentMenuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Outline
 
         // Draw animated arrow
         float scaleFactor = 0.7f; // Scale factor
@@ -221,6 +163,43 @@ while (!WindowShouldClose()) {
         // End drawing with the camera
         EndMode2D();
         EndDrawing();
+
+        // Handle selection
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+            string location_name = currentLocationNames[selectedMenuIndex]; // Get the location name
+            float fadeOutAlpha = 0.0f; // Start fully transparent
+            while (fadeOutAlpha < 255) {
+                fadeOutAlpha += 5; // Increase alpha
+                if (fadeOutAlpha > 255) fadeOutAlpha = 255;
+
+                BeginDrawing();
+                ClearBackground(Colors.RAYWHITE);
+                
+                // Draw the map texture
+                DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+                
+                // Draw gray panel
+                DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
+                DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
+                
+                // Draw allowed locations
+                for (int i = 0; i < currentMenuOptions.length; i++) {
+                    Color buttonColor = (i == selectedMenuIndex) ? Color(0, 0, 0, 210) : Color(0, 0, 0, 150);
+                    DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
+                    DrawTextEx(fontdialog, toStringz(currentMenuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
+                }
+                DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * currentMenuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Outline
+                
+                // Draw fade rectangle
+                DrawRectangle(0, 0, screenWidth, screenHeight, Color(0, 0, 0, cast(ubyte)fadeOutAlpha)); // Draw fade rectangle
+                EndDrawing();
+            }
+
+            // Load the selected location
+            loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"), 19.0f);
+            isNewLocationNeeded = true;
+            break; // Exit the loop after loading the location
+        }
     }
 
     // Unload resources

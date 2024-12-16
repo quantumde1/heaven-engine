@@ -200,6 +200,13 @@ extern (C) nothrow int luaL_hideUI(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int luaL_openMap(lua_State *L){
+    StopMusicStream(music);
+    import graphics.map;
+    try { openMap(to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2))); } catch (Exception e) {}
+    return 0;
+}
+
 extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     name_global = luaL_checkstring(L, 1).to!string;  // Update dialog name
     event_initialized = true;
@@ -215,13 +222,13 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     }
     
     pageChoice_glob = cast(int)luaL_checkinteger(L, 4);
-        emotion_global = cast(char*)luaL_checkstring(L, 3);
-        try {
-            uint image_size;
-            char *image_data = get_file_data_from_archive("res/faces.bin", emotion_global, &image_size);
-            dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-            UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-        } catch (Exception e) {}
+    emotion_global = cast(char*)luaL_checkstring(L, 3);
+    try {
+        uint image_size;
+        char *image_data = get_file_data_from_archive("res/faces.bin", emotion_global, &image_size);
+        dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    } catch (Exception e) {}
     // Get the choices array from the Lua stack
     luaL_checktype(L, 5, LUA_TTABLE);
     int choicesLength = cast(int)lua_objlen(L, 5);
@@ -266,13 +273,14 @@ extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
 extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
     uint image_size;
     neededCharacterDrawing = true;
+    int count = cast(int)luaL_checkinteger(L, 5);
     try {
     char *image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
-    texture_character = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    tex2d[count].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    posX_tex_char = cast(int)luaL_checkinteger(L, 2);
-    posY_tex_char = cast(int)luaL_checkinteger(L, 3);
-    scaleUp_char = luaL_checknumber(L, 4);
+    tex2d[count].x = cast(int)luaL_checkinteger(L, 2);
+    tex2d[count].y = cast(int)luaL_checkinteger(L, 3);
+    tex2d[count].scale = luaL_checknumber(L, 4);
     } catch (Exception e) {
         
     }
@@ -280,7 +288,8 @@ extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
 }
 
 extern (C) nothrow int lua_stopDraw2Dobject(lua_State *L) {
-    UnloadTexture(texture_character);
+    int count = cast(int)luaL_checkinteger(L, 1);
+    UnloadTexture(tex2d[count].texture);
     neededCharacterDrawing = false;
     return 0;
 }
@@ -600,6 +609,7 @@ extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "stopMusic", &lua_StopMusic);
     lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);
     lua_register(L, "hideUI", &luaL_hideUI);
+    lua_register(L, "openMap", &luaL_openMap);
 }
 
 // Initialization function to register all libraries
