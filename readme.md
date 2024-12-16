@@ -5,14 +5,14 @@
 ## Features
 
 - [x] Simple source code with comments(based on raylib by @raysan5)
-- [x] Lua scripts (only few functions implemented)
+- [x] Lua scripts
 - [x] Control configuration file
 - [x] Audio playing
 - [x] Battle system
 - [x] Main menu
 - [x] Personas, skills, load, etc menus
 - [x] Loading models and sprites(partially)
-- [x] video playback (without sound at this moment)
+- [x] video playback
 
 ## Guide
 
@@ -36,16 +36,16 @@ Script will done everything automatically(but not installing dependencies, see a
 
 Instuction is slightly harder than for UNIX like OSes.
 
-First, you must get mingw-w64 or other C compiler to compile libplayback and libhpff from source(i recommend to do it, because i may forget update them precompiled in repo).
-Next, you must get LDC/DMD. And then you must cd into dir with engine, do git submodule update --init --recursive, and then dub build.
+First, you must get mingw-w64 or other C compiler to compile libhpff from source(you should do it, because prebuilt from repo may work incorrectly).
+Next, you must get LDC/DMD/GDC/another D compiler(and if not included, install ```dub```), also you need gitl. Then, you must cd into dir with engine, do git submodule update --init --recursive, and then dub build.
 
 ### API
 its placed here:
 [api](docs/api.md)
 
-## FAQ
+## FAQ(maybe, lmao)
 
-### Why I must use it?
+### Must I use it?
 
 This engine suitable only for Shin Megami Tensei like JRPGs, not anything else. Also, this engine licensed under MIT, so you can do anything what you want, only giving a credit to me somewhere in your modification/game/etc.
 
@@ -60,3 +60,7 @@ I wrote it for myself, and i don't know how to make it better, because i'm newbi
 ### Why everything done in one thread?
 
 Because my engine is shitty-coded. Also this will work better on old CPUs.
+
+### Other questions...
+
+if you think you found a bug or you have something tnice to implement, don't be afraid to open an issue or dm me into telegram/matrix!
