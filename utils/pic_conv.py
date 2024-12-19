@@ -18,7 +18,7 @@ def make_magenta_transparent(input_image_path, output_image_path):
         for item in data:
             #0, 91, 127
             if item[0] == 0 and item[1] == 91 and item[2] == 127:  # Проверяем, является ли пиксель магентой
-                newData.append((255, 255, 255, 0))  # Делаем пиксель прозрачным
+                newData.append((0, 0, 0, 0))  # Делаем пиксель прозрачным
             else:
                 newData.append(item)
 

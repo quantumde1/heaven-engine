@@ -154,6 +154,7 @@ struct TextureShow {
 }
 
 TextureShow[5] tex2d;
+Texture2D[5] backgrounds;
 
 /* controls */
 struct ControlConfig {

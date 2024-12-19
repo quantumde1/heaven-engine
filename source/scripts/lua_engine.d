@@ -14,6 +14,8 @@ import graphics.scene;
 import ui.battle_ui;
 import graphics.video_playback;
 import std.file;
+import graphics.map;
+import std.array;
 
 /* 
  * This module provides Lua bindings for various engine functionalities.
@@ -91,7 +93,6 @@ extern (C) nothrow int lua_removeCube(lua_State *L) {
 
 extern (C) nothrow int lua_playVideo(lua_State *L) {
     try {
-        StopMusicStream(music);
         videoFinished = false;
         version (Windows) {
             playVideo(cast(char*)toStringz("/"~getcwd()~"/"~luaL_checkstring(L, 1).to!string));
@@ -257,15 +258,22 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
-    uint image_size;
+extern (C) nothrow int lua_load2Dbackground(lua_State *L) {
     try {
+    UnloadTexture(backgrounds[cast(int)luaL_checkinteger(L, 2)]);
+    uint image_size;
     char *image_data = get_file_data_from_archive("res/bg.bin", luaL_checkstring(L, 1), &image_size);
-    texture_background = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    backgrounds[cast(int)luaL_checkinteger(L, 2)] = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    neededDraw2D = true;
-    } catch (Exception e) {
+    } catch (Exception e) {}
+    return 0;
+}
 
+extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
+    try {
+        texture_background = backgrounds[luaL_checkinteger(L, 1)];
+        neededDraw2D = true;
+    } catch (Exception e) {
     }
     return 0;
 }
@@ -288,6 +296,12 @@ extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
 }
 
 extern (C) nothrow int lua_stopDraw2Dobject(lua_State *L) {
+    for (int i = 0; i < tex2d.length; i++) {
+        tex2d[i].texture = LoadTexture("empty");
+        tex2d[i].scale = 0.0f;
+        tex2d[i].x = 0;
+        tex2d[i].y = 0;
+    }
     int count = cast(int)luaL_checkinteger(L, 1);
     UnloadTexture(tex2d[count].texture);
     neededCharacterDrawing = false;
@@ -313,8 +327,19 @@ extern (C) nothrow int lua_getScreenHeight(lua_State *L) {
     return 1;
 }
 
+extern (C) nothrow int lua_getLocationName(lua_State *L) {
+    lua_pushstring(L, cast(char*)locationname);
+    return 1;
+}
+
 extern (C) nothrow int lua_stop2Dbackground(lua_State *L) {
     UnloadTexture(texture_background);
+    neededDraw2D = false;
+    return 0;
+}
+
+extern (C) nothrow int lua_unload2Dbackground(lua_State *L) {
+    UnloadTexture(tex2d[cast(int)luaL_checkinteger(L,1)].texture);
     neededDraw2D = false;
     return 0;
 }
@@ -356,6 +381,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dialogBox", &luaL_dialogBox);
     lua_register(L, "dialogAnswerValue", &luaL_dialogAnswerValue);
     lua_register(L, "loadLocation", &luaL_loadlocation);
+    lua_register(L, "getLocationName", &lua_getLocationName);
     lua_register(L, "initBattle", &lua_initBattle);
     lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
     lua_register(L, "inputName", &lua_showNameInput);
@@ -370,6 +396,8 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
     lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
+    lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
+    lua_register(L, "load2Dtexture", &lua_load2Dbackground);
     lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);

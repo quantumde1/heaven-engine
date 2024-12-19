@@ -11,6 +11,16 @@ function tablesEqual(table1, table2)
     return true
 end
 
+function file_exists(filename)
+    local file = io.open(filename, "r")  -- Try to open the file in read mode
+    if file then
+        file:close()  -- Close the file if it was opened successfully
+        return true    -- File exists
+    else
+        return false   -- File does not exist
+    end
+end
+
 -- Загрузка музыки и локации
 loadLocation("res/area1.glb", 19.0)
 
@@ -24,60 +34,83 @@ function startDialogCoroutine()
         hideUI()
         playMusic()
         --[[
-        draw2Dtexture("epilogue_1.png")
+        load2Dtexture("epilogue_1.png",0)
+        load2Dtexture("epilogue_2.png",1)
+        load2Dtexture("epilogue_3.png",2)
+        load2Dtexture("epilogue_4.png",3)
+        load2Dtexture("epilogue_5.png",4)
+        draw2Dtexture(0)
         local startTime = os.clock() -- Get the current time
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
         startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_4.png")
+        draw2Dtexture(3)
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
         startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_5.png")
+        draw2Dtexture(4)
+        while os.clock() - startTime < 0.29 do
+            coroutine.yield() -- Wait for 2 seconds
+        end
+        unload2Dtexture(3)
+        unload2Dtexture(4)
+        stopDraw2Dtexture()
+        load2Dtexture("epilogue_7.png", 3)
+        load2Dtexture("epilogue_8.png", 4)
+        startTime = os.clock() -- Get the current time
+        draw2Dtexture(3)
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
         startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_7.png")
+        unload2Dtexture(3)
+        load2Dtexture("epilogue_6.png", 3)
+        draw2Dtexture(4)
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
+        unload2Dtexture(4)
+        unload2Dtexture(0)
+        load2Dtexture("epilogue_1.png",0)
         startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_8.png")
+        draw2Dtexture(3)
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
-        startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_6.png")
-        while os.clock() - startTime < 0.29 do
-            coroutine.yield() -- Wait for 2 seconds
-        end
-        stopDraw2Dtexture()
-        draw2Dtexture("epilogue_1.png")
+        draw2Dtexture(0)
         local startTime = os.clock() -- Get the current time
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
         startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_2.png")
+        draw2Dtexture(1)
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
         end
         -- Draw the texture and wait for 2 seconds
         startTime = os.clock() -- Get the current time
-        draw2Dtexture("epilogue_3.png")
+        draw2Dtexture(2)
         while os.clock() - startTime < 0.29 do
             coroutine.yield() -- Wait for 2 seconds
-        end]]--
-        draw2Dtexture("background_news_paradigm_x.png")
+        end
+        unload2Dtexture(0)
+        unload2Dtexture(1)
+        unload2Dtexture(2)
+        unload2Dtexture(3)
+        unload2Dtexture(4)]]--
+        load2Dtexture("background_news_paradigm_x.png", 0)
+        load2Dtexture("background_city_2.png", 1)
+        load2Dtexture("background_city_1.png", 2)
+        load2Dtexture("background_city_3.png", 3)
+        draw2Dtexture(0)
         dialogBox("Announcer", {
             "Our next story tonight concerns the upcoming virtual city, \"Paradigm X\"",
             "While its public opening is coming soon, creator Algon Software is reportedly being flooded with beta applications.",
@@ -87,8 +120,7 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield() -- Ожидание завершения диалога
         end
-        stopDraw2Dtexture()
-        draw2Dtexture("background_city_2.png")
+        draw2Dtexture(1)
         dialogBox("Announcer", {"We will continue our coverage of the public release of Paradigm X as the story unfolds..."}, "empty", -1, {""}, 0)
         while isDialogExecuted() do
             coroutine.yield()
@@ -97,20 +129,19 @@ function startDialogCoroutine()
         while isDialogExecuted() do       
             coroutine.yield()
         end
-        stopDraw2Dtexture()
         draw2Dcharacter("hitomi_staying_texture.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 100, 5.0, 0)
-        draw2Dtexture("background_city_1.png")
+        draw2Dtexture(2)
         dialogBox("Hitomi", {"You're a member of a great hacker group, The Spookies. You should to be able to pull this off, at least.", "See? It's deserted around this terminal. Its the perfect place to do a little remote hacking, don't you think?", "What do you say?"}, "hitomi_normal.png", 2, {"We'll do it here.", "We're really doing this?"}, 1)
         while isDialogExecuted() do       
             coroutine.yield()
-            answerValue = getAnswerValue()
         end
+        answerValue = getAnswerValue()
         if answerValue == 1 then
             dialogBox("Hitomi", {"We can't rely on luck to get us into the Paradigm X beta. I doubt we'd win that lottery...", "Come on, please?"}, "hitomi_normal.png", 1, {"I'll give it a shot.", "I guess so..."}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
-                answerValue = getAnswerValue()
             end
+            answerValue = getAnswerValue()
             dialogBox("Hitomi", {"Haha, thanks."}, "hitomi_normal.png", -1, {""}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
@@ -120,10 +151,11 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
+        stopMusic()
         playVideo("res/videos/movie003.mp4")
-        stopDraw2Dtexture()
+        playMusic()
         stopDraw2Dcharacter(0)
-        draw2Dtexture("background_city_3.png")
+        draw2Dtexture(3)
         dialogBox("Hitomi", {"So, this is the list of lucky winners who are getting into the beta..."}, "hitomi_normal.png", -1, {""}, 1)
         while isDialogExecuted() do
             coroutine.yield()
@@ -132,7 +164,7 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        draw2Dtexture("background_city_1.png")
+        draw2Dtexture(2)
         draw2Dcharacter("hitomi_staying_texture.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 100, 5.0, 0)
         dialogBox("Hitomi", {"Huh? Did it work? One you're on the list, the license should be sent to your home email..."}, "hitomi_sad.png", -1, {""}, 1)
         while isDialogExecuted() do
@@ -143,11 +175,10 @@ function startDialogCoroutine()
             coroutine.yield()
         end
         stopDraw2Dcharacter(0)
-        stopDraw2Dtexture()
         stopMusic()
         loadMusic("redman.mp3")
         playMusic()
-        draw2Dtexture("background_city_3.png")
+        draw2Dtexture(3)
         dialogBox("???", {"...Bearer of strong soul... We meet at last..."}, "empty", -1, {""}, 1)
         while isDialogExecuted() do
             coroutine.yield()
@@ -168,8 +199,7 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        stopDraw2Dtexture(0)
-        draw2Dtexture("background_city_1.png")
+        draw2Dtexture(2)
         draw2Dcharacter("hitomi_staying_texture.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 100, 5.0, 0)
         dialogBox("Hitomi", {"Who was that? He knew your name. That's weird, huh?"}, "hitomi_sad.png", -1, {""}, 1)
         while isDialogExecuted() do
@@ -186,8 +216,8 @@ function startDialogCoroutine()
         dialogBox("Hitomi", {"Oh, was that Tomoko?", "It was, wasn't it?"}, "hitomi_normal.png", 1, {"That's right.", "No, it wasn't."}, 1)
         while isDialogExecuted() do
             coroutine.yield()
-            answerValue = getAnswerValue()
         end
+        answerValue = getAnswerValue()
         if answerValue == 1 then
             dialogBox("Hitomi", {"Nice try. I heard her voice from here. She sure sounded happy, though."}, "hitomi_normal.png", -1, {""}, 1)
             while isDialogExecuted() do
@@ -198,12 +228,19 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        stopDraw2Dtexture()
         stopDraw2Dcharacter(0)
         stopMusic()
         loadMusic("default.mp3")
         playMusic()
-        draw2Dtexture("house_mc_hall.png")
+        unload2Dtexture(0)
+        unload2Dtexture(1)
+        unload2Dtexture(2)
+        unload2Dtexture(3)
+        load2Dtexture("house_mc_hall.png", 0)
+        load2Dtexture("house_mc_room.png", 1)
+        load2Dtexture("network_background.png", 2)
+        load2Dtexture("network_background_2.png", 3)
+        draw2Dtexture(0)
         draw2Dcharacter("dad_normal.png", getScreenWidth() /2 - 150, getScreenHeight()/2 - 50, 5.0, 0)
         dialogBox("Father", {"Hm? Ah, it's you. You're home."}, "dad_normal.png", -1, {""},0)
         while isDialogExecuted() do
@@ -223,7 +260,7 @@ function startDialogCoroutine()
         end
         draw2Dcharacter("tomoko_staying_texture.png", getScreenWidth()/2 - 250, getScreenHeight()/2 - 80, 5.0, 1)
         local startTime = os.clock() -- Get the current time
-        while os.clock() - startTime < 0.3 do
+        while os.clock() - startTime < 0.03 do
             coroutine.yield() -- Wait for 2 seconds
         end
         dialogBox("Tomoko", {"Hey, brother!"}, "tomoko_normal.png", -1, {""}, 0)
@@ -295,17 +332,15 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        stopDraw2Dtexture()
         stopDraw2Dcharacter(0)
         stopDraw2Dcharacter(1)
         stopDraw2Dcharacter(2)
-        draw2Dtexture("house_mc_room.png")
+        draw2Dtexture(1)
         dialogBox("Hitomi", {"Your father and sister were really happy to hear that you got into the beta...", "I know we shouldn't have done that, but.. I'm glad it worked.", "Huh? Oh, hey, you've got some mail."}, "hitomi_normal.png", -1, {""}, 1)
         while isDialogExecuted() do
             coroutine.yield()
         end
-        stopDraw2Dtexture()
-        draw2Dtexture("network_background.png")
+        draw2Dtexture(2)
         dialogBox("System",{"You have 1 new message."}, "empty", -1, {""}, 1)
         while isDialogExecuted() do
             coroutine.yield()
@@ -326,9 +361,8 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        stopDraw2Dtexture()
-        draw2Dtexture("network_background_2.png")
-        dialogBox("System",{"Decryption complete.", "Our HQ has moved to the South Parking Garage in Shibahama. Spookies, assemble.\n\n-Spooky"}, "empty", -1, {""}, 1, 0.1)
+        draw2Dtexture(3)
+        dialogBox("System",{"Decryption complete.", "Our HQ has moved to the South Parking Garage in Shibahama. Spookies, assemble.\n\n-Spooky"}, "empty", -1, {""}, 1)
         while isDialogExecuted() do
             coroutine.yield()
         end
@@ -340,7 +374,234 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
+        unload2Dtexture(0)
+        unload2Dtexture(1)
+        unload2Dtexture(2)
+        unload2Dtexture(3)
+        stopDraw2Dtexture()
         openMap("home", "akenadai");
+        local location_name
+        location_name = getLocationName()
+        if location_name == "garage" then
+            loadMusic("hq.mp3")
+            playMusic()
+            load2Dtexture("garage_2.png", 0)
+            load2Dtexture("spooky_room.png", 1)
+            load2Dtexture("gump_first_1.png", 2)
+            load2Dtexture("gump_first_2.png", 3)
+            draw2Dtexture(0)
+            dialogBox("Hitomi", {"It's supposed to be here... But i don't see anyone.", "Where is everybody? Are we too early?"}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            playVideo("res/videos/movie025.moflex.mp4")
+            draw2Dcharacter("spooky_staying_texture.png", getScreenWidth() /2, getScreenHeight()/2 - 100, 5.0, 0)
+            while os.clock() - startTime < 0.07 do
+                coroutine.yield() -- Wait for 2 seconds
+            end
+            dialogBox("Spooky", {"Oh, you guys beat me here. Sorry for calling you so suddenly."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("#Spooky", {"Name: Masahiro Sakurai\nAlias: Leader\nHandle: Spooky"}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("#Spooky", {"The founder and chief of the hacking group, The Spookies. He is a capable man who is respected by others."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Hitomi", {"So, what happened? You moved the HQ without any warning."}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"It's nothing, really. I've just got something on my mind. Come on, let's talk inside."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            stopDraw2Dtexture()
+            draw2Dtexture(1)
+            dialogBox("Spooky", {"\"Kinap\", huh... I haven't heard of any hackers going by that name, either."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Hitomi", {"This guy even knew his name. That's what bother me..."}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"Maybe you're just being paranoid. You got your name on the beta list without any problems, after all.", "Amami City's a fully network-integrated city. It wouldn't surprise me if there was a hacker that skilled out there.", "Still, i wouldn't think that you'd be all that worried about something like that.", "Hey, is she always like this?"}, "spooky_normal.png", 3, {"She's more upbeat.", "She's a calm one.", "Sexy defines her."}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            answerValue = getAnswerValue()
+            if answerValue == 2 then
+                dialogBox("Hitomi", {"H-Hey! What are you saying!?"}, "hitomi_surpised.png", -1, {""}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                dialogBox("Spooky", {"Ha ha! Well, either way, I don't think there's any cause for concern."}, "spooky_normal.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            else
+                dialogBox("Spooky", {"Well, either way, I don't think there's any cause for concern."}, "spooky_normal.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            end
+            dialogBox("Hitomi", {"I suppose not...", "But you said you had something on your mind before? What is it?"}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"Hmm... Well, I guess I'll show you two first. You see, I picked up something interesting recently."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            while os.clock() - startTime < 0.03 do
+                coroutine.yield() -- Wait for 2 seconds
+            end
+            draw2Dtexture(2)
+            stopDraw2Dcharacter(0)
+            dialogBox("Hitomi", {"What is this...? Is that... A gun?"}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"Looks like one, doesn't it? But when you unlatch this part..."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            stopDraw2Dtexture(2)
+            draw2Dtexture(3)
+            dialogBox("Hitomi", {"Wait, so this is a PC?"}, "hitomi_surpised.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"I'm calling it a \"Gun-Type PC\" for now, but that's really all I know about it."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            draw2Dcharacter("spooky_staying_texture.png", getScreenWidth() /2, getScreenHeight()/2 - 100, 5.0, 0)
+            draw2Dtexture(1)
+            dialogBox("Hitomi", {"But what does this have to do with moving our HQ?"}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"Ever since I obtained this, I've noticed some suspicious people following me around.", "This PC is the only reason I can think of that would explain that. It's more just to soothe my nerves, though."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Hitomi", {"But is this thing really all that special?..."}, "hitomi_sad.png", -1, {""}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            dialogBox("Spooky", {"I don't know. I plan on doing some research. I'm glad you two showed up so early.", "I'm going back to the junk store I bought this thing from. Watch over the trailer while I'm gone, okay?", "If we can learn what this gun-type PC really is, we might be able to figure out who those suspicious guys are, too.", "I'll leave the gun PC with you. I don't want to risk getting back on those guys' radar. I'll see you later."}, "spooky_normal.png", -1, {""}, 0)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            stopDraw2Dcharacter(0)
+            while os.clock() - startTime < 0.03 do
+                coroutine.yield() -- Wait for 2 seconds
+            end
+            dialogBox("Hitomi", {"Huh? Hold on, Leader...", "Geez, he called us just so we could babysit the trailer for him? Still, I doubt anyone else will show up soon...", "Hey, what should we do?"}, "hitomi_sad.png", 2, {"Save", "Leave", "Gun-type PC"}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            answerValue = getAnswerValue()
+            if answerValue == 0 then
+                dialogBox("System", {"Saving, please wait..."}, "empty", -1, {""}, 1, 0.03)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                file = io.open("save_garage01.txt", "w")
+                file:write("garage:01")
+                file:close()
+                dialogBox("System", {"Saved."}, "empty", -1, {""}, 1, 0.03)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            end
+            if answerValue == 1 then
+                openMap("garage", "shibahama")
+            end
+            if answerValue == 2 then
+                dialogBox("Hitomi", {".............\nIt's not working. Is it broken?\nWell, we don't have anything else to do."}, "hitomi_sad.png", -1, {""}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                dialogBox("Hitomi", {"Oh, i know! Let's check out Paradigm X. You just got the license, so let's see what the big deal is.", "That will pass the time until Lunch and the others get here. Come on, let's do it!"}, "hitomi_normal.png", -1, {""}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            end
+            ::label1::
+            dialogBox("System", {"What will you do?"}, "empty", 0, {"Save", "Leave", "Paradigm X"}, 1)
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
+            answerValue = getAnswerValue()
+            if answerValue == 0 then
+                dialogBox("System", {"Saving, please wait..."}, "empty", -1, {""}, 1, 0.03)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                file = io.open("save_garage01.txt", "w")
+                file:write("garage:01")
+                file:close()
+                dialogBox("System", {"Saved."}, "empty", -1, {""}, 1, 0.03)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            end
+            if answerValue == 1 then
+                openMap("garage", "shibahama")
+            end
+            if answerValue == 2 then
+                dialogBox("Hitomi", {"Ha ha, i'm kind of excited!"}, "hitomi_normal.png", -1, {""}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                playVideo("res/videos/movie01e.moflex.mp4")
+                unload2Dtexture(1)
+                unload2Dtexture(0)
+                unload2Dtexture(2)
+                unload2Dtexture(3)
+                loadMusic("counter.mp3")
+                playMusic()
+                load2Dtexture("user_counter.png", 0)
+                load2Dtexture("first_paradigm_X_1.png", 1)
+                load2Dtexture("first_paradigm_X_2.png", 2)
+                load2Dtexture("first_paradigm_X_3.png", 3)
+                draw2Dtexture(0)
+                dialogBox("Receptionist", {"Welcome to Paradigm X! This is the User Counter, your portal to accessing this virtual world.", "First-time users will receive an explanation of Amami City's network.", "Please, listen carefully."}, "counter.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                stopDraw2Dtexture()
+                draw2Dtexture(1)
+                dialogBox("???", {"Ah hah haaaaaaaaah! If you need to know anything about the 'Net, just come to me!"}, "empty", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                draw2Dcharacter("cpt_paradigm_staying.png", getScreenWidth() /2, getScreenHeight()/2 - 150, 5.0, 0)
+                dialogBox("Cpt. Paradigm", {"I am this world's defender of justice! CAPTAIN PARADIGM!", "Let me tell you about the network that connects the beloved citizens of Amami City to Paradigm X."}, "cpt_paradigm.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                stopDraw2Dcharacter(0)
+                stopDraw2Dtexture()
+                draw2Dtexture(2)
+                dialogBox("Cpt. Paradigm", {"Paradigm X is a virtual city located on the massive servers of Algon Soft Corporation"}, "cpt_paradigm.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                stopDraw2Dtexture()
+                draw2Dtexture(3)
+                dialogBox("Cpt. Paradigm", {"The network that connects that server to your PCs is a city-wide broadband intranet that run throughout Amami City."}, "cpt_paradigm.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+            end
+        end
     end)
 end
 

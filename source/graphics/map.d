@@ -11,7 +11,11 @@ import std.conv;
 import std.algorithm;
 import std.uni: isWhite;
 
+bool mapOpened;
+string locationname;
+
 void openMap(string location, string area) {
+    mapOpened = true;
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
     const int rectWidth = 100;
@@ -22,9 +26,9 @@ void openMap(string location, string area) {
     float animationSpeed = 0.07f;
     // Define menu options and their corresponding positions
     string[] menuOptions_akenadai = ["Home", "Astro Museum", "Akane Mall"];
-    string[] menuOptions_shibahama = ["Shibahama Core", "Goumaden"];
+    string[] menuOptions_shibahama = ["Shibahama Core", "Goumaden", "South Parking"];
     string[] locationNames_akenadai = ["home", "planetarium", "akanemall"];
-    string[] locationNames_shibahama = ["core", "goumaden"];
+    string[] locationNames_shibahama = ["core", "goumaden", "garage"];
 
     // Set initial rectangle position based on location
     switch (location) {
@@ -36,10 +40,12 @@ void openMap(string location, string area) {
     
     // Load textures and music
     uint image_size;
-    char *image_data = get_file_data_from_archive("res/data.bin", "map_back.png", &image_size);
-    Texture2D mapTexture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+    char *image_data = get_file_data_from_archive("res/data.bin", "akenadai_map.png", &image_size);
+    Texture2D mapTextureAkenadai = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
 
+    image_data = get_file_data_from_archive("res/data.bin", "shibahama_map.png", &image_size);
+    Texture2D mapTextureShibahama = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     uint audio_size;
     char *audio_data = get_file_data_from_archive("res/data.bin", "map_music.mp3", &audio_size);
     Music musicMenu;
@@ -61,7 +67,6 @@ void openMap(string location, string area) {
     
     int currentFrame = 0;
     string currentArea = "Akenadai"; // Default area
-    string secondArea = "Shibahama";
     string[] currentMenuOptions = menuOptions_akenadai;
     string[] currentLocationNames = locationNames_akenadai;
 
@@ -80,10 +85,14 @@ void openMap(string location, string area) {
 
         BeginDrawing();
         ClearBackground(Colors.RAYWHITE);
-        
-        // Draw the map texture
-        DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.width, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
-        
+        if (currentArea == "shibahama" || currentArea == "Shibahama") {
+            currentArea = "Shibahama";
+            DrawTexturePro(mapTextureShibahama, Rectangle(0, 0, cast(float)mapTextureShibahama.width, cast(float)mapTextureShibahama.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+        }
+        if (currentArea == "akenadai" || currentArea == "Akenadai") {
+            currentArea = "Akenadai";
+            DrawTexturePro(mapTextureAkenadai, Rectangle(0, 0, cast(float)mapTextureAkenadai.width, cast(float)mapTextureAkenadai.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+        }
         // Draw fade rectangle
         DrawRectangle(0, 0, screenWidth, screenHeight, Color(0, 0, 0, cast(ubyte)fadeAlpha)); // Draw fade rectangle
         EndDrawing();
@@ -102,7 +111,6 @@ void openMap(string location, string area) {
         // Handle area switching
         if (IsKeyPressed(KeyboardKey.KEY_TAB) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
             currentArea = (currentArea == "Akenadai") ? "Shibahama" : "Akenadai";
-            secondArea = (currentArea == "Shibahama") ?  "Akenadai" : "Shibahama";
             // Update current menu options based on the selected area
             if (currentArea == "Akenadai") {
                 currentMenuOptions = menuOptions_akenadai;
@@ -124,22 +132,55 @@ void openMap(string location, string area) {
         if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
             selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + currentMenuOptions.length) % currentMenuOptions.length);
         }
+        switch (currentArea) {
+            case "Akenadai":
+                if (selectedMenuIndex == 0) {
 
-        // Update rectangle position based on selected menu index
-        rectX = 50; // Fixed position for the arrow
-        rectY = 60 + selectedMenuIndex * (rectHeight + 10); // Adjusted for spacing
+                }
+                if (selectedMenuIndex == 1) {
 
+                }
+                if (selectedMenuIndex == 2) {
+
+                }
+                break;
+            case "Shibahama":
+                if (selectedMenuIndex == 0) {
+                    rectX = 373;
+                    rectY = 790;
+                }
+                if (selectedMenuIndex == 1) {
+                    rectX = 773;
+                    rectY = 390;
+                }
+                if (selectedMenuIndex == 2) {
+                    rectX = 806;
+                    rectY = 810;
+                }
+                if (selectedMenuIndex == 3) {
+                    rectX = 1419;
+                    rectY = 220;
+                }
+                break;
+            default:
+                break;
+        }
         // Draw the map texture
         BeginMode2D(camera);
         ClearBackground(Colors.RAYWHITE);
-        DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.width, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
-        
+        if (currentArea == "shibahama" || currentArea == "Shibahama") {
+        // Draw the map texture
+            DrawTexturePro(mapTextureShibahama, Rectangle(0, 0, cast(float)mapTextureShibahama.width, cast(float)mapTextureShibahama.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+        }
+        if (currentArea == "akenadai" || currentArea == "Akenadai") {
+            DrawTexturePro(mapTextureAkenadai, Rectangle(0, 0, cast(float)mapTextureAkenadai.width, cast(float)mapTextureAkenadai.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+        }
         DrawRectangle(0, 0, screenWidth / 2, 50, Color(100, 54, 65, 255));
         DrawTextEx(fontdialog, toStringz(currentArea), Vector2(20, 10), 30, 0, Colors.WHITE);
 
         // Draw the second rectangle in the second half of the screen
         DrawRectangle(screenWidth / 2, 0, screenWidth / 2, 50, Color(80, 54, 65, 255));
-        DrawTextEx(fontdialog, toStringz(secondArea), Vector2(screenWidth / 2 + 20, 10), 30, 0, Colors.GRAY);
+        DrawTextEx(fontdialog, toStringz((currentArea == "Akenadai") ? "Shibahama" : "Akenadai"), Vector2(screenWidth / 2 + 20, 10), 30, 0, Colors.GRAY);
 
         // Draw allowed locations
         for (int i = 0; i < currentMenuOptions.length; i++) {
@@ -173,7 +214,7 @@ void openMap(string location, string area) {
 
         // Handle selection
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-            string location_name = currentLocationNames[selectedMenuIndex]; // Get the location name
+            locationname = currentLocationNames[selectedMenuIndex]; // Get the location name
             float fadeOutAlpha = 0.0f; // Start fully transparent
             while (fadeOutAlpha < 255) {
                 fadeOutAlpha += 5; // Increase alpha
@@ -181,10 +222,12 @@ void openMap(string location, string area) {
 
                 BeginDrawing();
                 ClearBackground(Colors.RAYWHITE);
-                
-                // Draw the map texture
-                DrawTexturePro(mapTexture, Rectangle(0, 0, cast(float)mapTexture.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
-                
+                if (currentArea == "shibahama" || currentArea == "Shibahama") {
+                    DrawTexturePro(mapTextureShibahama, Rectangle(0, 0, cast(float)mapTextureShibahama.width, cast(float)mapTextureShibahama.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+                }
+                if (currentArea == "akenadai" || currentArea == "Akenadai") {
+                    DrawTexturePro(mapTextureAkenadai, Rectangle(0, 0, cast(float)mapTextureAkenadai.width, cast(float)mapTextureAkenadai.height), Rectangle(0, 0, cast(float)screenWidth, cast(float)screenHeight), Vector2(0, 0), 0.0, Colors.WHITE);
+                }
                 // Draw gray panel
                 DrawRectangle(0, 0, screenWidth, 50, Color(100, 54, 65, 255));
                 DrawTextEx(fontdialog, "Select destination", Vector2(20, 10), 30, 0, Colors.WHITE);
@@ -203,18 +246,20 @@ void openMap(string location, string area) {
             }
 
             // Load the selected location
-            loadLocation(cast(char*)toStringz("res/" ~ location_name ~ ".glb"), 19.0f);
+            //loadLocation(cast(char*)toStringz("res/" ~ locationname ~ ".glb"), 19.0f);
             isNewLocationNeeded = true;
             break; // Exit the loop after loading the location
         }
     }
 
     // Unload resources
-    UnloadTexture(mapTexture);
+    UnloadTexture(mapTextureAkenadai);
+    UnloadTexture(mapTextureShibahama);
     if (audioEnabled) {
         UnloadMusicStream(musicMenu);
     }
     foreach (texture; arrowTextures) {
         UnloadTexture(texture);
     }
+    mapOpened = false;
 }
