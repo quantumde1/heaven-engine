@@ -21,20 +21,20 @@ function file_exists(filename)
     end
 end
 
--- Загрузка музыки и локации
 loadLocation("res/area1.glb", 19.0)
 
--- Создание корутины для управления диалогами
 local dialogCoroutine
 local answerValue
 function startDialogCoroutine()
+    if file_exists("save_garage01.txt") then
+        print("save exist")
+    end
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
         loadMusic("prologue_1.mp3")
         hideUI()
         playMusic()
-        --[[
-        load2Dtexture("epilogue_1.png",0)
+        --[[load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
         load2Dtexture("epilogue_3.png",2)
         load2Dtexture("epilogue_4.png",3)
@@ -533,7 +533,6 @@ function startDialogCoroutine()
                     coroutine.yield()
                 end
             end
-            ::label1::
             dialogBox("System", {"What will you do?"}, "empty", 0, {"Save", "Leave", "Paradigm X"}, 1)
             while isDialogExecuted() do
                 coroutine.yield()
@@ -571,35 +570,64 @@ function startDialogCoroutine()
                 load2Dtexture("first_paradigm_X_1.png", 1)
                 load2Dtexture("first_paradigm_X_2.png", 2)
                 load2Dtexture("first_paradigm_X_3.png", 3)
+                load2Dtexture("first_paradigm_X_4.png", 4)
                 draw2Dtexture(0)
                 dialogBox("Receptionist", {"Welcome to Paradigm X! This is the User Counter, your portal to accessing this virtual world.", "First-time users will receive an explanation of Amami City's network.", "Please, listen carefully."}, "counter.png", -1, {""}, 0)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                stopDraw2Dtexture()
                 draw2Dtexture(1)
                 dialogBox("???", {"Ah hah haaaaaaaaah! If you need to know anything about the 'Net, just come to me!"}, "empty", -1, {""}, 0)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                draw2Dcharacter("cpt_paradigm_staying.png", getScreenWidth() /2, getScreenHeight()/2 - 150, 5.0, 0)
+                draw2Dcharacter("cpt_paradigm_staying.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 150, 5.0, 0)
                 dialogBox("Cpt. Paradigm", {"I am this world's defender of justice! CAPTAIN PARADIGM!", "Let me tell you about the network that connects the beloved citizens of Amami City to Paradigm X."}, "cpt_paradigm.png", -1, {""}, 0)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
                 stopDraw2Dcharacter(0)
-                stopDraw2Dtexture()
+                
                 draw2Dtexture(2)
                 dialogBox("Cpt. Paradigm", {"Paradigm X is a virtual city located on the massive servers of Algon Soft Corporation"}, "cpt_paradigm.png", -1, {""}, 0)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                stopDraw2Dtexture()
                 draw2Dtexture(3)
-                dialogBox("Cpt. Paradigm", {"The network that connects that server to your PCs is a city-wide broadband intranet that run throughout Amami City."}, "cpt_paradigm.png", -1, {""}, 0)
+                dialogBox("Cpt. Paradigm", {"The network that connects that server to your PCs is a city-wide broadband intranet that run throughout Amami City.", "Thanks to this network, you can enter Paradigm X freely from your home PC and meet with your friends online."}, "cpt_paradigm.png", -1, {""}, 0)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
+                draw2Dtexture(4)
+                dialogBox("Cpt. Paradigm", {"With no lag and a nigh-zero percent rate of packet loss, the intranet of Amami City makes Paradigm X truly another world!"}, "cpt_paradigm.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                draw2Dcharacter("cpt_paradigm_staying.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 150, 5.0, 0)
+                draw2Dtexture(1)
+                dialogBox("Cpt. Paradigm", {"Now, allow me to briefly describe my home of Paradigm X, the dream city that resides within this network.", "Anything you want can be found on Paradigm X's virtual streets: a movie threater, pet shops... Anything!", "Through your PCs, you can access these \"cyber-shops\" and use them at any time. The city of the future never closes!", "This is truly the life of the future, brought to Amami City by Algon Soft!", "But, enough from me. It's time for you to experience it for yourself! Now, have a gooooooood time! Hahaha!"}, "cpt_paradigm.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                while os.clock() - startTime < 0.02 do
+                    coroutine.yield() -- Wait for 2 seconds
+                end
+                stopDraw2Dcharacter(0)
+                draw2Dtexture(0)
+                dialogBox("Receptionist", {"Did you enjoy the explanation? It's now time for you to actually experience Paradigm X.", "You may be surprised by the intense quality of the virtual city.", "When you want to end your time in Paradigm X, please return here. And... Have fun!"}, "counter.png", -1, {""}, 0)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                stopDraw2Dtexture()
+                unload2Dtexture(0)
+                unload2Dtexture(1)
+                unload2Dtexture(2)
+                unload2Dtexture(3)
+                unload2Dtexture(4)
+                stopMusic()
+                loadMusic("paradigm_x.mp3")
+                playMusic()
+                allowControl()
             end
         end
     end)
@@ -617,6 +645,7 @@ function updateDialog()
     end
 end
 
+shadersState(0)
 -- Настройка позиции камеры
 changeCameraPosition(0.0, 5.0, 0.1)
 changeCameraTarget(0.0, 5.0, 0.0)

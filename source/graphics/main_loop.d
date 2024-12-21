@@ -194,8 +194,10 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
     Camera Position: %s
 
     Camera Target: %s
+
+    Shaders: %s
 }.format(cubePosition, inBattle ? "In Battle" : "Exploring", playerHealth, cameraAngle, 
-        playerStepCounter, encounterThreshold, rel, audioEnabled, friendlyZone, camera.position, camera.target);
+        playerStepCounter, encounterThreshold, rel, audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled);
     if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
     else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
@@ -299,7 +301,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
             writeln("Lua error: ", lua_tostring(L, -1));
         }
     }
-    
     initWindowAndCamera(camera);
     // Load Models
     float cameraSpeed = 5.0f;
@@ -321,6 +322,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         char *vsdata = get_file_data_from_archive("res/shaders.bin", cast(char*)vs, &vssize);
         shader = LoadShaderFromMemory(vsdata, fsdata);
     }
+    if (shaderEnabled == false) {
     // Set Shader Locations
     shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
     shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
@@ -332,9 +334,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         assignShaderToModel(cubeModel);
     }
     assignShaderToModel(floorModel);
+    lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
+    }
     // Lighting Setup
     //modelCharacterSize = 5.0f;
-    lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
     luaL_initDialogs(L);
     DisableCursor();
     // Gamepad Mappings
@@ -383,9 +386,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
                     if (!showCharacterNameInputMenu && !neededDraw2D) drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
                     if (neededDraw2D) {
+                        allowControl = false;
                         DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                     }
                     if (neededCharacterDrawing) {
+                        allowControl = false;
                         for (int i = 0; i < tex2d.length; i++) {
                             DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors.WHITE);
                         }

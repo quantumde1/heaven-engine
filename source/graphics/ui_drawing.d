@@ -71,7 +71,12 @@ void showMainMenu(ref GameState currentGameState) {
         UpdateMusicStream(musicMenu);
         BeginDrawing();
         ClearBackground(Colors.BLACK);
-
+        if (IsKeyPressed(KeyboardKey.KEY_F3)) {
+            showDebug = true;
+        }
+        if (showDebug) {
+            drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, encounterThreshold, inBattle);
+        }
         // Check for user input and reset the inactivity timer
         if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
             IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||

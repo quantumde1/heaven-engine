@@ -104,6 +104,11 @@ extern (C) nothrow int lua_playVideo(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_allowControl(lua_State *L) {
+    allowControl = true;
+    return 0;
+}
+
 extern (C) nothrow int lua_changeCameraPosition(lua_State *L) {
     newCameraNeeded = true;
     positionCam = Vector3(
@@ -376,9 +381,15 @@ extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_shadersState(lua_State *L) {
+    shaderEnabled = cast(bool)luaL_checkinteger(L, 1);
+    return 0;
+}
+
 // Register the dialog functions
 extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dialogBox", &luaL_dialogBox);
+    lua_register(L, "shadersState", &lua_shadersState);
     lua_register(L, "dialogAnswerValue", &luaL_dialogAnswerValue);
     lua_register(L, "loadLocation", &luaL_loadlocation);
     lua_register(L, "getLocationName", &lua_getLocationName);
@@ -399,6 +410,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
     lua_register(L, "load2Dtexture", &lua_load2Dbackground);
     lua_register(L, "playVideo", &lua_playVideo);
+    lua_register(L, "allowControl", &lua_allowControl);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
     lua_register(L, "clearChoice", &luaL_dialogClearChoice);
@@ -406,7 +418,6 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
 
 // Music functions
 extern (C) nothrow int lua_LoadMusic(lua_State *L) {
-    meow:
     try {
         musicpath = cast(char*)luaL_checkstring(L, 1);
         uint audio_size;
@@ -422,7 +433,6 @@ extern (C) nothrow int lua_LoadMusic(lua_State *L) {
 }
 
 extern (C) nothrow int lua_LoadMusicExternal(lua_State *L) {
-    meow:
     try {
         musicpath = cast(char*)luaL_checkstring(L, 1);
         music = LoadMusicStream(musicpath);
