@@ -3,7 +3,7 @@ module dialogs.dialog_system;
 import raylib;
 import std.stdio;
 import std.conv;
-import graphics.main_loop;
+import graphics.engine;
 import std.range;
 import variables;
 import std.math;

@@ -21,20 +21,19 @@ function file_exists(filename)
     end
 end
 
-loadLocation("res/area1.glb", 19.0)
+loadLocation("res/street.glb", 0.02)
 
 local dialogCoroutine
 local answerValue
+
 function startDialogCoroutine()
-    if file_exists("save_garage01.txt") then
-        print("save exist")
-    end
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
+        setFriendlyZone(1)
         loadMusic("prologue_1.mp3")
         hideUI()
         playMusic()
-        --[[load2Dtexture("epilogue_1.png",0)
+        load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
         load2Dtexture("epilogue_3.png",2)
         load2Dtexture("epilogue_4.png",3)
@@ -105,7 +104,7 @@ function startDialogCoroutine()
         unload2Dtexture(1)
         unload2Dtexture(2)
         unload2Dtexture(3)
-        unload2Dtexture(4)]]--
+        unload2Dtexture(4)
         load2Dtexture("background_news_paradigm_x.png", 0)
         load2Dtexture("background_city_2.png", 1)
         load2Dtexture("background_city_1.png", 2)

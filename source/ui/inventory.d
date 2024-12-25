@@ -7,9 +7,9 @@ import std.stdio;
 import graphics.cubes;
 import std.conv;
 import std.algorithm;
-import script;
+import scripts.config;
 import std.string;
-import ui.battle_ui;
+import ui.battle;
 
 void drawInventory() {
     allowControl = false;

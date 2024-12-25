@@ -1,7 +1,7 @@
 module graphics.scene;
 
 import raylib;
-import graphics.main_loop;
+import graphics.engine;
 import std.typecons;
 import graphics.cubes;
 import std.string;
@@ -13,6 +13,7 @@ import std.file;
 import std.random;
 import std.datetime;
 import std.conv;
+import scripts.config;
 
 // Constants
 private const float TWO_PI = 2.0f * std.math.PI;
@@ -31,11 +32,7 @@ Camera3D createCamera() {
 
 // Function to initialize the window and camera
 void initWindowAndCamera(ref Camera3D camera) {
-    // Check if the window should close
-    if (WindowShouldClose()) {
-        writeln("Window initialization error");
-        return;
-    }
+    
     
     // Initialize the camera
     camera = createCamera();
@@ -196,12 +193,14 @@ float rotationStep, float radius) {
         if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && dungeonCrawlerMode) {
             cameraAngle = (cameraAngle + 90.0f) % FULL_ROTATION;
         }
-        if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
-            cameraAngle = (cameraAngle - 45.0f + FULL_ROTATION) % FULL_ROTATION;
-        }
-        if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(gamepadInt, 
-        GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
-            cameraAngle = (cameraAngle + 45.0f) % FULL_ROTATION;
+        if (!dungeonCrawlerMode) {
+            if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
+                cameraAngle = (cameraAngle - 45.0f + FULL_ROTATION) % FULL_ROTATION;
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(gamepadInt, 
+            GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
+                cameraAngle = (cameraAngle + 45.0f) % FULL_ROTATION;
+            }
         } else {
             float rightAxisMovement = GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
             if (rightAxisMovement < -0.2) {

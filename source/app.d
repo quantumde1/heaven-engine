@@ -3,17 +3,17 @@ import raylib;
 
 import std.stdio;
 //local imports
-import graphics.main_loop;
-import graphics.video_playback;
+import graphics.engine;
+import graphics.video;
 import variables;
 import std.file;
 import std.string;
-import script;
+import scripts.config;
 import std.conv;
 
 void main(string[] args) {
     if (isReleaseBuild()) {
-        SetTraceLogLevel(8);
+        SetTraceLogLevel(7);
     } else {
         SetTraceLogLevel(0);
     }

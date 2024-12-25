@@ -153,6 +153,9 @@ struct TextureShow {
     float scale;
 }
 
+debug {
+    int background_name;
+}
 TextureShow[5] tex2d;
 Texture2D[5] backgrounds;
 
@@ -178,7 +181,6 @@ enum GameState {
 }
 GameState currentGameState = GameState.MainMenu;
 bool videoFinished;
-bool rel = false;
 
 /* lighting */
 Light[4] lights;
