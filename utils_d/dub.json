@@ -1,0 +1,50 @@
+{
+	"authors": [
+		"quantumde1"
+	],
+	"copyright": "Copyright © 2024, quantumde1",
+	"dependencies": {
+		"bindbc-lua": "~>0.6.1",
+		"raylib-d": "~>5.0.1"
+	},
+	"description": "SDK for Heaven Engine",
+	"lflags-linux": [
+		"-rpath=/usr/lib",
+		"-rpath=$$ORIGIN"
+	],
+	"lflags-osx": [
+		"-rpath",
+		"./",
+		"-rpath",
+		"/opt/local/lib"
+	],
+	"lflags-posix": [
+		"-L/usr/lib",
+		"-L.",
+		"-L/opt/local/lib",
+		"-L/usr/local/lib"
+	],
+	"lflags-windows": [
+		"-L./"
+	],
+	"libs-posix": [
+		"raylib",
+		"lua-5.3",
+		"vlc",
+		"hpff"
+	],
+	"libs-windows": [
+		"raylib",
+		"lua53",
+		"libhpff",
+		"vlc"
+	],
+	"license": "MIT License",
+	"name": "heaven-sdk",
+	"subConfigurations": {
+		"bindbc-lua": "static"
+	},
+	"versions": [
+		"LUA_53"
+	]
+}

@@ -30,6 +30,7 @@ function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
+        --[[
         loadMusic("prologue_1.mp3")
         hideUI()
         playMusic()
@@ -628,7 +629,7 @@ function startDialogCoroutine()
                 playMusic()
                 allowControl()
             end
-        end
+        end]]--
     end)
 end
 
