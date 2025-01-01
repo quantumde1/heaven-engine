@@ -29,6 +29,21 @@ fi
 # Return to the original directory
 cd ..
 
+# Change directory to hpff and build
+printf "${GREEN}[BUILD] Building raylib...${RESET}\n"
+cd raylib/src/
+
+# Check if libhpff.so already exists
+if [ -f "../../libraylib.so" ]; then
+    printf "${YELLOW}[WARNING] libraylib.so already built. Skipping build process.${RESET}\n"
+else
+    make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED -j $(nproc)
+    # Move the built library to the parent directory
+    mv ./libraylib.so* ../../
+    printf "${GREEN}[SUCCESS] libraylib.so and company moved to the parent directory.${RESET}\n"
+fi
+
+cd ../../
 # Change directory to libplayback/
 #cd libplayback/
 # Check if libplayback.so already exists

@@ -21,6 +21,27 @@
                 "z": 3
             },
             "rotationAngle": 0
+        },
+        {
+            "name": "model1",
+            "type": "model",
+            "modelPath": "res/table.glb",
+            "position": {
+                "x": 5,
+                "y": 2,
+                "z": 100
+            },
+            "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "scale": {
+                "x": 4,
+                "y": 4,
+                "z": 4
+            },
+            "rotationAngle": 0
         }
     ],
     "environment": {

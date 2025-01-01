@@ -30,9 +30,10 @@ function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
-        loadMusic("prologue_1.mp3")
-        hideUI()
+        loadMusic("paradigm_x.mp3")
         playMusic()
+        --[[
+        hideUI()
         load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
         load2Dtexture("epilogue_3.png",2)
@@ -626,10 +627,10 @@ function startDialogCoroutine()
                 unload2Dtexture(4)
                 stopMusic()
                 loadMusic("paradigm_x.mp3")
-                playMusic()
+                playMusic()]]--
                 allowControl()
-            end
-        end
+            --end
+        --end
     end)
 end
 
@@ -647,7 +648,7 @@ end
 
 shadersState(1)
 -- Настройка позиции камеры
-local dungeonCrawler = true
+local dungeonCrawler = false
 if dungeonCrawler == true then
     changeCameraPosition(0.0, 7.0, 0.1)
     changeCameraTarget(0.0, 7.0, 0.0)
