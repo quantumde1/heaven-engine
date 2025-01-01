@@ -61,88 +61,80 @@ char* vscode = cast(char*)("
 );
 
 char* fscode = cast(char*)("
-    #version 330
+#version 330 core
 
-    // Input vertex attributes (from vertex shader)
-    in vec3 fragPosition;
-    in vec2 fragTexCoord;
-    in vec4 fragColor;
-    in vec3 fragNormal;
+// Input vertex attributes (from vertex shader)
+in vec3 fragPosition;
+in vec2 fragTexCoord;
+in vec4 fragColor;
+in vec3 fragNormal;
 
-    // Input uniform values
-    uniform sampler2D texture0;
-    uniform vec4 colDiffuse;
+// Input uniform values
+uniform sampler2D texture0;
+uniform vec4 colDiffuse;
 
-    // Output fragment color
-    out vec4 finalColor;
+// Output fragment color
+out vec4 finalColor;
 
-    // NOTE: Add here your custom variables
+// Define maximum number of lights
+#define MAX_LIGHTS 8
+#define LIGHT_DIRECTIONAL 0
+#define LIGHT_POINT 1
 
-    #define     MAX_LIGHTS              4
-    #define     LIGHT_DIRECTIONAL       0
-    #define     LIGHT_POINT             1
+struct Light {
+    int enabled;
+    int type;
+    vec3 position;
+    vec3 target;
+    vec4 color;
+};
 
-    struct MaterialProperty {
-        vec3 color;
-        int useSampler;
-        sampler2D sampler;
-    };
+// Input lighting values
+uniform Light lights[MAX_LIGHTS];
+uniform vec4 ambient;
+uniform vec3 viewPos;
 
-    struct Light {
-        int enabled;
-        int type;
-        vec3 position;
-        vec3 target;
-        vec4 color;
-    };
+void main()
+{
+    // Fetch texel color from texture sampler
+    vec4 texelColor = texture(texture0, fragTexCoord);
+    vec3 lightDot = vec3(0.0);
+    vec3 normal = normalize(fragNormal);
+    vec3 viewD = normalize(viewPos - fragPosition);
+    vec3 specular = vec3(0.0);
 
-    // Input lighting values
-    uniform Light lights[MAX_LIGHTS];
-    uniform vec4 ambient;
-    uniform vec3 viewPos;
-
-    void main()
+    // Loop through active lights
+    for (int i = 0; i < MAX_LIGHTS; i++)
     {
-        // Texel color fetching from texture sampler
-        vec4 texelColor = texture(texture0, fragTexCoord);
-        vec3 lightDot = vec3(0.0);
-        vec3 normal = normalize(fragNormal);
-        vec3 viewD = normalize(viewPos - fragPosition);
-        vec3 specular = vec3(0.0);
-
-        // NOTE: Implement here your fragment shader code
-
-        for (int i = 0; i < MAX_LIGHTS; i++)
+        if (lights[i].enabled == 1)
         {
-            if (lights[i].enabled == 1)
+            vec3 light = vec3(0.0);
+
+            if (lights[i].type == LIGHT_DIRECTIONAL)
             {
-                vec3 light = vec3(0.0);
-
-                if (lights[i].type == LIGHT_DIRECTIONAL)
-                {
-                    light = -normalize(lights[i].target - lights[i].position);
-                }
-
-                if (lights[i].type == LIGHT_POINT)
-                {
-                    light = normalize(lights[i].position - fragPosition);
-                }
-
-                float NdotL = max(dot(normal, light), 0.0);
-                lightDot += lights[i].color.rgb*NdotL;
-
-                float specCo = 0.0;
-                if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16); // 16 refers to shine
-                specular += specCo;
+                light = -normalize(lights[i].target - lights[i].position);
             }
+            else if (lights[i].type == LIGHT_POINT)
+            {
+                light = normalize(lights[i].position - fragPosition);
+            }
+
+            float NdotL = max(dot(normal, light), 0.0);
+            lightDot += lights[i].color.rgb * NdotL;
+
+            float specCo = 0.0;
+            if (NdotL > 0.0) 
+                specCo = pow(max(0.0, dot(viewD, reflect(-light, normal))), 16.0); // 16 refers to shininess
+            specular += specCo * lights[i].color.rgb; // Include light color in specular
         }
-
-        finalColor = (texelColor*((colDiffuse + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
-        finalColor += texelColor*(ambient/10.0);
-
-        // Gamma correction
-        finalColor = pow(finalColor, vec4(1.0/2.2));
     }
+
+    finalColor = texelColor * ((colDiffuse + vec4(specular, 1.0)) * vec4(lightDot, 1.0));
+    finalColor += texelColor * (ambient / 10.0);
+
+    // Gamma correction
+    finalColor = pow(finalColor, vec4(1.0 / 2.2));
+}
 ");
 
 // Constants
@@ -150,17 +142,6 @@ enum FontSize = 20;
 enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
-
-// Function Implementations
-nothrow void loadLocation(char* first, float size) {
-    model_location_path = first;
-    modelLocationSize = size;
-    debug { 
-        try { 
-            debug_writeln("loading loc ", model_location_path.to!string); 
-        } catch (Exception e) {} 
-    }
-}
 
 ControlConfig loadControlConfig() {
     return ControlConfig(
@@ -292,7 +273,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     immutable ControlConfig controlConfig = loadControlConfig();
     showMainMenu(currentGameState);
     // Lua Initialization
-    debug { debug_writeln("loading lua"); }
+    debug { 
+        debug_writeln("loading lua");
+    }
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_registerAllLibraries(L);
@@ -307,7 +290,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     } else {
         if (luaL_dofile(L, "scripts/00_script.bin") != LUA_OK) {
             debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
-            debug_writeln("Non-typical situation occured. Fix the script or contact developers.");
+            debug_writeln("Non-typical situation occured. Contact developers.");
             return;
         }
     }
@@ -317,25 +300,23 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     float rotationStep = 1.6f;
     float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
-    
-    // Load Floor Model and Shaders
-    floorModel = LoadModel(model_location_path);
     shader = LoadShaderFromMemory(vscode, fscode);
     if (shaderEnabled == true) {
-    // Set Shader Locations
-    shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
-    shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-    int ambientLoc = GetShaderLocation(shader, "ambient");
-    float[4] values = [ 0.1f, 0.1f, 0.1f, 1.0f ];
-    SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
-    assignShaderToModel(playerModel);
-    foreach (ref cubeModel; cubeModels) {
-        assignShaderToModel(cubeModel);
+        // Set Shader Locations
+        shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
+        shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+        int ambientLoc = GetShaderLocation(shader, "ambient");
+        float[3] values = [ 0.1f, 0.1f, 0.1f ];
+        SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
+        assignShaderToModel(playerModel);
+        foreach (ref cubeModel; cubeModels) {
+            assignShaderToModel(cubeModel);
+        }
+        for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
+        lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
+        lights[1] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 150), Vector3Zero(), Colors.LIGHTGRAY, shader);
+        lights[2] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, -150), Vector3Zero(), Colors.LIGHTGRAY, shader);
     }
-    assignShaderToModel(floorModel);
-    lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
-    }
-    bool enter = false;
     // Lighting Setup
     //modelCharacterSize = 5.0f;
     luaL_initDialogs(L);
@@ -374,19 +355,21 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     Nullable!Cube collidedCubeDialog = handleCollisionsDialog(cubePosition, cubes, cubeBoundingBox);
                     BeginDrawing();
                     ClearBackground(Colors.RAYWHITE);
-                    // Fade-in effect
-                    if (isNewLocationNeeded) {
+                    if (isNewLocationNeeded == true) {
                         playerStepCounter = 0;
                         cubePosition = Vector3(0, 0, 0);
                         camera.position = Vector3(0, 5, 0.1);
                         camera.target = Vector3(0, 5, 0);
                         cameraAngle = 90.0f;
-                        UnloadModel(floorModel);
-                        floorModel = LoadModel(model_location_path);
+                        for (int i = 0; i < floorModel.length; i++) UnloadModel(floorModel[i]);
                         isNewLocationNeeded = false;
-                        assignShaderToModel(floorModel);
+                        for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
-                    if (!showCharacterNameInputMenu && !neededDraw2D) drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+
+                    if (!showCharacterNameInputMenu && !neededDraw2D) {
+                        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                        drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                    }
                     if (neededDraw2D) {
                         allowControl = false;
                         DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
@@ -501,7 +484,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
 
                         if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                             StopMusicStream(music);
-                            openMap(location_name, "akenadai");
+                            openMap(location_name, 1.0f, false);
                         }
                     }
                     if (showDialog) {

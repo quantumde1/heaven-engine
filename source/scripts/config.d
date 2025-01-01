@@ -50,8 +50,12 @@ nothrow bool isAudioEnabled() {
 
 import std.format;
 
-void debug_writeln(A...)(A args) {    
-    writeln("INFO: ENGINE: ", args);
+nothrow void debug_writeln(A...)(A args) {   
+    try { 
+        writeln("INFO: ENGINE: ", args);
+    } catch (Exception e) {
+        
+    }
 }
 
 nothrow char parse_conf(string filename, string type) {

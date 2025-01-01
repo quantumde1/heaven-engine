@@ -4,21 +4,52 @@ import raylib;
 import graphics.engine;
 import std.typecons;
 import graphics.cubes;
-import std.string;
+import std;
 import std.stdio;
 import std.math;
 import variables;
-import std.path : dirName, buildNormalizedPath;
+import std.path;
 import std.file;
 import std.random;
 import std.datetime;
 import std.conv;
 import scripts.config;
+import std.json;
+import std.array;
 
 // Constants
 private const float TWO_PI = 2.0f * std.math.PI;
 private const float FULL_ROTATION = 360.0f;
 private const float HALF_ROTATION = 180.0f;
+
+void parseSceneFile(string path) {
+    JSONValue scene = parseJSON(readText(path));
+    JSONValue objects = scene["objects"];
+    for (int i = 0; i < objects.array.length; i++) {
+        switch (objects[i]["type"].str) {
+            case "model":
+                model_location_path = cast(char*)toStringz(objects[i]["modelPath"].str);
+                JSONValue scale = objects[i]["scale"];
+                JSONValue position = objects[i]["position"];
+                JSONValue rotation = objects[i]["rotation"];
+                modelPosition[i] = Vector3(position["x"].get!float, position["y"].get!float, position["z"].get!float);
+                modelLocationSize[i] = Vector3(scale["x"].get!float, scale["y"].get!float, scale["z"].get!float);
+                modelLocationRotate[i] = Vector3(rotation["x"].get!float, rotation["y"].get!float, rotation["z"].get!float);
+                rotateAngle[i] = objects[i]["rotationAngle"].get!float;
+                floorModel[i] = LoadModel(model_location_path);
+                
+                break;
+            case "light":
+                JSONValue color = objects[i]["color"];
+                JSONValue position = objects[i]["position"];
+                break;
+            default:
+                break;
+        }
+    }
+    JSONValue environment = scene["environment"];
+    texture_skybox = LoadTexture(cast(char*)environment["skybox"].str);
+}
 
 // Function to initialize the camera
 Camera3D createCamera() {
@@ -217,7 +248,7 @@ float rotationStep, float radius) {
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
 
-void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
+void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
     SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
@@ -240,7 +271,9 @@ void drawScene(Model floorModel, Camera3D camera, Vector3 cubePosition, float ca
         Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
     }
     // Draw floor model
-    DrawModel(floorModel, Vector3(0.0f, 0.0f, 0.0f), modelLocationSize, Colors.WHITE);
+    for (int i = 0; i < floorModel.length; i++) {
+        DrawModelEx(floorModel[i], modelPosition[i], modelLocationRotate[i], rotateAngle[i], modelLocationSize[i], Colors.WHITE);
+    }
     EndMode3D();
 }
 

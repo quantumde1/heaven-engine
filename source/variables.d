@@ -58,7 +58,7 @@ struct EnemyCube {
     int health = 20;
     Model model;
 }
-Model floorModel;
+Model[20] floorModel;
 bool loadedShader;
 
 struct BattleState {
@@ -183,11 +183,15 @@ GameState currentGameState = GameState.MainMenu;
 bool videoFinished;
 
 /* lighting */
-Light[4] lights;
+Light[8] lights;
 
 /* models and locations */
-float modelLocationSize;
+Vector3[70] modelLocationSize;
+Vector3[70] modelLocationRotate;
+float[70] rotateAngle;
+Vector3[70] modelPosition;
 string location_name;
+Texture2D texture_skybox;
 bool friendlyZone;
 float modelCharacterSize;
 Texture2D dialogImage;

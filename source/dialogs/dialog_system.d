@@ -31,7 +31,7 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
     Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
     DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
     float lineThickness = 5.0f; // Set the desired line thickness
-    DrawRectangleRoundedLines(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, lineThickness, Color(100, 54, 65, 255)); // Red color
+    DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, lineThickness, Color(100, 54, 65, 255)); // Red color
     int charRectWidth = rectWidth / CHAR_RECT_WIDTH_RATIO;
     static int currentPage = 0;
     int charRectHeight = rectHeight / CHAR_RECT_HEIGHT_RATIO;

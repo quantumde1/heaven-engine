@@ -249,7 +249,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
     DrawRectangleRounded(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, semiTransparentBlack);
     // Draw the outline for the rounded rectangle
-    DrawRectangleRoundedLines(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
+    DrawRectangleRoundedLinesEx(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
     for (int i = 0; i < numberOfTabs; i++) {
         Color tabColor = (i == selectedTabIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
         DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
@@ -282,7 +282,7 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
         }
         
         // Draw the outline for the button area
-        DrawRectangleRoundedLines(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
+        DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
     }
     if (isBossfight) {
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 

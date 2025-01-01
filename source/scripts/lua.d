@@ -154,14 +154,19 @@ extern (C) nothrow int lua_getDialogName(lua_State *L) {
     return 1; // Number of return values
 }
 
-extern (C) nothrow int luaL_loadlocation(lua_State* L) {
-    loadLocation(cast(char*)luaL_checkstring(L, 1), luaL_checknumber(L, 2));
-    return 0;
-}
 
 extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L) {
     lua_pushinteger(L, answer_num); // Push the integer value onto the Lua stack
     return 1;
+}
+
+extern (C) nothrow int lua_parseScene(lua_State *L) {
+    try {
+        parseSceneFile(luaL_checkstring(L, 1).to!string);
+    } catch (Exception e) {
+        
+    }
+    return 0;
 }
 
 extern (C) nothrow int luaL_rotateCam(lua_State* L) {
@@ -194,13 +199,6 @@ extern (C) void luaL_updateDialog(lua_State* L) {
     lua_pcall(L, 0, 0, 0); // Call the updateDialog function in Lua
 }
 
-extern (C) nothrow int luaL_dialogClearChoice(lua_State *L) {
-    for (int i = 0; i <= choices.length; i++) {
-        choices[i] = "";
-    }
-    return 0;
-}
-
 extern (C) nothrow int luaL_hideUI(lua_State *L) {
     hideNavigation = true;
     return 0;
@@ -209,7 +207,13 @@ extern (C) nothrow int luaL_hideUI(lua_State *L) {
 extern (C) nothrow int luaL_openMap(lua_State *L){
     StopMusicStream(music);
     import graphics.map;
-    try { openMap(to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2))); } catch (Exception e) {}
+    try { 
+        openMap(to!string(luaL_checkstring(L, 1)), luaL_checkinteger(L, 2), true); 
+    } catch (Exception e) {
+        debug {
+            debug_writeln("Error opening map.");
+        }
+    }
     return 0;
 }
 
@@ -392,7 +396,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dialogBox", &luaL_dialogBox);
     lua_register(L, "shadersState", &lua_shadersState);
     lua_register(L, "dialogAnswerValue", &luaL_dialogAnswerValue);
-    lua_register(L, "loadLocation", &luaL_loadlocation);
+    //lua_register(L, "loadLocation", &luaL_loadlocation);
     lua_register(L, "getLocationName", &lua_getLocationName);
     lua_register(L, "initBattle", &lua_initBattle);
     lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
@@ -413,8 +417,8 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "allowControl", &lua_allowControl);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
+    lua_register(L, "loadScene", &lua_parseScene);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
-    lua_register(L, "clearChoice", &luaL_dialogClearChoice);
 }
 
 // Music functions

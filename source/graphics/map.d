@@ -14,7 +14,7 @@ import std.uni: isWhite;
 bool mapOpened;
 string locationname;
 
-void openMap(string location, string area) {
+void openMap(string location, float modelsize, bool fromScript) {
     mapOpened = true;
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
@@ -188,7 +188,7 @@ void openMap(string location, string area) {
             DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
             DrawTextEx(fontdialog, toStringz(currentMenuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
         }
-        DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * currentMenuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Outline
+        DrawRectangleRoundedLinesEx(Rectangle(10, 60, 200, 30 * currentMenuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Outline
 
         // Draw animated arrow
         float scaleFactor = 0.7f; // Scale factor
@@ -238,7 +238,7 @@ void openMap(string location, string area) {
                     DrawRectangleRounded(Rectangle(10, 60 + (30 * i), 200, 30), 0.03f, 16, buttonColor);
                     DrawTextEx(fontdialog, toStringz(currentMenuOptions[i]), Vector2(20, 64 + (30 * i)), 20, 1.0f, Colors.WHITE);
                 }
-                DrawRectangleRoundedLines(Rectangle(10, 60, 200, 30 * currentMenuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Outline
+                DrawRectangleRoundedLinesEx(Rectangle(10, 60, 200, 30 * currentMenuOptions.length), 0.03f, 16, 3.0f, Color(100, 54, 65, 255)); // Outline
                 
                 // Draw fade rectangle
                 DrawRectangle(0, 0, screenWidth, screenHeight, Color(0, 0, 0, cast(ubyte)fadeOutAlpha)); // Draw fade rectangle
@@ -246,7 +246,11 @@ void openMap(string location, string area) {
             }
 
             // Load the selected location
-            //loadLocation(cast(char*)toStringz("res/" ~ locationname ~ ".glb"), 19.0f);
+            if (fromScript == true) {
+                debug {
+                    debug_writeln("Map called from script, not loading model");
+                }
+            }
             isNewLocationNeeded = true;
             break; // Exit the loop after loading the location
         }

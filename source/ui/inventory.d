@@ -22,7 +22,7 @@ void drawInventory() {
     int tabWidth = screenWidth / numberOfTabs;
     DrawRectangleRounded(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, semiTransparentBlack);
     // Draw the outline for the rounded rectangle
-    DrawRectangleRoundedLines(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
+    DrawRectangleRoundedLinesEx(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
     for (int i = 0; i < numberOfTabs; i++) {
         Color tabColor = (i == selectedTabIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
         DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
@@ -71,7 +71,7 @@ void drawInventory() {
     }
     
     // Draw the outline for the button area
-    DrawRectangleRoundedLines(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
+    DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
     if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
     (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
         selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;

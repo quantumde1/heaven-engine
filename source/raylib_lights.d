@@ -55,25 +55,21 @@ Light CreateLight(int type, Vector3 position, Vector3 target, Color color, Shade
 {
     Light light = { 0 };
 
-    if (lightsCount < 4)
-    {
-        light.enabled = true;
-        light.type = type;
-        light.position = position;
-        light.target = target;
-        light.color = color;
+    light.enabled = true;
+    light.type = type;
+    light.position = position;
+    light.target = target;
+    light.color = color;
 
-        // NOTE: Lighting shader naming must be the provided ones
-        light.enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
-        light.typeLoc = GetShaderLocation(shader, TextFormat("lights[%i].type", lightsCount));
-        light.positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
-        light.targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
-        light.colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
+    // NOTE: Lighting shader naming must be the provided ones
+    light.enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
+    light.typeLoc = GetShaderLocation(shader, TextFormat("lights[%i].type", lightsCount));
+    light.positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
+    light.targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
+    light.colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
 
-        UpdateLightValues(shader, light);
-        
-        lightsCount++;
-    }
-
+    UpdateLightValues(shader, light);
+    
+    lightsCount++;
     return light;
 }

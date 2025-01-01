@@ -21,16 +21,15 @@ function file_exists(filename)
     end
 end
 
-loadLocation("res/street.glb", 0.02)
-
 local dialogCoroutine
 local answerValue
+
+loadScene("res/scene1.json")
 
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
-        --[[
         loadMusic("prologue_1.mp3")
         hideUI()
         playMusic()
@@ -106,6 +105,7 @@ function startDialogCoroutine()
         unload2Dtexture(2)
         unload2Dtexture(3)
         unload2Dtexture(4)
+        
         load2Dtexture("background_news_paradigm_x.png", 0)
         load2Dtexture("background_city_2.png", 1)
         load2Dtexture("background_city_1.png", 2)
@@ -629,7 +629,7 @@ function startDialogCoroutine()
                 playMusic()
                 allowControl()
             end
-        end]]--
+        end
     end)
 end
 
@@ -645,13 +645,23 @@ function updateDialog()
     end
 end
 
-shadersState(0)
+shadersState(1)
 -- Настройка позиции камеры
-changeCameraPosition(0.0, 5.0, 0.1)
-changeCameraTarget(0.0, 5.0, 0.0)
-changeCameraUp(0.0, 1.0, 0.0)
-drawPlayerModel(0)
-dungeonCrawlerMode(1)
+local dungeonCrawler = true
+if dungeonCrawler == true then
+    changeCameraPosition(0.0, 7.0, 0.1)
+    changeCameraTarget(0.0, 7.0, 0.0)
+    changeCameraUp(0.0, 1.0, 0.0)
+    drawPlayerModel(0)
+    dungeonCrawlerMode(1)
+else
+    setPlayerModel("res/mc.glb", 0.020)
+    changeCameraPosition(0.0, 8.0, 10.0)
+    changeCameraTarget(0.0, 6.0, 0.0)
+    changeCameraUp(0.0, 1.0, 0.0)
+    drawPlayerModel(1)
+    dungeonCrawlerMode(0)
+end
 
 -- Запуск корутины диалога
 startDialogCoroutine()
