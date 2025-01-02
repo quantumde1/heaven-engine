@@ -90,7 +90,7 @@ lua_State* L;
 /* interface things */
 float flicker = 0.0;
 bool increasing = true;
-int ver = 1;
+float ver = 0.6;
 bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;

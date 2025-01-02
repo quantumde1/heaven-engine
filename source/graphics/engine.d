@@ -227,6 +227,13 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         gamepadInt = 1;
         debug debug_writeln("Linux version detected");
     }
+    version (Windows) {
+        debug debug_writeln("Windows version detected");
+    }
+    version (osx) {
+        debug debug_writeln("XNU/Darwin version detected");
+    }
+    debug_writeln("Engine version: ", ver);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
     float fadeAlpha = 2.0f;
@@ -484,7 +491,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
 
                         if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                             StopMusicStream(music);
-                            openMap(location_name, 1.0f, false);
+                            openMap(location_name, false);
                         }
                     }
                     if (showDialog) {
@@ -546,10 +553,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     EndDrawing();
                     CloseWindow();
                     UnloadFont(fontdialog);
-                    for (int i = tex2d.length; i > 0; i++) {
+                    for (int i = tex2d.length; i < tex2d.length; i++) {
                         UnloadTexture(tex2d[i].texture);
                     }
-                    for (int i = backgrounds.length; i > 0; i++) {
+                    for (int i = backgrounds.length; i < backgrounds.length; i++) {
                         UnloadTexture(backgrounds[i]);
                     }
                     closeAudio();

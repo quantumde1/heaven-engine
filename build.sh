@@ -85,6 +85,5 @@ fi
 strip ./libhpff.so
 strip ./heaven-engine
 echo "MADE_BY_QUANTUMDE1_UNDERLEVEL_STUDIOS_2024_ALL_RIGHTS_RESERVED_UNDER_MIT_LICENSE_LMAO" >> ./heaven-engine
-touch sky.sh && printf "#!/bin/sh\nexec heaven-engine\n" > sky
 printf "${GREEN}[BUILD] Build complete!${RESET}\n"
 printf "${GREEN}[INFO] All processes completed successfully!${RESET}\n"

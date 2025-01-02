@@ -30,10 +30,10 @@ function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
-        loadMusic("paradigm_x.mp3")
+        loadMusic("prologue_1.mp3")
         playMusic()
-        --[[
         hideUI()
+        --[[
         load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
         load2Dtexture("epilogue_3.png",2)
@@ -106,7 +106,7 @@ function startDialogCoroutine()
         unload2Dtexture(2)
         unload2Dtexture(3)
         unload2Dtexture(4)
-        
+        ]]--
         load2Dtexture("background_news_paradigm_x.png", 0)
         load2Dtexture("background_city_2.png", 1)
         load2Dtexture("background_city_1.png", 2)
@@ -380,7 +380,7 @@ function startDialogCoroutine()
         unload2Dtexture(2)
         unload2Dtexture(3)
         stopDraw2Dtexture()
-        openMap("home", "akenadai");
+        openMap("home");
         local location_name
         location_name = getLocationName()
         if location_name == "garage" then
@@ -627,10 +627,10 @@ function startDialogCoroutine()
                 unload2Dtexture(4)
                 stopMusic()
                 loadMusic("paradigm_x.mp3")
-                playMusic()]]--
+                playMusic()
                 allowControl()
-            --end
-        --end
+            end
+        end
     end)
 end
 
@@ -646,9 +646,9 @@ function updateDialog()
     end
 end
 
-shadersState(1)
+shadersState(0)
 -- Настройка позиции камеры
-local dungeonCrawler = false
+local dungeonCrawler = true
 if dungeonCrawler == true then
     changeCameraPosition(0.0, 7.0, 0.1)
     changeCameraTarget(0.0, 7.0, 0.0)

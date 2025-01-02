@@ -208,7 +208,7 @@ extern (C) nothrow int luaL_openMap(lua_State *L){
     StopMusicStream(music);
     import graphics.map;
     try { 
-        openMap(to!string(luaL_checkstring(L, 1)), luaL_checkinteger(L, 2), true); 
+        openMap(to!string(luaL_checkstring(L, 1)), true); 
     } catch (Exception e) {
         debug {
             debug_writeln("Error opening map.");

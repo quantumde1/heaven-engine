@@ -14,7 +14,7 @@ import std.uni: isWhite;
 bool mapOpened;
 string locationname;
 
-void openMap(string location, float modelsize, bool fromScript) {
+void openMap(string location, bool fromScript) {
     mapOpened = true;
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
@@ -251,7 +251,6 @@ void openMap(string location, float modelsize, bool fromScript) {
                     debug_writeln("Map called from script, not loading model");
                 }
             }
-            isNewLocationNeeded = true;
             break; // Exit the loop after loading the location
         }
     }
