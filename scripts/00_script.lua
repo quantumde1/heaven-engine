@@ -33,6 +33,7 @@ function startDialogCoroutine()
         loadMusic("prologue_1.mp3")
         playMusic()
         hideUI()
+        local startTime = os.clock() -- Get the current time
         --[[
         load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
@@ -106,7 +107,6 @@ function startDialogCoroutine()
         unload2Dtexture(2)
         unload2Dtexture(3)
         unload2Dtexture(4)
-        ]]--
         load2Dtexture("background_news_paradigm_x.png", 0)
         load2Dtexture("background_city_2.png", 1)
         load2Dtexture("background_city_1.png", 2)
@@ -288,7 +288,6 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        local startTime = os.clock() -- Get the current time
         while os.clock() - startTime < 0.07 do
             coroutine.yield() -- Wait for 2 seconds
         end
@@ -624,13 +623,49 @@ function startDialogCoroutine()
                 unload2Dtexture(1)
                 unload2Dtexture(2)
                 unload2Dtexture(3)
-                unload2Dtexture(4)
+                unload2Dtexture(4)]]--
                 stopMusic()
                 loadMusic("paradigm_x.mp3")
                 playMusic()
+                while os.clock() - startTime < 0.1 do
+                    coroutine.yield() -- Wait for 2 seconds
+                end
+                rotateCamera(50, 40)
+                while isCameraRotating() do
+                    coroutine.yield() -- Wait for 2 seconds
+                end
+                if isCameraRotating() == false then
+                    while os.clock() - startTime < 0.1 do
+                        coroutine.yield() -- Wait for 2 seconds
+                    end
+                end
+                rotateCamera(130, 40)
+                while isCameraRotating() do
+                    coroutine.yield() -- Wait for 2 seconds
+                end
+                if isCameraRotating() == false then
+                    while os.clock() - startTime < 0.1 do
+                        coroutine.yield() -- Wait for 2 seconds
+                    end
+                end
+                rotateCamera(90, 40)
+                while isCameraRotating() do
+                    coroutine.yield() -- Wait for 2 seconds
+                end
+                draw2Dcharacter("hitomi_staying_texture.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 100, 5.0, 0)
+                dialogBox("Hitomi", {"...Wow!"}, "hitomi_normal.png", -1, {""}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                dialogBox("Hitomi", {"So this a Paradigm X... It's wonderful!", "Hey, where should we go first?"}, "hitomi_normal.png", -1, {""}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                showUI()
+                stopDraw2Dcharacter(0)
                 allowControl()
-            end
-        end
+            --end
+        --end
     end)
 end
 

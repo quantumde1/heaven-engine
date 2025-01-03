@@ -176,6 +176,11 @@ extern (C) nothrow int luaL_rotateCam(lua_State* L) {
     return 0;
 }
 
+extern (C) nothrow int luaL_rotateCamState(lua_State* L) {
+    lua_pushboolean(L, isCameraRotating);
+    return 1;
+}
+
 string hint;
 
 extern (C) nothrow int luaL_showHint(lua_State *L) {
@@ -201,6 +206,11 @@ extern (C) void luaL_updateDialog(lua_State* L) {
 
 extern (C) nothrow int luaL_hideUI(lua_State *L) {
     hideNavigation = true;
+    return 0;
+}
+
+extern (C) nothrow int luaL_showUI(lua_State *L) {
+    hideNavigation = false;
     return 0;
 }
 
@@ -405,6 +415,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "showHint", &luaL_showHint);
     lua_register(L, "hideHint", &luaL_hideHint);
+    lua_register(L, "showUI", &luaL_showUI);
     lua_register(L, "dungeonCrawlerMode", &lua_setRotationCrowler);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
     lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
@@ -415,6 +426,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
     lua_register(L, "load2Dtexture", &lua_load2Dbackground);
     lua_register(L, "playVideo", &lua_playVideo);
+    lua_register(L, "isCameraRotating", &luaL_rotateCamState);
     lua_register(L, "allowControl", &lua_allowControl);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
     lua_register(L, "loadScene", &lua_parseScene);
