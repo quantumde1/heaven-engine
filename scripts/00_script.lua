@@ -34,7 +34,6 @@ function startDialogCoroutine()
         playMusic()
         hideUI()
         local startTime = os.clock() -- Get the current time
-        --[[
         load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
         load2Dtexture("epilogue_3.png",2)
@@ -623,7 +622,7 @@ function startDialogCoroutine()
                 unload2Dtexture(1)
                 unload2Dtexture(2)
                 unload2Dtexture(3)
-                unload2Dtexture(4)]]--
+                unload2Dtexture(4)
                 stopMusic()
                 loadMusic("paradigm_x.mp3")
                 playMusic()
@@ -664,8 +663,8 @@ function startDialogCoroutine()
                 showUI()
                 stopDraw2Dcharacter(0)
                 allowControl()
-            --end
-        --end
+            end
+        end
     end)
 end
 
