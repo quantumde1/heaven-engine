@@ -373,7 +373,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
 
-                    if (!showCharacterNameInputMenu && !neededDraw2D) {
+                    if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
                         DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                         drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
                     }
@@ -403,72 +403,42 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
                         1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
 
+                    if (IsKeyPressed(KeyboardKey.KEY_F4)) {
+                        playerStepCounter = encounterThreshold + 1;
+                    }
                     if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
                         originalCubePosition = cubePosition;
                         originalCameraPosition = camera.position;
                         originalCameraTarget = camera.target;
-                        StopMusicStream(music);
+                        if (isAudioEnabled()) {
+                            if (!isBossfight) {
+                                uint audio_size;
+                                char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
+                                StopMusicStream(music);
+                                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+                                PlayMusicStream(music);
+                                UpdateMusicStream(music);
+                            } else {
+                                uint audio_size;
+                                char *audio_data = get_file_data_from_archive("res/data.bin", "boss_battle.mp3", &audio_size);
+                                StopMusicStream(music);
+                                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+                                PlayMusicStream(music);
+                                UpdateMusicStream(music);
+                            }
+                        } else {
+                            StopMusicStream(music);
+                        }
                         allowControl = false;
                         playerStepCounter = 0;
                         encounterThreshold = uniform(900, 3000, rnd);
                         inBattle = true;
                         isBossfight = false;
-                        initBattle(camera, cubePosition, cameraAngle, randomNumber);
-                    }
-                    if (IsKeyPressed(KeyboardKey.KEY_F4)) {
-                        playerStepCounter = encounterThreshold +1;
+                        initBattle();
                     }
                     if (inBattle) {
-                        cameraAngle = 90.0f;
-                        if (!isBossfight) {
-                            if (showRunMessage) {
-                                runMessageTimer += GetFrameTime(); // Increment the timer by the time since the last frame
-                                DrawText("Your team...", GetScreenWidth() / 2 - MeasureText("Your team...", 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
-                                retreated = uniform(0, 2, rnd); // Generates 0 or 1, true if 0, false if 1
-                                if (retreated == 0) {
-                                    retreatMessage = "Retreated!";
-                                } else if (retreated == 1) {
-                                    retreatMessage = "Not retreated!";
-                                }
-                                if (runMessageTimer >= 3.0f) {
-                                    showRunMessage = false; // Hide the run message after 3 seconds
-                                    showRetreatedMessage = true; // Show the retreated message
-                                    runMessageTimer = 0.0f; // Reset the timer for the next message
-                                }
-                            }
-
-                            if (showRetreatedMessage) {
-                                DrawText(toStringz(retreatMessage), GetScreenWidth() / 2 - MeasureText(toStringz(retreatMessage), 20) / 2, GetScreenHeight() / 2 - 10, 40, Colors.RED);
-                                // Optionally, you can add a timer for the retreated message as well
-                                retreatedMessageTimer += GetFrameTime(); // Increment the timer for the retreated message
-                                if (retreatedMessageTimer >= 3.0f) {
-                                    showRetreatedMessage = false; // Hide the retreated message after 3 seconds
-                                    retreatedMessageTimer = 0.0f; // Reset the timer
-                                    if (retreated == 0) {
-                                        debug { debug_writeln ("retreated!"); }
-                                        inBattle = false;
-                                        cubePosition = originalCubePosition;
-                                        camera.position = originalCameraPosition;
-                                        camera.target = originalCameraTarget;
-                                        removeAllEnemyCubes();
-                                        StopMusicStream(music);
-                                        allowControl = true;
-                                    } else {
-                                        debug { debug_writeln ("not retreated!"); }
-                                        enemyTurn();
-                                    }
-                                }
-                            }
-                        }
-                        drawBattleUI(camera, cubePosition);
-                        UpdateMusicStream(musicBattle);
-                        if (!selectingEnemy) {
-                            drawHPAboveCubes(camera);
-                        }
-                    } else {
-                        PlayMusicStream(music);
+                        drawBattleMenu();
                     }
-
                     // Show Map Prompt
                     showMapPrompt = Vector3Distance(cubePosition, targetPosition) < 4.0f;
                     if (hintNeeded) {

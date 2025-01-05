@@ -21,221 +21,175 @@ const int PLAYER_HEALTH_BAR_X = 10;
 const int PLAYER_HEALTH_BAR_Y_OFFSET = 10;
 const int ATTACK_DAMAGE = 10;
 
-void removeAllEnemyCubes() {
-    // Iterate through each enemy cube and set its health to zero
-    foreach (index, enemyCube; enemyCubes) {
-        enemyCubes[index].health = 0; // Set health to zero to trigger removal logic
-    }
-
-    // Now, remove all enemy cubes that have health <= 0
-    enemyCubes = enemyCubes.filter!(cube => cube.health > 0).array(); // Convert FilterResult to array
-
-    // Optionally, you can also log the removal of each enemy cube
-    foreach (enemyCube; enemyCubes) {
-        if (enemyCube.health <= 0) {
-            debug debug_writeln(enemyCube.name, " is destroyed!");
-            removeCube(enemyCube.name); // Call the function to remove the cube from the game
-        }
-    }
-}
-
-void drawEnemyCubes() {
-    foreach (enemyCube; enemyCubes) {
-        DrawModel(enemyCube.model, enemyCube.position, 3.6f, Colors.WHITE);
-        assignShaderToModel(enemyCube.model);
-    }
-}
-
-void drawHPAboveCubes(Camera3D camera) {
-    foreach (enemyCube; enemyCubes) {
-        Vector3 cubeWorldPosition = enemyCube.position;
-        cubeWorldPosition.y += CUBE_DRAW_HEIGHT;
-        Vector2 cubeScreenPosition = GetWorldToScreen(cubeWorldPosition, camera);
-        string hpText = "HP: " ~ to!string(enemyCube.health);
-        DrawText(toStringz(enemyCube.name), cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y + 30, 20, 
-        Colors.RED);
-        DrawText(hpText.ptr, cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y, 20, Colors.RED);
-    }
-}
-
-void attackTab(int element) {
-    if (battleState.playerTurn && battleState.playerTurns > 0) {
-        if (element == 0) {
-            physicalAttack();
-        }
-        battleState.playerTurns--;
-        if (battleState.playerTurns <= 0) {
-            battleState.playerTurn = false;
-            battleState.enemyTurns = cast(int)enemyCubes.length;
-        }
-    }
-}
-
 void drawPlayerHealthBar(int playerHealth, int maxPlayerHealth) {
     int screenHeight = GetScreenHeight();
     float healthPercentage = cast(float)playerHealth / maxPlayerHealth;
-    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-    PLAYER_HEALTH_BAR_Y_OFFSET), cast(int)PLAYER_HEALTH_BAR_WIDTH, cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
-    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-    PLAYER_HEALTH_BAR_Y_OFFSET), cast(int)(PLAYER_HEALTH_BAR_WIDTH * healthPercentage), 
-    cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.RED);
+    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET), 
+                  cast(int)PLAYER_HEALTH_BAR_WIDTH, cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
+    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET), 
+                  cast(int)(PLAYER_HEALTH_BAR_WIDTH * healthPercentage), cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.RED);
     string healthText = "Health: " ~ to!string(playerHealth) ~ "/" ~ to!string(maxPlayerHealth);
     DrawText(toStringz(healthText), PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-    PLAYER_HEALTH_BAR_Y_OFFSET + 5), 10, Colors.WHITE);
+                  PLAYER_HEALTH_BAR_Y_OFFSET + 5), 10, Colors.WHITE);
 }
 
 void drawPlayerManaBar(int playerMana, int maxPlayerMana) {
     int screenHeight = GetScreenHeight();
     float manaPercentage = cast(float)playerMana / maxPlayerMana;
     DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-    PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)PLAYER_HEALTH_BAR_WIDTH, 
-    cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY); // Adjust Y position for mana bar
+                  PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)PLAYER_HEALTH_BAR_WIDTH, 
+                  cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
     DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-    PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)(PLAYER_HEALTH_BAR_WIDTH * manaPercentage), 
-    cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.BLUE);
+                  PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)(PLAYER_HEALTH_BAR_WIDTH * manaPercentage), 
+                  cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.BLUE);
     string manaText = "Mana: " ~ to!string(playerMana) ~ "/" ~ to!string(maxPlayerMana);
     DrawText(toStringz(manaText), PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-    PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5 + 5), 10, Colors.WHITE);
+                  PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5 + 5), 10, Colors.WHITE);
 }
 
-void physicalAttack() {
-    if (selectedEnemyIndex < enemyCubes.length) {
-        EnemyCube enemy = enemyCubes[selectedEnemyIndex];
-        enemy.health -= ATTACK_DAMAGE;
-        debug debug_writeln("Attacked ", enemy.name, ", Health left: ", enemy.health);
-        if (enemy.health <= 0) {
-            debug debug_writeln(enemy.name, " is destroyed!");
-            enemyCubes = enemyCubes[0 .. selectedEnemyIndex] ~ enemyCubes[selectedEnemyIndex + 1 .. $];
-            removeCube(enemy.name);
-        } else {
-            enemyCubes[selectedEnemyIndex] = enemy;
-        }
+void loadAssets() {
+    // Populating massive
+    for (int i = 0; i <= randomNumber; i++) {
+        enemies[i].texture = LoadTexture("res/tex/enemy_poltergheist.png");
+        enemies[i].maxHealth = 30;
+        enemies[i].currentHealth = enemies[i].maxHealth;
     }
+    background = LoadTexture("res/backgrounds/battle.png");
 }
 
-void skillAttack() {
-    if (selectedEnemyIndex < enemyCubes.length) {
-        EnemyCube enemy = enemyCubes[selectedEnemyIndex];
-        enemy.health -= ATTACK_DAMAGE;
-        debug debug_writeln("Magic attacked ", enemy.name, ", Health left: ", enemy.health);
-        if (enemy.health <= 0) {
-            debug debug_writeln(enemy.name, " is destroyed!");
-            enemyCubes = enemyCubes[0 .. selectedEnemyIndex] ~ enemyCubes[selectedEnemyIndex + 1 .. $];
-            removeCube(enemy.name);
-        } else {
-            enemyCubes[selectedEnemyIndex] = enemy;
-        }
-    }
-}
-
-void gameOverScreen() {
-    DrawText("GAME OVER", GetScreenWidth() / 2 - MeasureText("GAME OVER", 20) / 2, GetScreenHeight() / 2 - 10, 40,
-     Colors.RED);
-    
-}
-
-void checkForVictory(ref Camera3D camera, ref Vector3 cubePosition) {
-    if (all(enemyCubes.map!(cube => cube.health <= 0))) {
-        debug {
-            debug_writeln("All enemies defeated!");
-        }
-        inBattle = false;
-        cubePosition = originalCubePosition;
-        camera.position = originalCameraPosition;
-        camera.target = originalCameraTarget;
-        StopMusicStream(music);
-        UnloadModel(enemyModel);
-        allowControl = true;
-    }
-}
-
-Model enemyModel; // Define at a broader scope to make accessible elsewhere
-
-void initBattle(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, int randomCounter) {
-    if (!isBossfight) {
-        uint audio_size;
-        char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
-        if (audioEnabled) {
-            StopMusicStream(music);
-            musicBattle = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-            PlayMusicStream(musicBattle);
-        } else {
-            StopMusicStream(music);
-        }
-    } else {
-        uint audio_size;
-        char *audio_data = get_file_data_from_archive("res/data.bin", "boss_battle.mp3", &audio_size);
-        if (audioEnabled) {
-            StopMusicStream(music);
-            musicBattle = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-            PlayMusicStream(musicBattle);
-        } else {
-            StopMusicStream(music);
-        }
-    }
-    cubePosition.y += 10.0f;
-    camera.position.y += 10.0f;
-    camera.target.y += 10.0f;
-
-    enemyModel = LoadModel("res/enemy_model.glb"); // Load model once here
-
-    Vector3 enemyCubeOffset = Vector3(0.0f, 0.0f, -7.0f);
-    for (int i = 0; i <= randomCounter; i++) {
-        enemyCubeOffset.x = i * 4.0f;
-        Vector3 enemyCubePosition = Vector3Add(cubePosition, enemyCubeOffset);
-        EnemyCube enemyCube = {enemyCubePosition, "debug" ~ (i + 1).to!string(), 20, enemyModel};
-        enemyCubes ~= enemyCube;
-        addCube(enemyCube.position, enemyCube.name, [""], cast(char*)(""), 0);
-    }
-    battleState.playerTurns = 1;
-    battleState.enemyTurns = cast(int)enemyCubes.length;
-    battleState.playerTurn = true;
-}
-
-void enemyTurn() {
-    if (!battleState.playerTurn) {
-        foreach (enemyCube; enemyCubes) {
-            if (enemyCube.health > 0) {
-                playerHealth -= ATTACK_DAMAGE;
-                debug {
-                    debug_writeln("Enemy ", enemyCube.name, " attacks! Player HP: ", playerHealth);
-                }
-                battleState.enemyTurns--;
-
-                if (playerHealth <= 0) {
-                    debug {
-                        debug_writeln("Player is defeated!");
-                    }
-                    gameOverScreen();
-                    return;
+void performPhysicalAttack(int enemyIndex) {
+    if (enemyIndex >= 0 && enemyIndex < enemies.length) {
+        enemies[enemyIndex].currentHealth -= ATTACK_DAMAGE;
+        if (enemies[enemyIndex].currentHealth <= 0) {
+            enemies[enemyIndex].currentHealth = 0;
+            removeEnemy(enemyIndex);
+            if (selectedEnemyIndex == enemyIndex) {
+                if (enemies.length > 0) {
+                    selectedEnemyIndex = (selectedEnemyIndex + 1) % enemies.length;
+                } else {
+                    selectedEnemyIndex = -1;
                 }
             }
         }
-        if (battleState.enemyTurns <= 0) {
-            battleState.playerTurn = true;
-            battleState.playerTurns = 1;
+    }
+}
+
+void initBattle() {
+    // Setting states
+    loadAssets(); // Загружаем ассеты единожды
+    battleState.playerTurns = 1;
+    battleState.playerTurn = true;
+    drawEnemies();
+}
+
+float enemyVerticalOffset = 0.0f; 
+float enemySpeed = 3.0f;
+float enemyAmplitude = 25.0f;
+
+float blinkTime = 0.0f; // Переменная для отслеживания времени мигания
+const float BLINK_SPEED = 8.0f; // Скорость мигания
+
+void drawEnemies() {
+    int numberOfEnemies = randomNumber + 1;
+    float spacing = 300.0f;
+    float startX = (GetScreenWidth() - (numberOfEnemies * spacing)) / 2;
+
+    // Отрисовка фона
+    DrawTexturePro(background, Rectangle(0, 0, cast(float)background.width, cast(float)background.height), 
+                    Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), 
+                    Vector2(0, 0), 0.0, Colors.WHITE);
+    
+    // Обновление вертикального смещения для врагов
+    enemyVerticalOffset += enemySpeed;
+    if (enemyVerticalOffset > enemyAmplitude || enemyVerticalOffset < -enemyAmplitude) {
+        enemySpeed = -enemySpeed;
+    }
+
+    blinkTime += GetFrameTime() * BLINK_SPEED;
+
+    for (int i = 0; i < numberOfEnemies; i++) {
+        if (enemies[i].currentHealth > 0) { // Проверяем, жив ли враг
+            float posX = startX + (i * spacing);
+            float posY = (GetScreenHeight() / 2) + enemyVerticalOffset;
+
+            Color enemyColor = Colors.WHITE;
+            if (i == selectedEnemyIndex && selectingEnemy) {
+                float alpha = (sin(blinkTime) + 1) / 2;
+                enemyColor = Color(cast(ubyte)255, cast(ubyte)255, cast(ubyte)0, cast(ubyte)cast(int)(alpha * 255));
+            }
+
+            DrawTextureEx(enemies[i].texture, Vector2(posX, -100 + posY), 0, 5.0, enemyColor);
         }
     }
 }
 
-void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
+void removeAll() {
+    // Iterate through each enemy cube and set its health to zero
+    foreach (index, enemy; enemies) {
+        enemies[index].currentHealth = 0; // Set health to zero to trigger removal logic
+    }
+    
+    // Convert the fixed-size array to a dynamic array and filter out enemies with health greater than 0
+    enemies = enemies.array().filter!(enemy => enemy.currentHealth > 0).array(); // Convert FilterResult to array
+}
+
+/*void removeEnemy(int enemyIndex) {
+    if (enemyIndex >= 0 && enemyIndex < enemies.length) {
+        // Remove the enemy by shifting elements to the left
+        for (int i = enemyIndex; i < enemies.length - 1; i++) {
+            enemies[i] = enemies[i + 1];
+        }
+    }
+}*/
+
+void removeEnemy(int enemyIndex) {
+    if (enemyIndex >= 0 && enemyIndex < enemies.length) {
+        enemies[enemyIndex].currentHealth = 0; // Устанавливаем здоровье врага в ноль
+    }
+}
+
+void enemyTurn() {
+    playerHealth -= ATTACK_DAMAGE;
+}
+
+bool areAllEnemiesDefeated() {
+    foreach (enemy; enemies) {
+        if (enemy.currentHealth > 0) {
+            return false; // At least one enemy is still alive
+        }
+    }
+    return true; // All enemies are defeated
+}
+
+void drawBattleMenu() {
+    drawEnemies();
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     int barHeight = screenHeight / 9;
-    
     string[] menuTabs = ["Attack", "Skill", "Item", "Talk", "Escape"];
+    Color semiTransparentBlack = Color(0, 0, 0, 200); // RGBA: Black with 210 alpha
     int numberOfTabs = cast(int)menuTabs.length;
     int tabWidth = screenWidth / numberOfTabs;
+    DrawRectangleRounded(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, semiTransparentBlack);
+    // Draw the outline for the rounded rectangle
+    DrawRectangleRoundedLinesEx(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
+    for (int i = 0; i < numberOfTabs; i++) {
+        Color tabColor = (i == selectedTabIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
+        DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
+        
+        int textY = barHeight - 40;
+        DrawTextEx(fontdialog, toStringz(menuTabs[i]), Vector2(i * tabWidth + 10, textY), 40, 1.0f, Colors.WHITE);
+    }
 
-    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) && !battleDialog|| (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy)&& !battleDialog || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy && !battleDialog)) {
+    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy)) {
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
         selectedButtonIndex = 0;
     }
-    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) && !battleDialog|| (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) && !battleDialog|| (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)&& !battleDialog) {
+    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
+    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)) {
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
         selectedButtonIndex = 0;
     }
@@ -246,126 +200,98 @@ void drawBattleUI(ref Camera3D camera, ref Vector3 cubePosition) {
     int rectHeight = (2 * screenHeight) / 3;
     int rectX = 10;
     int rectY = barHeight + 15;
-    Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
-    DrawRectangleRounded(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, semiTransparentBlack);
-    // Draw the outline for the rounded rectangle
-    DrawRectangleRoundedLinesEx(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
-    for (int i = 0; i < numberOfTabs; i++) {
-        Color tabColor = (i == selectedTabIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
-        DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
-        
-        // Calculate the Y-coordinate for the text to be at the bottom left of the tab
-        int textY = barHeight - 40; // Adjust this value for vertical positioning
-        DrawTextEx(fontdialog, toStringz(menuTabs[i]), Vector2(i * tabWidth + 10, textY), 40, 1.0f, Colors.WHITE);
-    }
-    // Draw enemy model
-    BeginMode3D(camera);
-    drawEnemyCubes();
-    EndMode3D();
+
     int buttonHeight = 50;
     int buttonMargin = 10;
-    if (!battleDialog) {
-        drawPlayerHealthBar(playerHealth, 120);
-        drawPlayerManaBar(playerMana, 30);
-        // Draw the background rectangle for the button area
-        DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
+    drawPlayerHealthBar(playerHealth, 120);
+    drawPlayerManaBar(playerMana, 30);
+    // Draw the background rectangle for the button area
+    DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
+    
+    for (int i = 0; i < numberOfButtons; i++) {
+        int buttonY = rectY + (buttonHeight + buttonMargin) * i;
+        Color buttonColor = (i == selectedButtonIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
+        Color textColor = (i == selectedButtonIndex) ? Colors.WHITE : Colors.DARKGRAY;
+        // Draw the rounded rectangle for each button
+        DrawRectangleRounded(Rectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight), 0.03f, 16, buttonColor);
         
-        for (int i = 0; i < numberOfButtons; i++) {
-            int buttonY = rectY + (buttonHeight + buttonMargin) * i;
-            Color buttonColor = (i == selectedButtonIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
-            
-            // Draw the rounded rectangle for each button
-            DrawRectangleRounded(Rectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight), 0.03f, 16, buttonColor);
-            
-            // Draw the button text
-            DrawTextEx(fontdialog, toStringz(buttonText[i]), Vector2(rectX + buttonMargin + 10, buttonY + 4), 30, 1.0f, Colors.WHITE);
-        }
-        
-        // Draw the outline for the button area
-        DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
+        // Draw the button text
+        DrawTextEx(fontdialog, toStringz(buttonText[i]), Vector2(rectX + buttonMargin + 10, buttonY + 4), 30, 1.0f, textColor);
     }
-    if (isBossfight) {
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
-            showRunMessage = true; // Set the flag to true when the message should be shown
-            runMessageTimer = 0.0f; // Reset the timer
-        }
-
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 2 && selectedTabIndex == 3 || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 2 && selectedTabIndex == 3) {
-            battleDialog = true;
-        }
-        // Update the timer in the drawBattleUI function
-        if (showRunMessage) {
-            runMessageTimer += GetFrameTime(); // Increment the timer by the time since the last frame
-            if (runMessageTimer >= 3.0f) {
-                showRunMessage = false; // Hide the message after 3 seconds
+    switch (selectedTabIndex) {
+        case 0: // Attack
+            if (selectedTabIndex == 0 && IsKeyPressed(KeyboardKey.KEY_ENTER) && !selectingEnemy) {
+                debug_writeln("Enter pressed with selecting enemy to true");
+                selectingEnemy = true;
+                // Дополнительная проверка, чтобы избежать повторного срабатывания
+                if (enemies[selectedEnemyIndex].currentHealth <= 0) {
+                    debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
+                }
+            } else if (selectingEnemy && IsKeyPressed(KeyboardKey.KEY_ENTER)) {
+                debug_writeln("enter pressed for acting");
+                performPhysicalAttack(selectedEnemyIndex);
+                debug_writeln("selecting enemy to false");
+                for (int i = 0; i <= randomNumber; i++) {
+                    debug_writeln("HP of enemy[",i,"] is: ", enemies[i].currentHealth);
+                    if (enemies[i].currentHealth >= 0) {
+                        debug_writeln("enemy turn!");
+                        enemyTurn();
+                        selectingEnemy = false;
+                    } else {
+                        debug_writeln("ignore");
+                    }
+                }
             }
-        }
-        // Draw the message if the flag is true
-        if (showRunMessage) {
-            DrawTextEx(fontdialog, "You cannot run!", 
-            Vector2(GetScreenWidth() / 2 - MeasureTextEx(fontdialog, "You cannot run!", 40, 0).x / 2, GetScreenHeight() / 2 - 10),
-            40, 0, Colors.RED);
-        }
-    } else {
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedButtonIndex == 0 && selectedTabIndex == 4 || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedButtonIndex == 0 && selectedTabIndex == 4) {
-            
-            showRunMessage = true; // Set the flag to true when the message should be shown
-            runMessageTimer = 0.0f; // Reset the timer
-        }
-    }
-    if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) && !battleDialog|| 
-    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy && !battleDialog)) {
-        selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
-    }
-    if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) && !battleDialog|| 
-    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy && !battleDialog)) {
-        selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
-    }
-
-    if (IsKeyPressed(KeyboardKey.KEY_ENTER) && !battleDialog|| IsKeyPressed(KeyboardKey.KEY_SPACE) && !battleDialog|| 
-    IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)&& !battleDialog) {
-        if (selectedTabIndex == 0 && !selectingEnemy) {
-            secInBattle = true;
-            selectingEnemy = true;
-        } else if (selectingEnemy) {
-            attackTab(selectedButtonIndex);
-            debug debug_writeln("element: ", selectedButtonIndex);
-            selectingEnemy = false;
-        }
-    }
-    if (battleDialog == true) {
-        display_dialog(name_global, emotion_global, message_global, -1);
+            break;
+        default:
+            break;
     }
     if (selectingEnemy) {
-        foreach (index, enemyCube; enemyCubes) {
-            if (enemyCube.health > 0) {
-                Vector3 cubeWorldPosition = enemyCube.position;
-                cubeWorldPosition.y += CUBE_DRAW_HEIGHT;
-                Vector2 cubeScreenPosition = GetWorldToScreen(cubeWorldPosition, camera);
-                Color enemyColor = (index == selectedEnemyIndex) ? Colors.RED : Colors.WHITE;
-                DrawCube(enemyCube.position, 2.0f, 2.0f, 2.0f, enemyColor);
-                string hpText = "HP: " ~ to!string(enemyCube.health);
-                DrawText(toStringz(enemyCube.name), cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y + 30,
-                20, enemyColor);
-                DrawText(cast(char*)(hpText.ptr), cast(int)cubeScreenPosition.x, cast(int)cubeScreenPosition.y, 
-                20, enemyColor);
+        if (IsKeyPressed(KeyboardKey.KEY_LEFT) || (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))) {
+            selectedEnemyIndex -= 1;
+            if (selectedEnemyIndex == -1) {
+                selectedEnemyIndex = randomNumber;
             }
+            debug_writeln("Pressed left, counter: ", selectedEnemyIndex, " and enemy counter at all: ", randomNumber);
         }
-        if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-        GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && selectingEnemy)) {
-            selectedEnemyIndex = cast(int)((selectedEnemyIndex + 1) % enemyCubes.length);
-        }
-        if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && selectingEnemy) || (IsGamepadButtonPressed(gamepadInt,
-        GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && selectingEnemy)) {
-            selectedEnemyIndex = cast(int)((selectedEnemyIndex - 1 + enemyCubes.length) % enemyCubes.length);
+        if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))) {
+            if (selectedEnemyIndex == randomNumber) {
+                selectedEnemyIndex = 0;
+            } else {
+                selectedEnemyIndex += 1;
+            }
+            debug_writeln("Pressed right, counter: ", selectedEnemyIndex, " and enemy counter at all: ", randomNumber);
         }
     }
-
-    if (!battleState.playerTurn) {
-        enemyTurn();
+    // Draw the outline for the button area
+    DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
+    if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
+        selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
     }
-    checkForVictory(camera, cubePosition);
+    if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) || 
+    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy)) {
+        selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
+    }
+    if (areAllEnemiesDefeated()) {
+        debug_writeln("Exiting from battle");
+        for (int i = 0; i <= randomNumber; i++) {
+            for (int j = randomNumber; j < enemies.length - 1; j++) {
+                enemies[j] = enemies[j + 1];
+            }
+            UnloadTexture(enemies[i].texture);
+        }
+        StopMusicStream(music);
+        debug_writeln("setting music to ",musicpath);
+        uint audio_size;
+        char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
+        
+        if (audioEnabled) {
+            UnloadMusicStream(music);
+            music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+        }
+        PlayMusicStream(music);
+        allowControl = true;
+        inBattle = false;
+    }
 }

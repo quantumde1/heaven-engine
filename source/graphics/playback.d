@@ -207,7 +207,7 @@ extern (C) int playVideo(char* argv) {
         
         BeginDrawing();
         ClearBackground(Colors.BLACK);
-
+        UpdateMusicStream(music);
         foreach (video; video_list) {
             if (video.buffer is null) {
                 if (libvlc_media_player_get_state(video.player) == libvlc_state_t.libvlc_Playing) {

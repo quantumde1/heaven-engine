@@ -24,23 +24,17 @@ import std.array;
 */
 
 extern (C) nothrow int lua_initBattle(lua_State *L) {
-    originalCubePosition = cubePosition;
-    originalCameraPosition = camera.position;
-    originalCameraTarget = camera.target;
-    StopMusicStream(music);
-    allowControl = false;
-    bool isBoss;
-    if (luaL_checkinteger(L, 2) == 1) {
+    if (luaL_checkinteger(L, 1) == 1) {
         isBossfight = true;
-        name_global = to!string(luaL_checkstring(L, 3));
-        message_global = [to!string(luaL_checkstring(L, 4))];
+        randomNumber = cast(int)luaL_checkinteger(L, 4)-1;
+        name_global = to!string(luaL_checkstring(L, 2));
+        message_global = [to!string(luaL_checkstring(L, 3))];
+        playerStepCounter = encounterThreshold + 1;
     } else {
         isBossfight = false;
+        playerStepCounter = encounterThreshold + 1;
     }
-    playerStepCounter = 0;
-    inBattle = true;
     try {
-        initBattle(camera, cubePosition, cameraAngle, to!int(luaL_checkinteger(L, 1))-1);
     } catch (Exception e) {
 
     }
@@ -106,6 +100,11 @@ extern (C) nothrow int lua_playVideo(lua_State *L) {
 
 extern (C) nothrow int lua_allowControl(lua_State *L) {
     allowControl = true;
+    return 0;
+}
+
+extern (C) nothrow int lua_disallowControl(lua_State *L) {
+    allowControl = false;
     return 0;
 }
 
@@ -401,6 +400,11 @@ extern (C) nothrow int lua_shadersState(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_getTime(lua_State *L) {
+    lua_pushnumber(L, GetTime());
+    return 1;
+}
+
 // Register the dialog functions
 extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dialogBox", &luaL_dialogBox);
@@ -428,9 +432,11 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "playVideo", &lua_playVideo);
     lua_register(L, "isCameraRotating", &luaL_rotateCamState);
     lua_register(L, "allowControl", &lua_allowControl);
+    lua_register(L, "disallowControl", &lua_disallowControl);
     lua_register(L, "drawPlayerModel", &lua_drawPlayerModel);
     lua_register(L, "loadScene", &lua_parseScene);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
+    lua_register(L, "getTime", &lua_getTime);
 }
 
 // Music functions

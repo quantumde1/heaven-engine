@@ -28,7 +28,7 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
     int rectHeight = screenHeight / 2 - (2 * paddingHeight);
     int rectX = paddingWidth;
     int rectY = screenHeight - rectHeight - paddingHeight;
-    Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
+    Color semiTransparentBlack = Color(0, 0, 0, 200); // RGBA: Black with 210 alpha
     DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
     float lineThickness = 5.0f; // Set the desired line thickness
     DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, lineThickness, Color(100, 54, 65, 255)); // Red color
@@ -69,23 +69,40 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
     } else {
         isI = false;
     }
+    int shadowOffsetX = 4; // Смещение по оси X
+    int shadowOffsetY = 4; // Смещение по оси Y
+
     if (nameu[1] == '#') {
         // Draw the character name
         namewidth = MeasureText(toStringz(to!string(nameu.filter!(x => x != '#'))), FONT_SIZE+10); // Measure the width of the nameu text
+        DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), Vector2(position.x + shadowOffsetX, position.y + shadowOffsetY), FONT_SIZE, 1.0f, Colors.BLACK); // Цвет тени
         DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), position, FONT_SIZE, 1.0f, Colors.GREEN);
     }
     else {
         // Draw the character name
         namewidth = MeasureText(toStringz(nameu), FONT_SIZE+10); // Measure the width of the nameu text
+        DrawTextEx(fontdialog, toStringz(nameu), Vector2(position.x + shadowOffsetX, position.y + shadowOffsetY), FONT_SIZE, 1.0f, Colors.BLACK); // Цвет тени
         DrawTextEx(fontdialog, toStringz(nameu), position, FONT_SIZE, 1.0f, Colors.BLUE);
     }
 
     // Draw the current page text with wrapping
     if (isI) {
         Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth + 30, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
+        
+        // Draw shadow
+        Vector2 shadowPosition = Vector2(textBox.x + 4, textBox.y + 4); // Offset for shadow
+        DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), Rectangle(shadowPosition.x, shadowPosition.y, textBox.width, textBox.height), FONT_SIZE, 1.0f, true, Colors.BLACK); // Shadow color
+
+        // Draw actual text
         DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), textBox, FONT_SIZE, 1.0f, true, Colors.WHITE);
     } else {
         Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
+        
+        // Draw shadow
+        Vector2 shadowPosition = Vector2(textBox.x + 4, textBox.y + 4); // Offset for shadow
+        DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), Rectangle(shadowPosition.x, shadowPosition.y, textBox.width, textBox.height), FONT_SIZE, 1.0f, true, Colors.BLACK); // Shadow color
+
+        // Draw actual text
         DrawTextBoxed(fontdialog, toStringz(currentPageText[0 .. currentCharIndex]), textBox, FONT_SIZE, 1.0f, true, Colors.WHITE);
     }
     // Draw the image at the top right corner of the dialog box
@@ -117,7 +134,7 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
     // Display choices if on the choice page
     if (currentPage == choicePage) {
         // Set a fixed position for choices
-        int choiceY = cast(int)(rectY + rectHeight - charPaddingY - (choices.length * (FONT_SIZE + 5)) - 20); // Adjust the -20 as needed for spacing
+        int choiceY = cast(int)(rectY + rectHeight - charPaddingY - (choices.length * (FONT_SIZE + 5)) - 20);
         for (int i = 0; i < choices.length; i++) {
             Color buttonColor = (i == selectedChoice) ? Colors.WHITE : Colors.LIGHTGRAY;
             DrawTextEx(fontdialog, (" "~choices[i]).toStringz, 
@@ -210,6 +227,7 @@ void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl,
     if (showDialog && isCubeNotNull) {
         display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
     }
+    selectedChoice = 0;
 }
 
 // Draw text using font inside rectangle limits
@@ -218,17 +236,12 @@ static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float font
     DrawTextBoxedSelectable(font, text, rec, fontSize, spacing, wordWrap, tint, 0, 0, Colors.WHITE, Colors.WHITE);
 }
 
-// Draw text using font inside rectangle limits with support for text selection
 static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint)
 {
-    int length = TextLength(text);  // Total length in bytes of the text, scanned by codepoints in loop
-
-    float textOffsetY = 0;          // Offset between lines (on line break '\n')
-    float textOffsetX = 0.0f;       // Offset X to next character to draw
-
-    float scaleFactor = fontSize/cast(float)font.baseSize;     // Character rectangle scaling factor
-
-    // Word/character wrapping mechanism variables
+    int length = TextLength(text);
+    float textOffsetY = 0;
+    float textOffsetX = 0.0f;
+    float scaleFactor = fontSize/cast(float)font.baseSize; 
     enum { MEASURE_STATE = 0, DRAW_STATE = 1 };
     int state = wordWrap? MEASURE_STATE : DRAW_STATE;
 
@@ -238,13 +251,10 @@ static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, 
 
     for (int i = 0, k = 0; i < length; i++, k++)
     {
-        // Get next codepoint from byte string and glyph index in font
         int codepointByteCount = 0;
         int codepoint = GetCodepoint(&text[i], &codepointByteCount);
         int index = GetGlyphIndex(font, codepoint);
 
-        // NOTE: Normally we exit the decoding sequence as soon as a bad byte is found (and return 0x3f)
-        // but we need to draw all of the bad bytes using the '?' symbol moving one byte
         if (codepoint == 0x3f) codepointByteCount = 1;
         i += (codepointByteCount - 1);
 
@@ -255,16 +265,8 @@ static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, 
 
             if (i + 1 < length) glyphWidth = glyphWidth + spacing;
         }
-
-        // NOTE: When wordWrap is ON we first measure how much of the text we can draw before going outside of the rec container
-        // We store this info in startLine and endLine, then we change states, draw the text between those two variables
-        // and change states again and again recursively until the end of the text (or until we get outside of the container).
-        // When wordWrap is OFF we don't need the measure state so we go to the drawing state immediately
-        // and begin drawing on the next line before we can get outside the container.
         if (state == MEASURE_STATE)
         {
-            // TODO: There are multiple types of spaces in UNICODE, maybe it's a good idea to add support for more
-            // Ref: http://jkorpela.fi/chars/spaces.html
             if ((codepoint == ' ') || (codepoint == '\t') || (codepoint == '\n')) endLine = i;
 
             if ((textOffsetX + glyphWidth) > rec.width)
@@ -288,7 +290,6 @@ static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, 
                 i = startLine;
                 glyphWidth = 0;
 
-                // Save character position when we switch states
                 int tmp = lastk;
                 lastk = k - 1;
                 k = tmp;
@@ -312,18 +313,14 @@ static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, 
                     textOffsetX = 0;
                 }
 
-                // When text overflows rectangle height limit, just stop drawing
                 if ((textOffsetY + font.baseSize*scaleFactor) > rec.height) break;
 
-                // Draw selection background
                 bool isGlyphSelected = false;
                 if ((selectStart >= 0) && (k >= selectStart) && (k < (selectStart + selectLength)))
                 {
                     DrawRectangleRec(Rectangle( rec.x + textOffsetX - 1, rec.y + textOffsetY, glyphWidth, cast(float)font.baseSize*scaleFactor ), selectBackTint);
                     isGlyphSelected = true;
                 }
-
-                // Draw current character glyph
                 if ((codepoint != ' ') && (codepoint != '\t'))
                 {
                     DrawTextCodepoint(font, codepoint, Vector2( rec.x + textOffsetX, rec.y + textOffsetY ), fontSize, isGlyphSelected? selectTint : tint);

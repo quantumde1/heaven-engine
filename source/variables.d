@@ -51,13 +51,6 @@ int randomNumber;
 Model playerModel;
 Model[] cubeModels;
 
-/* battle related things */
-struct EnemyCube {
-    Vector3 position;
-    string name;
-    int health = 20;
-    Model model;
-}
 Model[20] floorModel;
 bool loadedShader;
 
@@ -66,20 +59,21 @@ struct BattleState {
     int enemyTurns;
     bool playerTurn; // true if it's the player's turn, false for enemies
 }
-Cube[] battleCubes;
+
+struct Enemy {
+    int maxHealth;
+    int currentHealth;
+    Texture2D texture;
+}
+
+Enemy[6] enemies;
 BattleState battleState;
 bool battleDialog;
-EnemyCube[] enemyCubes; // Массив для хранения вражеских кубов
 int selectedEnemyIndex = 0; // Индекс выбранного вражеского куба
 bool selectingEnemy = false; // Флаг выбора вражеского куба
 bool inBattle = false;
 bool isBossfight;
-int retreated;
-float runMessageTimer = 0.0f;
-bool showRunMessage = false;
-bool showRetreatedMessage = false;
-float retreatedMessageTimer = 0.0f;
-string retreatMessage; // To hold the retreat messag
+Texture2D background;
 int selectedTabIndex = 0;
 int secInBattle = false;
 int playerMana = 30;
@@ -98,6 +92,7 @@ bool audioEnabled;
 int gamepadInt = 0;
 
 /* dialogs */
+Texture2D texture_old;
 bool allowControl = true; //for checking is control allowed at this moment
 bool showDialog = false; //is dialog must be shown now
 bool allow_exit_dialog = true; //can you exit from dialog

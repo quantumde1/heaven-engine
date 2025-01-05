@@ -11,6 +11,24 @@ function tablesEqual(table1, table2)
     return true
 end
 
+function checkCoordinatesEquality(x_current, y_current, z_current, x_needed, y_needed, z_needed)
+    local deviation = 2
+    if (x_current >= x_needed - deviation and x_current <= x_needed + deviation) then
+        if (y_current >= y_needed - deviation and y_current <= y_needed + deviation) then
+            if (z_current >= z_needed - deviation and z_current <= z_needed + deviation) then
+                return true
+            else
+                return false
+            end
+        else
+            return false
+        end
+    else
+        return false
+    end
+    return false
+end
+
 function file_exists(filename)
     local file = io.open(filename, "r")  -- Try to open the file in read mode
     if file then
@@ -28,32 +46,32 @@ loadScene("res/scene1.json")
 
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
+        local startTime = getTime() -- Get the current time
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
-        loadMusic("prologue_1.mp3")
-        playMusic()
         hideUI()
-        local startTime = os.clock() -- Get the current time
+        --[[loadMusic("prologue_1.mp3")
+        playMusic()
         load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
         load2Dtexture("epilogue_3.png",2)
         load2Dtexture("epilogue_4.png",3)
         load2Dtexture("epilogue_5.png",4)
         draw2Dtexture(0)
-        local startTime = os.clock() -- Get the current time
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 5 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
-        startTime = os.clock() -- Get the current time
         draw2Dtexture(3)
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
-        startTime = os.clock() -- Get the current time
         draw2Dtexture(4)
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         unload2Dtexture(3)
@@ -61,44 +79,44 @@ function startDialogCoroutine()
         stopDraw2Dtexture()
         load2Dtexture("epilogue_7.png", 3)
         load2Dtexture("epilogue_8.png", 4)
-        startTime = os.clock() -- Get the current time
         draw2Dtexture(3)
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
-        startTime = os.clock() -- Get the current time
         unload2Dtexture(3)
         load2Dtexture("epilogue_6.png", 3)
         draw2Dtexture(4)
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
         unload2Dtexture(4)
         unload2Dtexture(0)
         load2Dtexture("epilogue_1.png",0)
-        startTime = os.clock() -- Get the current time
         draw2Dtexture(3)
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
         draw2Dtexture(0)
-        local startTime = os.clock() -- Get the current time
-        while os.clock() - startTime < 0.29 do
+        startTime = getTime() -- Get the current time
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         stopDraw2Dtexture()
-        startTime = os.clock() -- Get the current time
+        startTime = getTime() -- Get the current time
         draw2Dtexture(1)
-        while os.clock() - startTime < 0.29 do
+        while getTime() - startTime < 4 do
             coroutine.yield() -- Wait for 2 seconds
         end
         -- Draw the texture and wait for 2 seconds
-        startTime = os.clock() -- Get the current time
+        startTime = getTime() -- Get the current time
         draw2Dtexture(2)
-        while os.clock() - startTime < 0.29 do
+        while getTime() - startTime < 5 do
             coroutine.yield() -- Wait for 2 seconds
         end
         unload2Dtexture(0)
@@ -254,13 +272,11 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        local startTime = os.clock() -- Get the current time
-        while os.clock() - startTime < 0.07 do
+        while getTime() - startTime < 0.07 do
             coroutine.yield() -- Wait for 2 seconds
         end
         draw2Dcharacter("tomoko_staying_texture.png", getScreenWidth()/2 - 250, getScreenHeight()/2 - 80, 5.0, 1)
-        local startTime = os.clock() -- Get the current time
-        while os.clock() - startTime < 0.03 do
+        while getTime() - startTime < 0.03 do
             coroutine.yield() -- Wait for 2 seconds
         end
         dialogBox("Tomoko", {"Hey, brother!"}, "tomoko_normal.png", -1, {""}, 0)
@@ -287,12 +303,11 @@ function startDialogCoroutine()
         while isDialogExecuted() do
             coroutine.yield()
         end
-        while os.clock() - startTime < 0.07 do
+        while getTime() - startTime < 0.07 do
             coroutine.yield() -- Wait for 2 seconds
         end
         draw2Dcharacter("mother_staying_texture.png", getScreenWidth()/2 + 310, getScreenHeight()/2 - 80, 5.0, 2)
-        local startTime = os.clock() -- Get the current time
-        while os.clock() - startTime < 0.03 do
+        while getTime() - startTime < 0.03 do
             coroutine.yield() -- Wait for 2 seconds
         end
         dialogBox("Mother", {"Oh, dear, you are such a child. You have to raise the kids better."}, "mother_normal.png", -1, {""}, 0)
@@ -377,8 +392,8 @@ function startDialogCoroutine()
         unload2Dtexture(1)
         unload2Dtexture(2)
         unload2Dtexture(3)
-        stopDraw2Dtexture()
         openMap("home");
+        stopDraw2Dtexture()
         local location_name
         location_name = getLocationName()
         if location_name == "garage" then
@@ -395,7 +410,7 @@ function startDialogCoroutine()
             end
             playVideo("res/videos/movie025.moflex.mp4")
             draw2Dcharacter("spooky_staying_texture.png", getScreenWidth() /2, getScreenHeight()/2 - 100, 5.0, 0)
-            while os.clock() - startTime < 0.07 do
+            while getTime() - startTime < 0.07 do
                 coroutine.yield() -- Wait for 2 seconds
             end
             dialogBox("Spooky", {"Oh, you guys beat me here. Sorry for calling you so suddenly."}, "spooky_normal.png", -1, {""}, 0)
@@ -456,7 +471,7 @@ function startDialogCoroutine()
             while isDialogExecuted() do
                 coroutine.yield()
             end
-            while os.clock() - startTime < 0.03 do
+            while getTime() - startTime < 0.03 do
                 coroutine.yield() -- Wait for 2 seconds
             end
             draw2Dtexture(2)
@@ -498,7 +513,7 @@ function startDialogCoroutine()
                 coroutine.yield()
             end
             stopDraw2Dcharacter(0)
-            while os.clock() - startTime < 0.03 do
+            while getTime() - startTime < 0.03 do
                 coroutine.yield() -- Wait for 2 seconds
             end
             dialogBox("Hitomi", {"Huh? Hold on, Leader...", "Geez, he called us just so we could babysit the trailer for him? Still, I doubt anyone else will show up soon...", "Hey, what should we do?"}, "hitomi_sad.png", 2, {"Save", "Leave", "Gun-type PC"}, 1)
@@ -558,6 +573,7 @@ function startDialogCoroutine()
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
+                stopMusic()
                 playVideo("res/videos/movie01e.moflex.mp4")
                 unload2Dtexture(1)
                 unload2Dtexture(0)
@@ -576,7 +592,7 @@ function startDialogCoroutine()
                     coroutine.yield()
                 end
                 draw2Dtexture(1)
-                dialogBox("???", {"Ah hah haaaaaaaaah! If you need to know anything about the 'Net, just come to me!"}, "empty", -1, {""}, 0)
+                dialogBox("???", {"     Ah hah haaaaaaaaah! If you need to know anything about the 'Net, just come to me!"}, "empty", -1, {""}, 0)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
@@ -608,7 +624,7 @@ function startDialogCoroutine()
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                while os.clock() - startTime < 0.02 do
+                while getTime() - startTime < 0.02 do
                     coroutine.yield() -- Wait for 2 seconds
                 end
                 stopDraw2Dcharacter(0)
@@ -624,53 +640,64 @@ function startDialogCoroutine()
                 unload2Dtexture(3)
                 unload2Dtexture(4)
                 stopMusic()
-                loadMusic("paradigm_x.mp3")
-                playMusic()
-                while os.clock() - startTime < 0.1 do
+                disallowControl()
+                while getTime() - startTime < 0.5 do
                     coroutine.yield() -- Wait for 2 seconds
                 end
                 rotateCamera(50, 40)
                 while isCameraRotating() do
                     coroutine.yield() -- Wait for 2 seconds
                 end
-                if isCameraRotating() == false then
-                    while os.clock() - startTime < 0.1 do
-                        coroutine.yield() -- Wait for 2 seconds
-                    end
+                startTime = getTime()
+                while getTime() - startTime < 0.5 do
+                    coroutine.yield() -- Wait for 2 seconds
                 end
                 rotateCamera(130, 40)
                 while isCameraRotating() do
                     coroutine.yield() -- Wait for 2 seconds
                 end
-                if isCameraRotating() == false then
-                    while os.clock() - startTime < 0.1 do
-                        coroutine.yield() -- Wait for 2 seconds
-                    end
+                startTime = getTime()
+                while getTime() - startTime < 0.5 do
+                    coroutine.yield() -- Wait for 2 seconds
                 end
                 rotateCamera(90, 40)
                 while isCameraRotating() do
                     coroutine.yield() -- Wait for 2 seconds
                 end
-                draw2Dcharacter("hitomi_staying_texture.png", getScreenWidth() /2 - 100, getScreenHeight()/2 - 100, 5.0, 0)
-                dialogBox("Hitomi", {"...Wow!"}, "hitomi_normal.png", -1, {""}, 1)
+                dialogBox("Hitomi", {"...Wow!", "So this a Paradigm X... It's wonderful!", "Hey, where should we go first?"}, "hitomi_normal.png", -1, {""}, 1)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                dialogBox("Hitomi", {"So this a Paradigm X... It's wonderful!", "Hey, where should we go first?"}, "hitomi_normal.png", -1, {""}, 1)
-                while isDialogExecuted() do
-                    coroutine.yield()
-                end
+                stopDraw2Dcharacter(0)]]--
+		        setFriendlyZone(0)
                 showUI()
-                stopDraw2Dcharacter(0)
                 allowControl()
-            end
-        end
+                initBattle(3, "test", "test", 1)
+                loadMusic("paradigm_x.mp3")
+                playMusic()
+            --end
+        --end
     end)
 end
 
+local dialogStage = 0
+
 -- Функция для проверки статуса диалога
 function checkDialogStatus()
-    -- Implement any necessary checks for dialog status here
+    if checkCoordinatesEquality(getPlayerX(), getPlayerY(), getPlayerZ(), 0, 0, -10) == true and dialogStage == 0 then
+        dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"girl", "i wanna take you to a gay bar", "i wanna take you to a gay bar"}, 1)
+        dialogStage = 1
+        while isDialogExecuted() do
+            coroutine.yield()
+        end
+    end
+    if checkCoordinatesEquality(getPlayerX(), getPlayerY(), getPlayerZ(), 0, 0, -20) == true and dialogStage == 1 then
+        dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"lets start a war", "start a nuclear war", "at the gay bar gay bar gay bar"}, 1)
+        dialogStage = 2
+        while isDialogExecuted() do
+            coroutine.yield()
+        end
+    end
 end
 
 -- Функция для обновления диалога
