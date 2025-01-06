@@ -181,8 +181,11 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
 
     Music file: %s
 
+    Random encounter enemy count: %d
+
+    player XP: %d
 }.format(cubePosition, inBattle ? "battle" : "non battle", playerHealth, cameraAngle, 
-        playerStepCounter, encounterThreshold,  audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled, musicpath.to!string);
+        playerStepCounter, encounterThreshold,  audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled, musicpath.to!string, randomNumber+1, XP);
     if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
     else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
@@ -407,6 +410,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         playerStepCounter = encounterThreshold + 1;
                     }
                     if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
+                        enemies = new Enemy[randomNumber+1];
                         originalCubePosition = cubePosition;
                         originalCameraPosition = camera.position;
                         originalCameraTarget = camera.target;

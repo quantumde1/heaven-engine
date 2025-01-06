@@ -60,13 +60,16 @@ struct BattleState {
     bool playerTurn; // true if it's the player's turn, false for enemies
 }
 
+// struct
 struct Enemy {
     int maxHealth;
     int currentHealth;
     Texture2D texture;
 }
 
-Enemy[6] enemies;
+Enemy[] enemies;
+
+int XP;
 BattleState battleState;
 bool battleDialog;
 int selectedEnemyIndex = 0; // Индекс выбранного вражеского куба

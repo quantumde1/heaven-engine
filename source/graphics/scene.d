@@ -222,7 +222,7 @@ float rotationStep, float radius) {
             cameraAngle = (cameraAngle - 90.0f + FULL_ROTATION) % FULL_ROTATION;
         }
         if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && dungeonCrawlerMode) {
-            cameraAngle = (cameraAngle + 90.0f) % FULL_ROTATION;
+                cameraAngle = (cameraAngle + 90.0f) % FULL_ROTATION;
         }
         if (!dungeonCrawlerMode) {
             if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {

@@ -672,7 +672,7 @@ function startDialogCoroutine()
 		        setFriendlyZone(0)
                 showUI()
                 allowControl()
-                initBattle(3, "test", "test", 1)
+                --initBattle(3, "test", "test", 1)
                 loadMusic("paradigm_x.mp3")
                 playMusic()
             --end
