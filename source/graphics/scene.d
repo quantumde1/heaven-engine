@@ -212,32 +212,22 @@ void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float
 void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, 
 float rotationStep, float radius) {
     if (allowControl) {
-        if (IsKeyDown(KeyboardKey.KEY_LEFT) && !dungeonCrawlerMode) {
-            cameraAngle = (cameraAngle - rotationStep + FULL_ROTATION) % FULL_ROTATION;
-        }
-        if (IsKeyDown(KeyboardKey.KEY_RIGHT) && !dungeonCrawlerMode) {
-            cameraAngle = (cameraAngle + rotationStep) % FULL_ROTATION;
-        }
-        if (IsKeyPressed(KeyboardKey.KEY_LEFT) && dungeonCrawlerMode) {
-            cameraAngle = (cameraAngle - 90.0f + FULL_ROTATION) % FULL_ROTATION;
-        }
-        if (IsKeyPressed(KeyboardKey.KEY_RIGHT) && dungeonCrawlerMode) {
-                cameraAngle = (cameraAngle + 90.0f) % FULL_ROTATION;
-        }
+        float targetAngle;
         if (!dungeonCrawlerMode) {
-            if (IsKeyPressed(KeyboardKey.KEY_Q) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
-                cameraAngle = (cameraAngle - 45.0f + FULL_ROTATION) % FULL_ROTATION;
+            if (IsKeyDown(KeyboardKey.KEY_RIGHT)) {
+            cameraAngle = (cameraAngle + rotationStep) % FULL_ROTATION;
             }
-            if (IsKeyPressed(KeyboardKey.KEY_E) || IsGamepadButtonPressed(gamepadInt, 
-            GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
-                cameraAngle = (cameraAngle + 45.0f) % FULL_ROTATION;
+            if (IsKeyDown(KeyboardKey.KEY_LEFT)) {
+                cameraAngle = (cameraAngle - rotationStep + FULL_ROTATION) % FULL_ROTATION;
+
             }
         } else {
-            float rightAxisMovement = GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
-            if (rightAxisMovement < -0.2) {
-                cameraAngle = (cameraAngle - rotationStep * 1.5f + FULL_ROTATION) % FULL_ROTATION;
-            } else if (rightAxisMovement > 0.2) {
-                cameraAngle = (cameraAngle + rotationStep * 1.5f) % FULL_ROTATION;
+            targetAngle = 90.0f;
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+                cameraAngle -= targetAngle;
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+                cameraAngle += targetAngle;
             }
         }
     }

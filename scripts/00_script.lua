@@ -50,7 +50,7 @@ function startDialogCoroutine()
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
         hideUI()
-        --[[loadMusic("prologue_1.mp3")
+        loadMusic("prologue_1.mp3")
         playMusic()
         load2Dtexture("epilogue_1.png",0)
         load2Dtexture("epilogue_2.png",1)
@@ -668,15 +668,15 @@ function startDialogCoroutine()
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                stopDraw2Dcharacter(0)]]--
+                stopDraw2Dcharacter(0)
 		        setFriendlyZone(0)
                 showUI()
                 allowControl()
-                --initBattle(3, "test", "test", 1)
+                initBattle(3, "test", "test", 1)
                 loadMusic("paradigm_x.mp3")
                 playMusic()
-            --end
-        --end
+            end
+        end
     end)
 end
 

@@ -120,7 +120,29 @@ void showMainMenu(ref GameState currentGameState) {
             version (Windows) { 
                 playVideo(cast(char*)("/"~getcwd()~"/"~"res/videos/opening_old.mp4")); // Play the video
             }
+            PlayMusicStream(music);
             inactivityTimer = 0.0f; // Reset the timer after playing the video
+            // Fade-in effect
+            while (fadeAlpha < 1.0f) {
+                fadeAlpha += 0.02f; // Increase alpha value for fading in
+                if (fadeAlpha > 1.0f) fadeAlpha = 1.0f; // Clamp to 1.0
+                BeginDrawing();
+                ClearBackground(Colors.BLACK);
+                DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
+                for (int i = 0; i < menuOptions.length; i++) {
+                    Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
+                    int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
+                    int textX = (screenWidth - textWidth) / 2; // Center the text
+                    int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
+                    Color fadedTextColor = Fade(textColor, fadeAlpha);
+                    DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
+                }
+                int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
+                int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
+                int textX = (screenWidth - textWidth) / 2; // Center the text
+                DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2(textX, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
+                EndDrawing();
+            }
         }
 
         // Draw the logo
@@ -215,7 +237,7 @@ void showMainMenu(ref GameState currentGameState) {
                     for (int i = 0; i < menuOptions.length; i++) {
                         menuOptionYPositions[i] = logoY + logoTexture.height + 100 + (30 * i);
                     }
-
+                fadeAlpha = 1.0f;
                     // Fade out effect when starting the game
                     while (fadeAlpha > 0.0f) {
                         fadeAlpha -= 0.04f; // Decrease the alpha value for fading
