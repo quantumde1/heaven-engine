@@ -37,8 +37,7 @@
 		"raylib",
 		"lua53",
 		"libhpff",
-		"vlc",
-		"dummy"
+		"vlc"
 	],
 	"license": "MIT License",
 	"name": "heaven-engine",

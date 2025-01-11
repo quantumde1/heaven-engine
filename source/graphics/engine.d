@@ -9,7 +9,7 @@ import std.file;
 import std.string;
 import std.conv;
 import ui.flicker;
-import ui.battle;
+import graphics.battle;
 import graphics.menu;
 import graphics.scene;
 import variables;
@@ -25,6 +25,17 @@ import raylib_lights;
 import graphics.map;
 import std.array;
 import ui.inventory;
+
+ControlConfig loadControlConfig() {
+    return ControlConfig(
+        parse_conf("conf/layout.conf", "right"),
+        parse_conf("conf/layout.conf", "left"),
+        parse_conf("conf/layout.conf", "backward"),
+        parse_conf("conf/layout.conf", "forward"),
+        parse_conf("conf/layout.conf", "dialog"),
+        parse_conf("conf/layout.conf", "opmenu")
+    );
+}
 
 char* vscode = cast(char*)("
     #version 330
@@ -143,17 +154,6 @@ enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
 
-ControlConfig loadControlConfig() {
-    return ControlConfig(
-        parse_conf("conf/layout.conf", "right"),
-        parse_conf("conf/layout.conf", "left"),
-        parse_conf("conf/layout.conf", "backward"),
-        parse_conf("conf/layout.conf", "forward"),
-        parse_conf("conf/layout.conf", "dialog"),
-        parse_conf("conf/layout.conf", "opmenu")
-    );
-}
-
 void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
                    int playerStepCounter, int encounterThreshold, bool inBattle) {
     const string debugText = q{
@@ -245,7 +245,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     auto rnd_sec = Random(seed);
     
     encounterThreshold = uniform(900, 3000, rnd);
-    randomNumber = uniform(1, 3, rnd_sec);
+    randomNumber = uniform(1, 4, rnd_sec);
     
     // Window and Audio Initialization
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
@@ -280,7 +280,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     ClearBackground(Colors.BLACK);
     EndDrawing();
     // Load Control Configuration and Initialize Audio
-    immutable ControlConfig controlConfig = loadControlConfig();
+    controlConfig = loadControlConfig();
     showMainMenu(currentGameState);
     // Lua Initialization
     debug { 
@@ -338,7 +338,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         cubes[i].rotation = 0.0f;
     }
     // Main Game Loop
-    import scripts.config;
     while (WindowShouldClose() == false) {
         // Check if the window should close
         if (WindowShouldClose()) {
@@ -394,7 +393,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
                     }
                     if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
-                        draw_navigation(cameraAngle, navFont);
+                        draw_navigation(cameraAngle, navFont, fontdialog);
                     }
                     if (show_sec_dialog && showDialog) {
                         allow_exit_dialog = allowControl = false;
@@ -405,12 +404,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
                     float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
                         1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
-
-                    if (IsKeyPressed(KeyboardKey.KEY_F4)) {
-                        playerStepCounter = encounterThreshold + 1;
+                    
+                    debug {
+                        if (IsKeyPressed(KeyboardKey.KEY_F4)) {
+                            playerStepCounter = encounterThreshold + 1;
+                        }
                     }
                     if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
-                        enemies = new Enemy[randomNumber+1];
+                        enemies = new Enemy[randomNumber];
                         originalCubePosition = cubePosition;
                         originalCameraPosition = camera.position;
                         originalCameraTarget = camera.target;
@@ -445,9 +446,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
                     // Show Map Prompt
                     showMapPrompt = Vector3Distance(cubePosition, targetPosition) < 4.0f;
-                    if (hintNeeded) {
-                        const int posY = GetScreenHeight() - FontSize - 40;
-                        DrawText(toStringz(hint), 40, posY, 20, Colors.BLACK);
+                    if (hintNeeded && !showInventory && !inBattle) {
+                        if (!showDialog) {
+                            Color semiTransparentBlack = Color(0, 0, 0, 200);
+                            int rectWidth = GetScreenWidth() / 5;
+                            int rectHeight = GetScreenHeight() / 10;
+                            int rectX = (GetScreenWidth() - rectWidth) / 2;
+                            int rectY = (GetScreenHeight() - rectHeight) - rectHeight + (rectHeight/2);
+                            Vector2 textSize = MeasureTextEx(fontdialog, toStringz(hint), 30, 1.0f);
+                            float textX = rectX + (rectWidth - textSize.x) / 2;
+                            float textY = rectY + (rectHeight - textSize.y) / 2; 
+                            DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
+                            DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
+                            DrawTextEx(fontdialog, toStringz(hint), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
+                        }
                     }
                     if (showMapPrompt) {
                         const int posY = GetScreenHeight() - FontSize - 40;
@@ -468,9 +480,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             openMap(location_name, false);
                         }
                     }
-                    if (showDialog) {
-
-                    } else {
+                    if (!showDialog) {
                         // Flickering Effect
                         int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
                         if (!inBattle && !friendlyZone && !hideNavigation) {
@@ -500,11 +510,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         }
                     }
                     // Check Dialog Status
-                    lua_getglobal(L, "checkDialogStatus");
+                    lua_getglobal(L, "_3dEventLoop");
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
                         lua_pop(L, 2);
                     } else {
-                        debug_writeln("Unable to check dialog status or cannot rotate camera: ", to!string(lua_tostring(L, -1)));
+                        debug_writeln("Error in 2DEventLoop: ", to!string(lua_tostring(L, -1)));
                     }
 
                     // Draw Debug Information

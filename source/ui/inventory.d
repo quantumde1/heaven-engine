@@ -9,7 +9,57 @@ import std.conv;
 import std.algorithm;
 import scripts.config;
 import std.string;
-import ui.battle;
+import graphics.battle;
+import ui.common;
+
+void handleMenuInput(int numberOfButtons, int numberOfTabs) {
+    if (inBattle) { 
+        return;
+    }
+    // Handle input for navigating through buttons and tabs
+    if ((IsKeyPressed(KeyboardKey.KEY_DOWN)) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) )) {
+        selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
+    }
+    if ((IsKeyPressed(KeyboardKey.KEY_UP)) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) )) {
+        selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
+    }
+    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT)) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) ) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) )) {
+        selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
+        selectedButtonIndex = 0; // Reset button selection when changing tabs
+    }
+    if ((IsKeyPressed(KeyboardKey.KEY_LEFT)) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) ) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) )) {
+        selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
+        selectedButtonIndex = 0; // Reset button selection when changing tabs
+    }
+    if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
+        allowControl = true;
+        showInventory = false;
+        return;
+    }
+    switch (selectedTabIndex) {
+        case 0: // Attack
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 1 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 1) {
+                currentGameState = GameState.Exit;
+            }
+            break;
+        default:
+            break;
+    }
+}
 
 void drawInventory() {
     allowControl = false;
@@ -20,31 +70,6 @@ void drawInventory() {
     string[] menuTabs = ["Summon", "Return", "Skill", "Item", "System"];
     int numberOfTabs = cast(int)menuTabs.length;
     int tabWidth = screenWidth / numberOfTabs;
-    DrawRectangleRounded(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, semiTransparentBlack);
-    // Draw the outline for the rounded rectangle
-    DrawRectangleRoundedLinesEx(Rectangle(0, 0, screenWidth, barHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color for the outline
-    for (int i = 0; i < numberOfTabs; i++) {
-        Color tabColor = (i == selectedTabIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
-        DrawRectangle(i * tabWidth, 0, tabWidth, barHeight, tabColor);
-        
-        // Calculate the Y-coordinate for the text to be at the bottom left of the tab
-        int textY = barHeight - 40; // Adjust this value for vertical positioning
-        DrawTextEx(fontdialog, toStringz(menuTabs[i]), Vector2(i * tabWidth + 10, textY), 40, 1.0f, Colors.WHITE);
-    }
-
-    if ((IsKeyPressed(KeyboardKey.KEY_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && !selectingEnemy)) {
-        selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
-        selectedButtonIndex = 0;
-    }
-    if ((IsKeyPressed(KeyboardKey.KEY_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) && !selectingEnemy) || (IsGamepadButtonPressed(gamepadInt, 
-    GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !selectingEnemy)) {
-        selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
-        selectedButtonIndex = 0;
-    }
-
     string[] buttonText = buttonTextsInventory[selectedTabIndex];
     int numberOfButtons = cast(int)buttonText.length;
     int rectWidth = screenWidth / 4;
@@ -54,38 +79,17 @@ void drawInventory() {
 
     int buttonHeight = 50;
     int buttonMargin = 10;
+
+    // Draw the menu bar
+    drawMenuBar(barHeight, tabWidth, menuTabs, semiTransparentBlack);
+
+    // Draw player health and mana bars
     drawPlayerHealthBar(playerHealth, 120);
     drawPlayerManaBar(playerMana, 30);
-    // Draw the background rectangle for the button area
-    DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
-    
-    for (int i = 0; i < numberOfButtons; i++) {
-        int buttonY = rectY + (buttonHeight + buttonMargin) * i;
-        Color buttonColor = (i == selectedButtonIndex) ? semiTransparentBlack : Color(0, 0, 0, 150);
-        
-        // Draw the rounded rectangle for each button
-        DrawRectangleRounded(Rectangle(rectX + buttonMargin, buttonY, rectWidth - (2 * buttonMargin), buttonHeight), 0.03f, 16, buttonColor);
-        
-        // Draw the button text
-        DrawTextEx(fontdialog, toStringz(buttonText[i]), Vector2(rectX + buttonMargin + 10, buttonY + 4), 30, 1.0f, Colors.WHITE);
-    }
-    
-    // Draw the outline for the button area
-    DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255)); // Red color
-    if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
-    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) && !selectingEnemy)) {
-        selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
-    }
-    if ((IsKeyPressed(KeyboardKey.KEY_UP) && !selectingEnemy) || 
-    (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) && !selectingEnemy)) {
-        selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
-    }
-    if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 1 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 1) {
-        currentGameState = GameState.Exit;
-    }
-    if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
-        allowControl = true;
-        showInventory = false;
-        return;
-    }
+
+    // Draw the button panel
+    drawButtonPanel(rectX, rectY, rectWidth, rectHeight, buttonText, numberOfButtons, buttonHeight, buttonMargin);
+
+    // Handle input for menu navigation
+    handleMenuInput(numberOfButtons, numberOfTabs);
 }

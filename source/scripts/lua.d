@@ -11,7 +11,7 @@ import graphics.cubes;
 import std.string;
 import graphics.engine;
 import graphics.scene;
-import ui.battle;
+import graphics.battle;
 import graphics.video;
 import std.file;
 import graphics.map;
@@ -180,12 +180,61 @@ extern (C) nothrow int luaL_rotateCamState(lua_State* L) {
     return 1;
 }
 
+bool isControlConfigUsed;
+
+extern (C) nothrow int luaL_getButtonDialog(lua_State *L) {
+    try {
+        if (!isControlConfigUsed) {
+            switch (to!string(luaL_checkstring(L, 1))) {
+                case "dialog":
+                    button = controlConfig.dialog_button;
+                    break;
+                case "forward":
+                    button = controlConfig.forward_button;
+                    break;
+                case "backward":
+                    button = controlConfig.back_button;
+                    break;
+                case "left":
+                    button = controlConfig.left_button;
+                    break;
+                case "right":
+                    button = controlConfig.right_button;
+                    break;
+                case "opmenu":
+                    button = controlConfig.opmenu_button;
+                    break;
+                default:
+                    break;
+            }
+            isControlConfigUsed = true;
+        }
+        lua_pushstring(L, toStringz(button.to!string));
+    } catch (Exception e) {
+
+    }
+    return 1;
+}
+
 string hint;
 
 extern (C) nothrow int luaL_showHint(lua_State *L) {
-    hint = "Hint: "~to!string(luaL_checkstring(L, 1));
+    hint = ""~to!string(luaL_checkstring(L, 1));
     hintNeeded = true;
     return 0;
+}
+
+extern (C) nothrow int luaL_isKeyPressed(lua_State *L) {
+    try {
+        if (IsKeyPressed((button))) {
+            lua_pushboolean(L, true);
+        } else {
+            lua_pushboolean(L, false);
+        }
+    } catch (Exception e) {
+
+    }
+    return 1;
 }
 
 extern (C) nothrow int luaL_hideHint(lua_State *L) {
@@ -199,7 +248,7 @@ extern (C) void luaL_initDialogs(lua_State* L) {
 }
 
 extern (C) void luaL_updateDialog(lua_State* L) {
-    lua_getglobal(L, "updateDialog");
+    lua_getglobal(L, "_2dEventLoop");
     lua_pcall(L, 0, 0, 0); // Call the updateDialog function in Lua
 }
 
@@ -425,7 +474,9 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
+    lua_register(L, "getButtonName", &luaL_getButtonDialog);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
+    lua_register(L, "isKeyPressed", &luaL_isKeyPressed);
     lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
     lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
     lua_register(L, "load2Dtexture", &lua_load2Dbackground);

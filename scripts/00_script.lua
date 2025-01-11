@@ -12,7 +12,7 @@ function tablesEqual(table1, table2)
 end
 
 function checkCoordinatesEquality(x_current, y_current, z_current, x_needed, y_needed, z_needed)
-    local deviation = 2
+    local deviation = 4
     if (x_current >= x_needed - deviation and x_current <= x_needed + deviation) then
         if (y_current >= y_needed - deviation and y_current <= y_needed + deviation) then
             if (z_current >= z_needed - deviation and z_current <= z_needed + deviation) then
@@ -49,7 +49,7 @@ function startDialogCoroutine()
         local startTime = getTime() -- Get the current time
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
-        hideUI()
+        hideUI()--[[
         loadMusic("prologue_1.mp3")
         playMusic()
         load2Dtexture("epilogue_1.png",0)
@@ -668,40 +668,43 @@ function startDialogCoroutine()
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                stopDraw2Dcharacter(0)
+                stopDraw2Dcharacter(0)]]--
 		        setFriendlyZone(0)
-                showUI()
-                allowControl()
-                initBattle(3, "test", "test", 1)
+                --initBattle(3, "test", "test", 1)
                 loadMusic("paradigm_x.mp3")
                 playMusic()
-            end
-        end
+                showUI()
+                allowControl()
+            --end
+        --end
     end)
 end
 
 local dialogStage = 0
 
 -- Функция для проверки статуса диалога
-function checkDialogStatus()
+function _3dEventLoop()
     if checkCoordinatesEquality(getPlayerX(), getPlayerY(), getPlayerZ(), 0, 0, -10) == true and dialogStage == 0 then
-        dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"girl", "i wanna take you to a gay bar", "i wanna take you to a gay bar"}, 1)
+        --[[dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"girl", "i wanna take you to a gay bar", "i wanna take you to a gay bar"}, 1)
         dialogStage = 1
         while isDialogExecuted() do
             coroutine.yield()
+        end]]--
+        showHint("Press "..getButtonName("dialog").." to talk")
+        if isKeyPressed(getButtonName("dialog")) then
+            dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"girl", "i wanna take you to a gay bar", "i wanna take you to a gay bar"}, 1)
+            
+            while isDialogExecuted() do
+                coroutine.yield()
+            end
         end
-    end
-    if checkCoordinatesEquality(getPlayerX(), getPlayerY(), getPlayerZ(), 0, 0, -20) == true and dialogStage == 1 then
-        dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"lets start a war", "start a nuclear war", "at the gay bar gay bar gay bar"}, 1)
-        dialogStage = 2
-        while isDialogExecuted() do
-            coroutine.yield()
-        end
+    else
+        hideHint()
     end
 end
 
 -- Функция для обновления диалога
-function updateDialog()
+function _2dEventLoop()
     if dialogCoroutine and coroutine.status(dialogCoroutine) ~= "dead" then
         coroutine.resume(dialogCoroutine) -- Возобновление выполнения корутины
     end

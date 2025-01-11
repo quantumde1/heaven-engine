@@ -8,6 +8,16 @@ import raylib_lights;
 
 extern (C) char* get_file_data_from_archive(const char *input_file, const char *file_name, uint *file_size_out);
 
+ControlConfig controlConfig;
+
+const int PLAYER_HEALTH_BAR_X = 10;
+const float CUBE_DRAW_HEIGHT = 2.5f;
+const float PLAYER_HEALTH_BAR_WIDTH = 200.0f;
+const float PLAYER_HEALTH_BAR_HEIGHT = 20.0f;
+const int PLAYER_HEALTH_BAR_Y_OFFSET = 10;
+const int ATTACK_DAMAGE = 5;
+const int PLAYER_DAMAGE = 15;
+
 /* camera related things */
 Vector3 positionCam; // = Vector3(0.0f, 10.0f, 10.0f);    
 Vector3 targetCam; // = Vector3(0.0f, 4.0f, 0.0f); 
@@ -109,7 +119,7 @@ char* emotion_global;
 string name_global;
 string[] message_global;
 bool show_sec_dialog = false;
-static int currentChoiceCharIndex = 0;
+immutable int currentChoiceCharIndex = 0;
 bool event_initialized;
 string[] choices; // To hold choices from Lua
 Font fontdialog;
@@ -159,13 +169,15 @@ Texture2D[5] backgrounds;
 
 /* controls */
 struct ControlConfig {
-    immutable char right_button;
-    immutable char left_button;
-    immutable char back_button;
-    immutable char forward_button;
-    immutable char dialog_button;
-    immutable char opmenu_button;
+    char right_button;
+    char left_button;
+    char back_button;
+    char forward_button;
+    char dialog_button;
+    char opmenu_button;
 }
+
+char button;
 
 /* main menu */
 bool debugBuild = false;

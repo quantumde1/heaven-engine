@@ -5,12 +5,12 @@ import std.math;
 import variables;
 
 void draw_flickering_rhombus(int colorChoice, float intensity) {
-    int rhombusSize = 150;
-    int padding = 20;
-    int rhombusX = padding;
-    int rhombusY = GetScreenHeight() - rhombusSize - padding;
-    int centerX = rhombusX + rhombusSize / 2;
-    int centerY = rhombusY + rhombusSize / 2;
+    int rectWidth = 100; // Ширина прямоугольника
+    int rectHeight = 100; // Высота прямоугольника
+    int padding = 80;
+    int rectX = padding; // X-координата
+    int rectY = GetScreenHeight() - rectHeight - padding; // Y-координата
+
     Color color;
     switch (colorChoice) {
         case 0:
@@ -27,8 +27,9 @@ void draw_flickering_rhombus(int colorChoice, float intensity) {
             break;
         default:
             color = Colors.GREEN;
-            break; // Default to green if an unknown value is passed
+            break; // По умолчанию зеленый, если передано неизвестное значение
     }
+
     if (increasing) {
         flicker += GetFrameTime();
         if (flicker >= 1.0) {
@@ -42,12 +43,10 @@ void draw_flickering_rhombus(int colorChoice, float intensity) {
             increasing = true;
         }
     }
-    color.a = cast(char)(flicker * 255);
-    Vector2[4] points = [
-        Vector2(centerX, centerY - rhombusSize / 2),
-        Vector2(centerX + rhombusSize / 2, centerY),
-        Vector2(centerX, centerY + rhombusSize / 2),
-        Vector2(centerX - rhombusSize / 2, centerY)
-    ];
-    DrawPoly(Vector2(centerX+40, centerY-50), 4, rhombusSize / 2, 90.0f, color);
+    if (!showInventory) {
+        color.a = cast(char)(flicker * 255);
+        DrawRectangle(rectX, rectY, rectWidth, rectHeight, Color(0, 0, 0, 200));
+        DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
+        DrawRectangle(rectX, rectY, rectWidth, rectHeight, color);
+    }
 }

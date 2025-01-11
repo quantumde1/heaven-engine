@@ -210,24 +210,27 @@ void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float
 }
 
 void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, 
-float rotationStep, float radius) {
+                  float rotationStep, float radius) {
     if (allowControl) {
         float targetAngle;
         if (!dungeonCrawlerMode) {
             if (IsKeyDown(KeyboardKey.KEY_RIGHT)) {
-            cameraAngle = (cameraAngle + rotationStep) % FULL_ROTATION;
+                cameraAngle = fmod(cameraAngle + rotationStep, 360.0f);
+                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
             if (IsKeyDown(KeyboardKey.KEY_LEFT)) {
-                cameraAngle = (cameraAngle - rotationStep + FULL_ROTATION) % FULL_ROTATION;
-
+                cameraAngle = fmod(cameraAngle - rotationStep, 360.0f);
+                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
         } else {
             targetAngle = 90.0f;
             if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
-                cameraAngle -= targetAngle;
+                cameraAngle = fmod(cameraAngle - targetAngle, 360.0f);
+                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
             if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
-                cameraAngle += targetAngle;
+                cameraAngle = fmod(cameraAngle + targetAngle, 360.0f);
+                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
         }
     }
