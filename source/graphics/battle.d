@@ -185,7 +185,8 @@ void drawBattleMenu() {
 
         DrawTextEx(fontdialog, toStringz("Current XP: " ~ to!string(XP+addXP)), Vector2(rectX + 30, textY), 30, 1.0f, Colors.WHITE);
 
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER)) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER)
+        || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
             float fadeOutAlpha = 0.0f;
             while (fadeOutAlpha < 255) {
                 fadeOutAlpha += 5;
@@ -244,14 +245,16 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
     }
     switch (selectedTabIndex) {
         case 0: // Attack
-            if (selectedTabIndex == 0 && IsKeyPressed(KeyboardKey.KEY_ENTER) && !selectingEnemy) {
+            if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedTabIndex == 0 && !selectingEnemy
+            || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)  && selectedTabIndex == 0 && !selectingEnemy) {
                 debug_writeln("Enter pressed with selecting enemy to true");
                 selectingEnemy = true;
                 // Дополнительная проверка, чтобы избежать повторного срабатывания
                 if (enemies[selectedEnemyIndex].currentHealth <= 0) {
                     debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
                 }
-            } else if (selectingEnemy && IsKeyPressed(KeyboardKey.KEY_ENTER)) {
+            } else if (selectingEnemy && IsKeyPressed(KeyboardKey.KEY_ENTER)
+            || selectingEnemy && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
                 debug_writeln("enter pressed for acting");
                 debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp before attack is ", enemies[selectedEnemyIndex].currentHealth);
                 performPhysicalAttack(selectedEnemyIndex);

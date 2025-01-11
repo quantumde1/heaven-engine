@@ -214,21 +214,25 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     if (allowControl) {
         float targetAngle;
         if (!dungeonCrawlerMode) {
-            if (IsKeyDown(KeyboardKey.KEY_RIGHT)) {
+            if (IsKeyDown(KeyboardKey.KEY_RIGHT)
+            || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle + rotationStep, 360.0f);
                 if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
-            if (IsKeyDown(KeyboardKey.KEY_LEFT)) {
+            if (IsKeyDown(KeyboardKey.KEY_LEFT)
+            || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle - rotationStep, 360.0f);
                 if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
         } else {
             targetAngle = 90.0f;
-            if (IsKeyPressed(KeyboardKey.KEY_LEFT)) {
+            if (IsKeyPressed(KeyboardKey.KEY_LEFT)
+            || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle - targetAngle, 360.0f);
                 if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }
-            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)) {
+            if (IsKeyPressed(KeyboardKey.KEY_RIGHT)
+            || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle + targetAngle, 360.0f);
                 if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
             }

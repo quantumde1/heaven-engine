@@ -449,13 +449,26 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (hintNeeded && !showInventory && !inBattle) {
                         if (!showDialog) {
                             Color semiTransparentBlack = Color(0, 0, 0, 200);
-                            int rectWidth = GetScreenWidth() / 5;
-                            int rectHeight = GetScreenHeight() / 10;
-                            int rectX = (GetScreenWidth() - rectWidth) / 2;
-                            int rectY = (GetScreenHeight() - rectHeight) - rectHeight + (rectHeight/2);
+                            
+                            // Measure the text size
                             Vector2 textSize = MeasureTextEx(fontdialog, toStringz(hint), 30, 1.0f);
-                            float textX = rectX + (rectWidth - textSize.x) / 2;
-                            float textY = rectY + (rectHeight - textSize.y) / 2; 
+                            
+                            // Define padding around the text
+                            int padding = 20; // You can adjust this value as needed
+                            
+                            // Calculate the rectangle dimensions based on the text size and padding
+                            int rectWidth = to!int(textSize.x + 2 * padding);
+                            int rectHeight = to!int(textSize.y + 2 * padding);
+                            
+                            // Center the rectangle on the screen
+                            int rectX = (GetScreenWidth() - rectWidth) / 2;
+                            int rectY = (GetScreenHeight() - rectHeight) - rectHeight + (rectHeight / 2);
+                            
+                            // Calculate the text position within the rectangle
+                            float textX = rectX + padding;
+                            float textY = rectY + padding;
+                            
+                            // Draw the rectangle and text
                             DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
                             DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
                             DrawTextEx(fontdialog, toStringz(hint), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);

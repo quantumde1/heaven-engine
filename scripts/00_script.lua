@@ -712,7 +712,7 @@ end
 
 shadersState(0)
 -- Настройка позиции камеры
-local dungeonCrawler = true
+local dungeonCrawler = false
 if dungeonCrawler == true then
     changeCameraPosition(0.0, 7.0, 0.1)
     changeCameraTarget(0.0, 7.0, 0.0)

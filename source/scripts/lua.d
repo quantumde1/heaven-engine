@@ -180,36 +180,62 @@ extern (C) nothrow int luaL_rotateCamState(lua_State* L) {
     return 1;
 }
 
-bool isControlConfigUsed;
-
 extern (C) nothrow int luaL_getButtonDialog(lua_State *L) {
     try {
-        if (!isControlConfigUsed) {
-            switch (to!string(luaL_checkstring(L, 1))) {
-                case "dialog":
-                    button = controlConfig.dialog_button;
-                    break;
-                case "forward":
-                    button = controlConfig.forward_button;
-                    break;
-                case "backward":
-                    button = controlConfig.back_button;
-                    break;
-                case "left":
-                    button = controlConfig.left_button;
-                    break;
-                case "right":
-                    button = controlConfig.right_button;
-                    break;
-                case "opmenu":
-                    button = controlConfig.opmenu_button;
-                    break;
-                default:
-                    break;
+            if (!IsGamepadAvailable(gamepadInt)) {
+                switch (to!string(luaL_checkstring(L, 1))) {
+                    case "dialog":
+                        button = controlConfig.dialog_button;
+                        break;
+                    case "forward":
+                        button = controlConfig.forward_button;
+                        break;
+                    case "backward":
+                        button = controlConfig.back_button;
+                        break;
+                    case "left":
+                        button = controlConfig.left_button;
+                        break;
+                    case "right":
+                        button = controlConfig.right_button;
+                        break;
+                    case "opmenu":
+                        button = controlConfig.opmenu_button;
+                        break;
+                    default:
+                        break;
+                }
+                lua_pushstring(L, toStringz(button.to!string));
+            } else {
+                switch (to!string(luaL_checkstring(L, 1))) {
+                    case "dialog":
+                        button = GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
+                        lua_pushstring(L, toStringz("Circle/B"));
+                        break;
+                    case "forward":
+                        button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP;
+                        lua_pushstring(L, toStringz("Up"));
+                        break;
+                    case "backward":
+                        button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN;
+                        lua_pushstring(L, toStringz("Down"));
+                        break;
+                    case "left":
+                        button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP;
+                        lua_pushstring(L, toStringz("Left"));
+                        break;
+                    case "right":
+                        button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
+                        lua_pushstring(L, toStringz("Right"));
+                        break;
+                    case "opmenu":
+                        button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT;
+                        lua_pushstring(L, toStringz("Triangle/X"));
+                        break;
+                    default:
+                        break;
+                }
             }
-            isControlConfigUsed = true;
-        }
-        lua_pushstring(L, toStringz(button.to!string));
     } catch (Exception e) {
 
     }
@@ -226,10 +252,18 @@ extern (C) nothrow int luaL_showHint(lua_State *L) {
 
 extern (C) nothrow int luaL_isKeyPressed(lua_State *L) {
     try {
-        if (IsKeyPressed((button))) {
-            lua_pushboolean(L, true);
+        if (!IsGamepadAvailable(gamepadInt)) {
+            if (IsKeyPressed((button))) {
+                lua_pushboolean(L, true);
+            } else {
+                lua_pushboolean(L, false);
+            }
         } else {
-            lua_pushboolean(L, false);
+            if (IsGamepadButtonPressed(gamepadInt, button.to!int)) {
+                lua_pushboolean(L, true);
+            } else {
+                lua_pushboolean(L, false);
+            }
         }
     } catch (Exception e) {
 
