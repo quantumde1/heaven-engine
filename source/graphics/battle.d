@@ -17,6 +17,55 @@ import std.random;
 import std.datetime;
 import ui.common;
 
+Texture2D[] attackAnimationFrames;
+int currentFrame = 0;
+float frameTime = 0.0f;
+const float frameDuration = 0.016f; // Было 0.1f, теперь в 3 раза быстрее
+bool isPlayingAnimation = false;
+
+Texture2D[] loadAnimationFrames(const string archivePath, const string animationName) {
+    Texture2D[] frames;
+    uint frameIndex = 1;
+    while (true) {
+        string frameFileName = format("processed_%s_frame_%04d.png", animationName, frameIndex);
+        uint image_size;
+        debug_writeln(frameFileName);
+        char* image_data = get_file_data_from_archive(cast(const(char)*)archivePath.ptr, cast(const(char)*)frameFileName.ptr, &image_size);
+        if (image_data == null) {
+            debug_writeln("exiting from load anim");
+            break; // Если файл не найден, завершаем цикл
+        }
+        Image image = LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size);
+        Texture2D texture = LoadTextureFromImage(image);
+        UnloadImage(image);
+        frames ~= texture;
+        frameIndex++;
+    }
+    return frames;
+}
+
+void drawAttackAnimation() {
+    if (isPlayingAnimation && currentFrame < attackAnimationFrames.length) {
+        Texture2D currentTexture = attackAnimationFrames[currentFrame];
+        Vector2 position = Vector2(
+            (GetScreenWidth() - currentTexture.width * 6) / 2, // Учитываем увеличение масштаба
+            (GetScreenHeight() - currentTexture.height * 6) / 2 // Учитываем увеличение масштаба
+        );
+        DrawTextureEx(currentTexture, position, 0, 6.0, Colors.WHITE); // Масштаб 3.0 вместо 1.0
+
+        // Обновляем время кадра
+        frameTime += GetFrameTime();
+        if (frameTime >= frameDuration) {
+            frameTime = 0.0f;
+            currentFrame++;
+            if (currentFrame >= attackAnimationFrames.length) {
+                isPlayingAnimation = false;
+                currentFrame = 0;
+            }
+        }
+    }
+}
+
 void loadAssets() {
     // Populating massive
     for (int i = 0; i < randomNumber; i++) {
@@ -34,10 +83,14 @@ void loadAssets() {
 }
 
 void initBattle() {
-    //Setting states and loading assets
+    // Setting states and loading assets
     loadAssets();
     battleState.playerTurns = 1;
     battleState.playerTurn = true;
+
+    // Load attack animation
+    attackAnimationFrames = loadAnimationFrames("res/attack/SW_00.bin", "SW_00");
+    isPlayingAnimation = false;
 }
 
 void exitBattle() {
@@ -129,6 +182,8 @@ void drawBattleMenu() {
     checkVictory();
     // Draw enemies on the screen
     drawEnemies();
+    // Draw attack animation if playing
+    drawAttackAnimation();
     Color semiTransparentBlack = Color(0, 0, 0, 200); // Black with 200 alpha
     if (drawBattleUI) {
         // Set up screen dimensions and UI variables
@@ -160,7 +215,8 @@ void drawBattleMenu() {
 
         // Handle input for menu navigation
         handleMenuInput(numberOfButtons, numberOfTabs);
-    } else {
+    }
+    if (!isPlayingAnimation && !drawBattleUI) {
         uint seed = cast(uint)Clock.currTime().toUnixTime();
         auto rnd = Random(seed);
         int addXP = 5 * (randomNumber);
@@ -214,6 +270,7 @@ void drawBattleMenu() {
             inBattle = false;
             allowControl = true;
             drawBattleUI = true;
+        
         }
     }
 }
@@ -310,6 +367,11 @@ void performPhysicalAttack(int enemyIndex) {
             debug_writeln("Killed enemy no.", enemyIndex,"! removing...");
             enemies[enemyIndex].currentHealth = 0; // Mark as dead
         }
+
+        // Start attack animation
+        isPlayingAnimation = true;
+        currentFrame = 0;
+        frameTime = 0.0f;
     }
 }
 
