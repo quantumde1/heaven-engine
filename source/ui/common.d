@@ -1,34 +1,85 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 module ui.common;
 
 import raylib;
 import std.string;
 import std.conv;
 import variables;
+import scripts.config;
 
-void drawPlayerHealthBar(int playerHealth, int maxPlayerHealth) {
-    int screenHeight = GetScreenHeight();
+const int PLAYER_HEALTH_BAR_X = 10;
+const float PLAYER_HEALTH_BAR_WIDTH = 300.0f;
+const float PLAYER_HEALTH_BAR_HEIGHT = 30.0f;
+const int PLAYER_HEALTH_BAR_Y_OFFSET = 600;
+
+void drawPlayerHealthAndManaBar(int playerHealth, int maxPlayerHealth, int playerMana, int maxPlayerMana, float xOffset, float yOffset, float barWidth, float barHeight, string playerName) {
     float healthPercentage = cast(float)playerHealth / maxPlayerHealth;
-    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET), 
-                  cast(int)PLAYER_HEALTH_BAR_WIDTH, cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
-    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - PLAYER_HEALTH_BAR_Y_OFFSET), 
-                  cast(int)(PLAYER_HEALTH_BAR_WIDTH * healthPercentage), cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.RED);
-    string healthText = "Health: " ~ to!string(playerHealth) ~ "/" ~ to!string(maxPlayerHealth);
-    DrawText(toStringz(healthText), PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-                  PLAYER_HEALTH_BAR_Y_OFFSET + 5), 10, Colors.WHITE);
+    float manaPercentage = cast(float)playerMana / maxPlayerMana;
+
+    // Увеличиваем высоту прямоугольника, чтобы вместить текст имени
+    float totalHeight = barHeight * 2 + 30; // Увеличиваем высоту на 30 пикселей для текста имени
+    DrawRectangleRounded(Rectangle(xOffset, yOffset, barWidth, totalHeight), 0.03f, 16, Color(0, 0, 0, 200));
+    DrawRectangleRoundedLinesEx(Rectangle(xOffset, yOffset, barWidth, totalHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
+
+    // Отрисовка имени персонажа внутри прямоугольника
+    Vector2 nameTextSize = MeasureTextEx(fontdialog, toStringz(playerName), 20, 1.0f);
+    float nameTextX = xOffset + (barWidth - nameTextSize.x) / 2; // Центрирование по горизонтали
+    float nameTextY = yOffset + 5; // Размещение внутри прямоугольника (с небольшим отступом сверху)
+    DrawTextEx(fontdialog, toStringz(playerName), Vector2(nameTextX, nameTextY), 20, 1.0f, Colors.WHITE);
+
+    // Отрисовка полоски здоровья
+    DrawRectangleRounded(Rectangle(xOffset + 5, yOffset + 30, cast(int)((barWidth - 10) * healthPercentage), barHeight - 10), 0.03f, 16, Colors.RED);
+
+    // Отрисовка полоски маны
+    DrawRectangleRounded(Rectangle(xOffset + 5, yOffset + barHeight + 30, cast(int)((barWidth - 10) * manaPercentage), barHeight - 10), 0.03f, 16, Colors.BLUE);
+
+    // Текст здоровья и маны
+    if (playerHealth == 0) {
+        string healthText = "EMPTY";
+        Vector2 textSize = MeasureTextEx(fontdialog, toStringz(healthText), 30, 1.0f);
+        float textX = xOffset + (barWidth - textSize.x) / 2; // Центрирование по горизонтали
+        float textY = yOffset + (totalHeight - textSize.y) / 2; // Центрирование по вертикали
+        DrawTextEx(fontdialog, toStringz(healthText), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
+    } else {
+        string healthText = "HP: " ~ to!string(playerHealth) ~ "/" ~ to!string(maxPlayerHealth);
+        DrawTextEx(fontdialog, toStringz(healthText), Vector2(xOffset + 10, yOffset + 30), 20, 1.0f, Colors.WHITE);
+
+        string manaText = "MP: " ~ to!string(playerMana) ~ "/" ~ to!string(maxPlayerMana);
+        DrawTextEx(fontdialog, toStringz(manaText), Vector2(xOffset + 10, yOffset + barHeight + 30), 20, 1.0f, Colors.WHITE);
+    }
 }
 
-void drawPlayerManaBar(int playerMana, int maxPlayerMana) {
+void drawPartyHealthAndManaBars() {
+    int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
-    float manaPercentage = cast(float)playerMana / maxPlayerMana;
-    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-                  PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)PLAYER_HEALTH_BAR_WIDTH, 
-                  cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.GRAY);
-    DrawRectangle(PLAYER_HEALTH_BAR_X, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-                  PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5), cast(int)(PLAYER_HEALTH_BAR_WIDTH * manaPercentage), 
-                  cast(int)PLAYER_HEALTH_BAR_HEIGHT, Colors.BLUE);
-    string manaText = "Mana: " ~ to!string(playerMana) ~ "/" ~ to!string(maxPlayerMana);
-    DrawText(toStringz(manaText), PLAYER_HEALTH_BAR_X + 5, cast(int)(screenHeight - PLAYER_HEALTH_BAR_HEIGHT - 
-                  PLAYER_HEALTH_BAR_Y_OFFSET - PLAYER_HEALTH_BAR_HEIGHT - 5 + 5), 10, Colors.WHITE);
+    float barWidth = PLAYER_HEALTH_BAR_WIDTH; 
+    float barHeight = PLAYER_HEALTH_BAR_HEIGHT;
+    float spacing = 45.0f;
+
+    int rows = 2;
+    int columns = 3;
+
+    float startX = screenWidth - (columns * (barWidth + 15)); 
+    float startY = screenHeight - (rows * (barHeight * 2 + spacing));
+
+    for (int i = 0; i < partyMembers.length; i++) {
+        int row = i / columns;
+        int col = i % columns;
+
+        float xOffset = startX + col * (barWidth + 15.0f);
+        float yOffset = startY + row * (barHeight * 2 + spacing);
+        drawPlayerHealthAndManaBar(
+            partyMembers[i].currentHealth,
+            partyMembers[i].maxHealth,
+            partyMembers[i].currentMana,
+            partyMembers[i].maxMana,
+            xOffset,
+            yOffset,
+            barWidth,
+            barHeight,
+            partyMembers[i].name // Передаем имя персонажа
+        );
+    }
 }
 
 void drawMenuBar(int barHeight, int tabWidth, string[] menuTabs, Color semiTransparentBlack) {

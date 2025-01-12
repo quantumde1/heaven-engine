@@ -153,10 +153,7 @@ void drawBattleMenu() {
 
         // Draw the menu bar
         drawMenuBar(barHeight, tabWidth, menuTabs, semiTransparentBlack);
-
-        // Draw player health and mana bars
-        drawPlayerHealthBar(playerHealth, 120);
-        drawPlayerManaBar(playerMana, 30);
+        drawPartyHealthAndManaBars();
 
         // Draw the button panel
         drawButtonPanel(rectX, rectY, rectWidth, rectHeight, buttonText, numberOfButtons, buttonHeight, buttonMargin);
@@ -220,6 +217,7 @@ void drawBattleMenu() {
         }
     }
 }
+
 
 void handleMenuInput(int numberOfButtons, int numberOfTabs) {
     // Handle input for navigating through buttons and tabs
@@ -306,8 +304,8 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
 
 void performPhysicalAttack(int enemyIndex) {
     if (enemies[enemyIndex].currentHealth > 0) {
-        enemies[enemyIndex].currentHealth -= PLAYER_DAMAGE;
-        debug_writeln("attacked enemy no.", enemyIndex,"! HP of enemy is ", enemies[enemyIndex].currentHealth);
+        enemies[enemyIndex].currentHealth -= 15;
+        debug_writeln("attacked enemy no.", enemyIndex,"! HP of enemy is ", enemies[enemyIndex].currentHealth, " player HP is ", partyMembers[0].currentHealth);
         if (enemies[enemyIndex].currentHealth <= 0) {
             debug_writeln("Killed enemy no.", enemyIndex,"! removing...");
             enemies[enemyIndex].currentHealth = 0; // Mark as dead
@@ -316,7 +314,25 @@ void performPhysicalAttack(int enemyIndex) {
 }
 
 void enemyTurn() {
-    playerHealth -= ATTACK_DAMAGE;
+    int[] livingMembers;
+
+    foreach (i, member; partyMembers) {
+        if (member.currentHealth > 0) {
+            livingMembers ~= cast(int)i; // Добавляем индекс живого члена группы
+        }
+    }
+    if (livingMembers.empty || partyMembers[0].currentHealth == 0) {
+        debug_writeln("All party members or mc are dead. No attack performed.");
+        return;
+    }
+
+    uint seed = cast(uint)Clock.currTime().toUnixTime();
+    auto rnd = Random(seed);
+    int randomIndex = uniform(0, cast(int)livingMembers.length, rnd);
+    int randomPartyMember = livingMembers[randomIndex];
+
+    debug_writeln("Attacked party member: ", randomPartyMember);
+    partyMembers[randomPartyMember].currentHealth -= 5;
 }
 
 void killAllEnemies() {

@@ -1,4 +1,4 @@
--- Функция для сравнения двух таблиц
+-- idk but ok
 function tablesEqual(table1, table2)
     if #table1 ~= #table2 then
         return false
@@ -41,15 +41,16 @@ end
 
 local dialogCoroutine
 local answerValue
-
+--loading default scene
 loadScene("res/scene1.json")
-
+-- main coroutine
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         local startTime = getTime() -- Get the current time
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
-        hideUI()--[[
+        hideUI()
+        --[[
         loadMusic("prologue_1.mp3")
         playMusic()
         load2Dtexture("epilogue_1.png",0)
@@ -668,7 +669,8 @@ function startDialogCoroutine()
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                stopDraw2Dcharacter(0)]]--
+                stopDraw2Dcharacter(0)
+                ]]--
 		        setFriendlyZone(0)
                 --initBattle(3, "test", "test", 1)
                 loadMusic("paradigm_x.mp3")
@@ -682,7 +684,7 @@ end
 
 local dialogStage = 0
 
--- Функция для проверки статуса диалога
+-- 3d event loop
 function _3dEventLoop()
     if checkCoordinatesEquality(getPlayerX(), getPlayerY(), getPlayerZ(), 0, 0, -10) == true and dialogStage == 0 then
         --[[dialogBox("#TEST", {"size matters!"}, "hitomi_normal.png", 0, {"girl", "i wanna take you to a gay bar", "i wanna take you to a gay bar"}, 1)
@@ -703,7 +705,7 @@ function _3dEventLoop()
     end
 end
 
--- Функция для обновления диалога
+-- 2d event loop, but everything must be in coroutine
 function _2dEventLoop()
     if dialogCoroutine and coroutine.status(dialogCoroutine) ~= "dead" then
         coroutine.resume(dialogCoroutine) -- Возобновление выполнения корутины
@@ -711,8 +713,7 @@ function _2dEventLoop()
 end
 
 shadersState(0)
--- Настройка позиции камеры
-local dungeonCrawler = false
+local dungeonCrawler = true
 if dungeonCrawler == true then
     changeCameraPosition(0.0, 7.0, 0.1)
     changeCameraTarget(0.0, 7.0, 0.0)
@@ -728,5 +729,4 @@ else
     dungeonCrawlerMode(0)
 end
 
--- Запуск корутины диалога
 startDialogCoroutine()

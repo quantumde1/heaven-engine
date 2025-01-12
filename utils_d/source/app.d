@@ -1,3 +1,4 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 import raylib;
 import std.math;
 import std.conv;

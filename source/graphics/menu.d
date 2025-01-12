@@ -1,3 +1,4 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 module graphics.menu;
 
 import raylib;
@@ -76,7 +77,7 @@ void showMainMenu(ref GameState currentGameState) {
             showDebug = true;
         }
         if (showDebug) {
-            drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, encounterThreshold, inBattle);
+            drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, encounterThreshold, inBattle);
         }
         // Check for user input and reset the inactivity timer
         if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||

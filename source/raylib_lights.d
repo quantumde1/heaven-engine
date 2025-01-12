@@ -1,3 +1,4 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 module raylib_lights;
 
 extern(C) {

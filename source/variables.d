@@ -1,3 +1,4 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 module variables;
 
 import graphics.cubes;
@@ -10,13 +11,6 @@ extern (C) char* get_file_data_from_archive(const char *input_file, const char *
 
 ControlConfig controlConfig;
 
-const int PLAYER_HEALTH_BAR_X = 10;
-const float CUBE_DRAW_HEIGHT = 2.5f;
-const float PLAYER_HEALTH_BAR_WIDTH = 200.0f;
-const float PLAYER_HEALTH_BAR_HEIGHT = 20.0f;
-const int PLAYER_HEALTH_BAR_Y_OFFSET = 10;
-const int ATTACK_DAMAGE = 5;
-const int PLAYER_DAMAGE = 15;
 
 /* camera related things */
 Vector3 positionCam; // = Vector3(0.0f, 10.0f, 10.0f);    
@@ -82,8 +76,8 @@ Enemy[] enemies;
 int XP;
 BattleState battleState;
 bool battleDialog;
-int selectedEnemyIndex = 0; // Индекс выбранного вражеского куба
-bool selectingEnemy = false; // Флаг выбора вражеского куба
+int selectedEnemyIndex = 0;
+bool selectingEnemy = false;
 bool inBattle = false;
 bool isBossfight;
 Texture2D background;
@@ -102,7 +96,7 @@ bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;
 bool audioEnabled;
-int gamepadInt = 0;
+int gamepadInt;
 
 /* dialogs */
 Texture2D texture_old;
@@ -112,7 +106,6 @@ bool allow_exit_dialog = true; //can you exit from dialog
 int selectedChoice = 0;
 int pageChoice_glob;
 int answer_num;
-string name = "Sasha";
 bool isTextFullyDisplayed;
 bool isTextureImageLoaded;
 char* emotion_global;
@@ -130,6 +123,18 @@ enum int CHAR_RECT_HEIGHT_RATIO = 5;
 enum int CHAR_RECT_WIDTH_RATIO = 7;
 float typingSpeed;
 
+struct PartyMember {
+    int maxHealth;
+    int currentHealth;
+    int maxMana;
+    int currentMana;
+    string name;
+    int level;
+    int XP;
+}
+
+int currentPartyMemberIndex = 0;
+PartyMember[6] partyMembers;
 /* inventory */
 string[][] buttonTexts = [
     ["Physical attack", "Gun attack", "Pass"], // Для вкладки "Attack"
@@ -145,7 +150,7 @@ string[][] buttonTextsInventory = [
     ["Revival Bead"], // item
     ["Save", "Exit game"] // system
 ];
-string[3] myDemons;
+
 int selectedButtonIndex = 0;
 int selectedSubmenuButtonIndex = 0;
 
@@ -181,7 +186,7 @@ char button;
 
 /* main menu */
 bool debugBuild = false;
-int playerHealth = 120;
+
 enum GameState {
     MainMenu,
     InGame,

@@ -1,4 +1,4 @@
-//quantumde1 developed software, licensed under BSD-0-Clause license.
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 import raylib;
 
 import std.stdio;

@@ -1,3 +1,4 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 module ui.inventory;
 
 import raylib;
@@ -83,9 +84,7 @@ void drawInventory() {
     // Draw the menu bar
     drawMenuBar(barHeight, tabWidth, menuTabs, semiTransparentBlack);
 
-    // Draw player health and mana bars
-    drawPlayerHealthBar(playerHealth, 120);
-    drawPlayerManaBar(playerMana, 30);
+    drawPartyHealthAndManaBars();
 
     // Draw the button panel
     drawButtonPanel(rectX, rectY, rectWidth, rectHeight, buttonText, numberOfButtons, buttonHeight, buttonMargin);

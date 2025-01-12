@@ -1,3 +1,4 @@
+// quantumde1 developed software, licensed under BSD-0-Clause license.
 module graphics.engine;
 
 import raylib;
@@ -226,6 +227,7 @@ void fadeEffectLogo(float alpha, bool fadeIn, immutable(char*) name, bool fullsc
 
 void engine_loader(string window_name, int screenWidth, int screenHeight, string lua_exec, bool play) {
     // Initialization
+    gamepadInt = 0;
     version (linux) {
         gamepadInt = 1;
         debug debug_writeln("Linux version detected");
@@ -236,6 +238,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     version (osx) {
         debug debug_writeln("XNU/Darwin version detected");
     }
+    partyMembers[0] = PartyMember(120, 120, 0, 0, "quantumde1", 1, 0);
+    partyMembers[1] = PartyMember(100, 100, 30, 30, "Nemissa", 1, 0);
     debug_writeln("Engine version: ", ver);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
@@ -400,7 +404,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
                     } else {
                         displayDialogs(collidedCubeDialog, controlConfig.dialog_button, allowControl, showDialog, 
-                        allow_exit_dialog, name);
+                        allow_exit_dialog, partyMembers[0].name);
                     }
                     float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
                         1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
@@ -532,7 +536,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
 
                     // Draw Debug Information
                     if (showDebug) {
-                        drawDebugInfo(cubePosition, currentGameState, playerHealth, cameraAngle, playerStepCounter, 
+                        drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
                         encounterThreshold, inBattle);
                     }
 
