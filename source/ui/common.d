@@ -21,29 +21,22 @@ void drawPlayerHealthAndManaBar(int playerHealth, int maxPlayerHealth, int playe
     DrawRectangleRounded(Rectangle(xOffset, yOffset, barWidth, totalHeight), 0.03f, 16, Color(0, 0, 0, 200));
     DrawRectangleRoundedLinesEx(Rectangle(xOffset, yOffset, barWidth, totalHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
 
-    // Отрисовка имени персонажа внутри прямоугольника
-    Vector2 nameTextSize = MeasureTextEx(fontdialog, toStringz(playerName), 20, 1.0f);
-    float nameTextX = xOffset + (barWidth - nameTextSize.x) / 2; // Центрирование по горизонтали
-    float nameTextY = yOffset + 5; // Размещение внутри прямоугольника (с небольшим отступом сверху)
-    DrawTextEx(fontdialog, toStringz(playerName), Vector2(nameTextX, nameTextY), 20, 1.0f, Colors.WHITE);
-
-    // Отрисовка полоски здоровья
-    DrawRectangleRounded(Rectangle(xOffset + 5, yOffset + 30, cast(int)((barWidth - 10) * healthPercentage), barHeight - 10), 0.03f, 16, Colors.RED);
-
-    // Отрисовка полоски маны
-    DrawRectangleRounded(Rectangle(xOffset + 5, yOffset + barHeight + 30, cast(int)((barWidth - 10) * manaPercentage), barHeight - 10), 0.03f, 16, Colors.BLUE);
-
     // Текст здоровья и маны
-    if (playerHealth == 0) {
+    if (playerHealth <= 0) {
         string healthText = "EMPTY";
         Vector2 textSize = MeasureTextEx(fontdialog, toStringz(healthText), 30, 1.0f);
         float textX = xOffset + (barWidth - textSize.x) / 2; // Центрирование по горизонтали
         float textY = yOffset + (totalHeight - textSize.y) / 2; // Центрирование по вертикали
         DrawTextEx(fontdialog, toStringz(healthText), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
     } else {
+        Vector2 nameTextSize = MeasureTextEx(fontdialog, toStringz(playerName), 20, 1.0f);
+        float nameTextX = xOffset + (barWidth - nameTextSize.x) / 2; // Центрирование по горизонтали
+        float nameTextY = yOffset + 5; // Размещение внутри прямоугольника (с небольшим отступом сверху)
+        DrawTextEx(fontdialog, toStringz(playerName), Vector2(nameTextX, nameTextY), 20, 1.0f, Colors.WHITE);
+        DrawRectangleRounded(Rectangle(xOffset + 5, yOffset + 30, cast(int)((barWidth - 10) * healthPercentage), barHeight - 10), 0.03f, 16, Colors.RED);
+        DrawRectangleRounded(Rectangle(xOffset + 5, yOffset + barHeight + 30, cast(int)((barWidth - 10) * manaPercentage), barHeight - 10), 0.03f, 16, Colors.BLUE);
         string healthText = "HP: " ~ to!string(playerHealth) ~ "/" ~ to!string(maxPlayerHealth);
         DrawTextEx(fontdialog, toStringz(healthText), Vector2(xOffset + 10, yOffset + 30), 20, 1.0f, Colors.WHITE);
-
         string manaText = "MP: " ~ to!string(playerMana) ~ "/" ~ to!string(maxPlayerMana);
         DrawTextEx(fontdialog, toStringz(manaText), Vector2(xOffset + 10, yOffset + barHeight + 30), 20, 1.0f, Colors.WHITE);
     }
@@ -77,7 +70,7 @@ void drawPartyHealthAndManaBars() {
             yOffset,
             barWidth,
             barHeight,
-            partyMembers[i].name // Передаем имя персонажа
+            partyMembers[i].name
         );
     }
 }

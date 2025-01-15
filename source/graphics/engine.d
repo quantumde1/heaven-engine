@@ -11,7 +11,7 @@ import std.string;
 import std.conv;
 import ui.flicker;
 import graphics.battle;
-import graphics.menu;
+import ui.menu;
 import graphics.scene;
 import variables;
 import std.random;
@@ -443,7 +443,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         encounterThreshold = uniform(900, 3000, rnd);
                         inBattle = true;
                         isBossfight = false;
-                        initBattle();
+                        initBattle(demonsAllowed);
                     }
                     if (inBattle) {
                         drawBattleMenu();

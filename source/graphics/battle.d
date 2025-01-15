@@ -20,8 +20,12 @@ import ui.common;
 Texture2D[] attackAnimationFrames;
 int currentFrame = 0;
 float frameTime = 0.0f;
-const float frameDuration = 0.016f; // Было 0.1f, теперь в 3 раза быстрее
+const float frameDuration = 0.016f;
 bool isPlayingAnimation = false;
+bool isEnemyShaking = false;
+float shakeDuration = 0.26f;
+float shakeTimer = 0.0f;
+Vector2 shakeOffset = Vector2(0, 0);
 
 Texture2D[] loadAnimationFrames(const string archivePath, const string animationName) {
     Texture2D[] frames;
@@ -66,25 +70,39 @@ void drawAttackAnimation() {
     }
 }
 
-void loadAssets() {
-    // Populating massive
+import core.stdc.stdlib;
+import core.stdc.time;
+import std.json;
+import std.file;
+
+int[] demonNumber;
+
+void loadAssets(string[] demons_filenames) {
+    // Инициализация генератора случайных чисел один раз
+    srand(cast(uint)time(null));
+    demonNumber = new int[randomNumber];
     for (int i = 0; i < randomNumber; i++) {
+        demonNumber[i] = cast(int)(rand() % demons_filenames.length);
+        JSONValue demon_data = parseJSON(readText("res/enemies_data/"~demons_filenames[demonNumber[i]]~".json"));
         uint image_size;
-        char *image_data = get_file_data_from_archive("res/tex.bin", "enemy_poltergheist.png", &image_size);
+        char *image_data = get_file_data_from_archive(toStringz("res/enemies.bin"), toStringz(demons_filenames[demonNumber[i]]~".png"), &image_size);
         enemies[i].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
         UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-        enemies[i].maxHealth = 30;
+        enemies[i].maxHealth = demon_data["hp"].get!int;
         enemies[i].currentHealth = enemies[i].maxHealth;
+        enemies[i].maxMana = demon_data["mp"].get!int;
+        enemies[i].currentMana = enemies[i].maxMana;
     }
+
     uint image_size;
     char *image_data = get_file_data_from_archive("res/bg.bin", "battle.png", &image_size);
     background = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
 }
 
-void initBattle() {
+void initBattle(string[] demons_filenames) {
     // Setting states and loading assets
-    loadAssets();
+    loadAssets(demons_filenames);
     battleState.playerTurns = 1;
     battleState.playerTurn = true;
 
@@ -129,7 +147,7 @@ void drawEnemies() {
     static float enemyVerticalOffset = 0.0f; 
     static float enemySpeed = 3.0f;
     static float enemyAmplitude = 25.0f;
-    static float spacing = 300.0f;
+    static float spacing = 340.0f;
     float startX = (GetScreenWidth() - (numberOfEnemies * spacing)) / 2;
     
     // Отрисовка фона
@@ -150,13 +168,33 @@ void drawEnemies() {
             float posX = startX + (i * spacing);
             float posY = (GetScreenHeight() / 2) + enemyVerticalOffset;
 
+            // Вычитаем половину ширины и высоты текстуры для центрирования
+            float textureHalfWidth = enemies[i].texture.width / 2.0f;
+            float textureHalfHeight = enemies[i].texture.height / 2.0f;
+
             Color enemyColor = Colors.WHITE;
             if (i == selectedEnemyIndex && selectingEnemy) {
                 float alpha = (sin(blinkTime) + 1) / 2;
                 enemyColor = Color(cast(ubyte)255, cast(ubyte)255, cast(ubyte)0, cast(ubyte)cast(int)(alpha * 255));
             }
 
-            DrawTextureEx(enemies[i].texture, Vector2(posX, -100 + posY), 0, 5.0, enemyColor);
+            // Обновление тряски для текущего врага
+            if (enemies[i].isShaking) {
+                enemies[i].shakeTimer += GetFrameTime();
+                if (enemies[i].shakeTimer >= shakeDuration) {
+                    enemies[i].isShaking = false;
+                    enemies[i].shakeOffset = Vector2(0, 0); // Сбрасываем смещение после завершения тряски
+                } else {
+                    // Генерация случайного смещения для тряски
+                    enemies[i].shakeOffset = Vector2(GetRandomValue(-10, 10), 0);
+                }
+            }
+
+            // Применяем смещение для тряски
+            Vector2 finalPosition = Vector2(posX - textureHalfWidth + enemies[i].shakeOffset.x, -200 + posY - textureHalfHeight + enemies[i].shakeOffset.y);
+
+            // Рисуем текстуру с учетом центрирования и тряски
+            DrawTextureEx(enemies[i].texture, finalPosition, 0, 5.0, enemyColor);
         }
     }
 }
@@ -304,9 +342,12 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
             || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)  && selectedTabIndex == 0 && !selectingEnemy) {
                 debug_writeln("Enter pressed with selecting enemy to true");
                 selectingEnemy = true;
-                // Дополнительная проверка, чтобы избежать повторного срабатывания
-                if (enemies[selectedEnemyIndex].currentHealth <= 0) {
-                    debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
+                if (selectedEnemyIndex != enemies.length) {
+                    if (enemies[selectedEnemyIndex].currentHealth == 0) {
+                        debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
+                    }
+                } else {
+                    debug_writeln("Enemy no x.", selectedEnemyIndex, " destroyed!");
                 }
             } else if (selectingEnemy && IsKeyPressed(KeyboardKey.KEY_ENTER)
             || selectingEnemy && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
@@ -332,13 +373,17 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
             break;
     }
     if (selectingEnemy) {
-        if (enemies[selectedEnemyIndex].currentHealth == 0) {
-            for (int i = 0; i < randomNumber; i++) {
-                if (enemies[i].currentHealth > 0) {
-                    selectedEnemyIndex = i;
-                    break; // Exit the loop once a live enemy is found
+        if (selectedEnemyIndex != enemies.length) {
+            if (enemies[selectedEnemyIndex].currentHealth == 0) {
+                for (int i = 0; i < randomNumber; i++) {
+                    if (enemies[i].currentHealth > 0) {
+                        selectedEnemyIndex = i;
+                        break; // Exit the loop once a live enemy is found
+                    }
                 }
             }
+        } else {
+            
         }
         if (IsKeyPressed(KeyboardKey.KEY_LEFT) || (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))) {
             do {
@@ -368,6 +413,10 @@ void performPhysicalAttack(int enemyIndex) {
             enemies[enemyIndex].currentHealth = 0; // Mark as dead
         }
 
+        // Начинаем тряску только для атакованного врага
+        enemies[enemyIndex].isShaking = true;
+        enemies[enemyIndex].shakeTimer = 0.0f;
+
         // Start attack animation
         isPlayingAnimation = true;
         currentFrame = 0;
@@ -376,25 +425,40 @@ void performPhysicalAttack(int enemyIndex) {
 }
 
 void enemyTurn() {
-    int[] livingMembers;
+    // Проходим по всем врагам
+    for (int i = 0; i < enemies.length; i++) {
+        // Проверяем, жив ли текущий враг
+        if (enemies[i].currentHealth > 0) {
+            // Получаем данные о враге из JSON
+            JSONValue demon_data = parseJSON(readText("res/enemies_data/"~demonsAllowed[demonNumber[i]]~".json"));
+            int maxDamage = demon_data["maxDamage"].get!int;
+            int minDamage = demon_data["minDamage"].get!int;
 
-    foreach (i, member; partyMembers) {
-        if (member.currentHealth > 0) {
-            livingMembers ~= cast(int)i; // Добавляем индекс живого члена группы
+            // Выбираем случайного живого члена группы для атаки
+            int[] livingMembers;
+            foreach (j, member; partyMembers) {
+                if (member.currentHealth > 0) {
+                    livingMembers ~= cast(int)j; // Добавляем индекс живого члена группы
+                }
+            }
+
+            // Если есть живые члены группы, выбираем случайного и атакуем
+            if (!livingMembers.empty) {
+                uint seed = cast(uint)Clock.currTime().toUnixTime();
+                auto rnd = Random(seed);
+                int randomIndex = uniform(0, cast(int)livingMembers.length, rnd);
+                int randomPartyMember = livingMembers[randomIndex];
+
+                // Наносим урон выбранному члену группы
+                int damage = uniform(minDamage, maxDamage + 1, rnd); // Случайный урон в пределах minDamage и maxDamage
+                partyMembers[randomPartyMember].currentHealth -= damage;
+
+                debug_writeln("Enemy ", i, " attacked party member: ", randomPartyMember, " for ", damage, " damage.");
+            } else {
+                debug_writeln("All party members are dead. No attack performed by enemy ", i);
+            }
         }
     }
-    if (livingMembers.empty || partyMembers[0].currentHealth == 0) {
-        debug_writeln("All party members or mc are dead. No attack performed.");
-        return;
-    }
-
-    uint seed = cast(uint)Clock.currTime().toUnixTime();
-    auto rnd = Random(seed);
-    int randomIndex = uniform(0, cast(int)livingMembers.length, rnd);
-    int randomPartyMember = livingMembers[randomIndex];
-
-    debug_writeln("Attacked party member: ", randomPartyMember);
-    partyMembers[randomPartyMember].currentHealth -= 5;
 }
 
 void killAllEnemies() {

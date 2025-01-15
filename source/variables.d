@@ -66,11 +66,20 @@ struct BattleState {
 
 // struct
 struct Enemy {
+    Texture2D texture;
     int maxHealth;
     int currentHealth;
-    Texture2D texture;
+    int maxMana;
+    int currentMana;
+    int currentLevel;
+    bool isShaking;
+    float shakeTimer;
+    Vector2 shakeOffset;
 }
 
+bool fromSave;
+
+string[] demonsAllowed;
 Enemy[] enemies;
 
 int XP;

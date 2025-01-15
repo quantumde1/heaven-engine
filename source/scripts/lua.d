@@ -684,6 +684,18 @@ extern (C) nothrow int lua_setMcModel(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_allowDemons(lua_State *L) {
+    luaL_checktype(L, 1, LUA_TTABLE);
+    int textTableLength = cast(int)lua_objlen(L, 1);
+    demonsAllowed = new string[](textTableLength);
+    for (int i = 1; i <= textTableLength; i++) {
+        lua_rawgeti(L, 1, i);
+        demonsAllowed[i - 1] = luaL_checkstring(L, -1).to!string;
+        lua_pop(L, 1);
+    }
+    return 0;
+}
+
 extern (C) nothrow int lua_setCubeModel(lua_State *L) {
     int index = cast(int)luaL_checkinteger(L, 1) - 1;
     const char* modelPath = luaL_checkstring(L, 2);
@@ -730,6 +742,7 @@ extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "howMuchModels", &lua_howMuchModels);
     lua_register(L, "rotateCamera", &luaL_rotateCam);
     lua_register(L, "loadScript", &luaL_loadScript);
+    lua_register(L, "allowDemons", &lua_allowDemons);
     lua_register(L, "setPlayerModel", &lua_setMcModel);
     lua_register(L, "removeCube", &lua_removeCube);
 }

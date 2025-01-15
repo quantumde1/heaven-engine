@@ -41,6 +41,9 @@ end
 
 local dialogCoroutine
 local answerValue
+local location_name
+local userSave
+
 --loading default scene
 loadScene("res/scene1.json")
 -- main coroutine
@@ -50,7 +53,16 @@ function startDialogCoroutine()
         -- Начало диалога с Сергеем
         setFriendlyZone(1)
         hideUI()
-        --[[
+        local debugWalk
+        -- save for tester, haha
+        if file_exists("./save.txt") then
+            debugWalk = true
+            goto test
+        end
+        -- save for users
+        if file_exists("./save.txt") then
+            goto test
+        end
         loadMusic("prologue_1.mp3")
         playMusic()
         load2Dtexture("epilogue_1.png",0)
@@ -393,10 +405,16 @@ function startDialogCoroutine()
         unload2Dtexture(1)
         unload2Dtexture(2)
         unload2Dtexture(3)
+        allowControl()
+        disallowControl()
         openMap("home");
         stopDraw2Dtexture()
-        local location_name
         location_name = getLocationName()
+        ::test::
+        if debugWalk == true then
+            location_name = "garage"
+            userSave = true
+        end
         if location_name == "garage" then
             loadMusic("hq.mp3")
             playMusic()
@@ -404,6 +422,9 @@ function startDialogCoroutine()
             load2Dtexture("spooky_room.png", 1)
             load2Dtexture("gump_first_1.png", 2)
             load2Dtexture("gump_first_2.png", 3)
+            if userSave == true then
+                goto saved
+            end
             draw2Dtexture(0)
             dialogBox("Hitomi", {"It's supposed to be here... But i don't see anyone.", "Where is everybody? Are we too early?"}, "hitomi_sad.png", -1, {""}, 1)
             while isDialogExecuted() do
@@ -521,7 +542,15 @@ function startDialogCoroutine()
             while isDialogExecuted() do
                 coroutine.yield()
             end
-            answerValue = getAnswerValue()
+            ::saved::
+            if userSave == true then
+                draw2Dtexture(1)
+                dialogBox("Hitomi", {"Hey, what should we do?"}, "hitomi_sad.png", 0, {"Save", "Leave", "Gun-type PC"}, 1)
+                while isDialogExecuted() do
+                    coroutine.yield()
+                end
+                answerValue = getAnswerValue()
+            end
             if answerValue == 0 then
                 dialogBox("System", {"Saving, please wait..."}, "empty", -1, {""}, 1, 0.03)
                 while isDialogExecuted() do
@@ -670,15 +699,16 @@ function startDialogCoroutine()
                     coroutine.yield()
                 end
                 stopDraw2Dcharacter(0)
-                ]]--
+                
 		        setFriendlyZone(0)
                 --initBattle(3, "test", "test", 1)
                 loadMusic("paradigm_x.mp3")
                 playMusic()
+                allowDemons({"DEV09B", "DEV0FA", "DEV02A"})
                 showUI()
                 allowControl()
-            --end
-        --end
+            end
+        end
     end)
 end
 
