@@ -40,8 +40,6 @@ void openMap(string location, bool fromScript) {
     mapOpened = true;
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
-    const int rectWidth = 100;
-    const int rectHeight = 100;
     int selectedMenuIndex = 0;
     float timeElapsed = 0.0f;
     float animationSpeed = 0.07f;

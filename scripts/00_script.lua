@@ -550,22 +550,34 @@ function startDialogCoroutine()
                     coroutine.yield()
                 end
                 answerValue = getAnswerValue()
+                if answerValue == 0 then
+                    dialogBox("System", {"Saving, please wait..."}, "empty", -1, {""}, 1, 0.03)
+                    while isDialogExecuted() do
+                        coroutine.yield()
+                    end
+                    file = io.open("save.txt", "w")
+                    file:write("garage:01")
+                    file:close()
+                    dialogBox("System", {"Saved."}, "empty", -1, {""}, 1, 0.03)
+                    while isDialogExecuted() do
+                        coroutine.yield()
+                    end
+                    goto saved
+                end
             end
             if answerValue == 0 then
                 dialogBox("System", {"Saving, please wait..."}, "empty", -1, {""}, 1, 0.03)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-                file = io.open("save_garage01.txt", "w")
+                file = io.open("save.txt", "w")
                 file:write("garage:01")
                 file:close()
                 dialogBox("System", {"Saved."}, "empty", -1, {""}, 1, 0.03)
                 while isDialogExecuted() do
                     coroutine.yield()
                 end
-            end
-            if answerValue == 1 then
-                openMap("garage", "shibahama")
+                goto saved
             end
             if answerValue == 2 then
                 dialogBox("Hitomi", {".............\nIt's not working. Is it broken?\nWell, we don't have anything else to do."}, "hitomi_sad.png", -1, {""}, 1)

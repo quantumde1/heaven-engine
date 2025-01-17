@@ -41,7 +41,7 @@ nothrow bool isReleaseBuild() {
 
 nothrow bool isAudioEnabled() {
     try {
-        auto audioType = check_build_settings("conf/build_type.conf", "audio");
+        auto audioType = check_build_settings("conf/configuration.conf", "audio");
         return audioType == "ON";
     } catch (Exception e) {
         debug_writeln("Error getting audio state: " ~ e.msg);
