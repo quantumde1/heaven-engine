@@ -54,8 +54,8 @@ enum SpeedMultiplier = 2.0f;
 int randomNumber;
 Model playerModel;
 Model[] cubeModels;
-
-Model[20] floorModel;
+string[50] pathToVertices;
+Model[50] floorModel;
 bool loadedShader;
 
 struct BattleState {

@@ -23,6 +23,115 @@ private const float TWO_PI = 2.0f * std.math.PI;
 private const float FULL_ROTATION = 360.0f;
 private const float HALF_ROTATION = 180.0f;
 
+Mesh createCubeMesh(float size) {
+    // Создаем меш куба с заданным размером
+    Mesh cubeMesh = GenMeshCube(size, size, size);
+    return cubeMesh;
+}
+
+void SaveVerticesToFile(const char *filename, Mesh mesh) {
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+        printf("Ошибка при открытии файла для записи\n");
+        return;
+    }
+
+    for (int i = 0; i < mesh.triangleCount; i++) {
+        int index1 = mesh.indices[i * 3 + 0];
+        int index2 = mesh.indices[i * 3 + 1];
+        int index3 = mesh.indices[i * 3 + 2];
+
+        fprintf(file, "Triangle %d:\n", i);
+        fprintf(file, "  Vertex 1: (%f, %f, %f)\n", mesh.vertices[index1 * 3 + 0], mesh.vertices[index1 * 3 + 1], mesh.vertices[index1 * 3 + 2]);
+        fprintf(file, "  Vertex 2: (%f, %f, %f)\n", mesh.vertices[index2 * 3 + 0], mesh.vertices[index2 * 3 + 1], mesh.vertices[index2 * 3 + 2]);
+        fprintf(file, "  Vertex 3: (%f, %f, %f)\n", mesh.vertices[index3 * 3 + 0], mesh.vertices[index3 * 3 + 1], mesh.vertices[index3 * 3 + 2]);
+    }
+
+    fclose(file);
+}
+
+void DrawMeshFromFileDataScaled(Mesh mesh, Vector3 position, Vector3 scale, Color color) {
+    // Проходим по всем треугольникам меша
+    for (int i = 0; i < mesh.triangleCount; i++) {
+        // Получаем индексы вершин треугольника
+        int index1 = mesh.indices[i * 3 + 0];
+        int index2 = mesh.indices[i * 3 + 1];
+        int index3 = mesh.indices[i * 3 + 2];
+
+        // Получаем координаты вершин и применяем масштабирование
+        Vector3 v1 = Vector3(
+            mesh.vertices[index1 * 3 + 0] * scale.x,
+            mesh.vertices[index1 * 3 + 1] * scale.y,
+            mesh.vertices[index1 * 3 + 2] * scale.z
+        );
+
+        Vector3 v2 = Vector3(
+            mesh.vertices[index2 * 3 + 0] * scale.x,
+            mesh.vertices[index2 * 3 + 1] * scale.y,
+            mesh.vertices[index2 * 3 + 2] * scale.z
+        );
+
+        Vector3 v3 = Vector3(
+            mesh.vertices[index3 * 3 + 0] * scale.x,
+            mesh.vertices[index3 * 3 + 1] * scale.y,
+            mesh.vertices[index3 * 3 + 2] * scale.z
+        );
+
+        // Применяем позицию модели к вершинам
+        v1 = Vector3Add(v1, position);
+        v2 = Vector3Add(v2, position);
+        v3 = Vector3Add(v3, position);
+
+        // Рисуем треугольник
+        DrawTriangle3D(v1, v2, v3, color);
+    }
+}
+
+void LoadVerticesFromFile(const char *filename, Mesh *mesh, Vector3 multiplier) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        printf("Ошибка при открытии файла для чтения\n");
+        return;
+    }
+
+    char[256] line; // Исправлено: правильный синтаксис для объявления массива
+    int triangleIndex = -1;
+    int vertexIndex = 0;
+
+    while (fgets(cast(char*)line, cast(int)line.sizeof, file)) {
+        if (sscanf(cast(char*)line, cast(char*)"Triangle %d:", &triangleIndex) == 1) {
+            vertexIndex = 0; // Сброс индекса вершин для нового треугольника
+        } else if (triangleIndex >= 0 && vertexIndex < 3) {
+            float x, y, z;
+            if (sscanf(cast(char*)line, cast(char*)"  Vertex %d: (%f, %f, %f)", &vertexIndex, &x, &y, &z) == 3) {
+                // Умножаем координаты на multiplier
+                x *= multiplier.x;
+                y *= multiplier.y;
+                z *= multiplier.z;
+                int index = mesh.indices[triangleIndex * 3 + vertexIndex - 1]; // -1, так как vertexIndex начинается с 1
+                mesh.vertices[index * 3 + 0] = x;
+                mesh.vertices[index * 3 + 1] = y;
+                mesh.vertices[index * 3 + 2] = z;
+            }
+        }
+    }
+
+    fclose(file);
+}
+import std.datetime;
+Mesh mesh;
+bool CheckCollisionWithVertices(Vector3 cubePosition, Mesh mesh, float threshold) {
+    for (int i = 0; i < mesh.vertexCount; i++) {
+        Vector3 vertexPosition = Vector3( mesh.vertices[i * 3 + 0], mesh.vertices[i * 3 + 1], mesh.vertices[i * 3 + 2] );
+        if (Vector3Distance(cubePosition, vertexPosition) < threshold) {
+            SysTime today = Clock.currTime().toUnixTime();
+            debug_writeln(vertexPosition, today);
+            return true;
+        }
+    }
+    return false;
+}
+
 void parseSceneFile(string path) {
     JSONValue scene = parseJSON(readText(path));
     JSONValue objects = scene["objects"];
@@ -38,7 +147,13 @@ void parseSceneFile(string path) {
                 modelLocationRotate[i] = Vector3(rotation["x"].get!float, rotation["y"].get!float, rotation["z"].get!float);
                 rotateAngle[i] = objects[i]["rotationAngle"].get!float;
                 floorModel[i] = LoadModel(model_location_path);
-                
+                pathToVertices[i] = objects[i]["collisionData"].get!string;
+                // Проходим по всем мешам модели
+                for (int meshIndex = 0; meshIndex < floorModel[i].meshCount; meshIndex++) {
+                    debug_writeln("Loading vertice ", meshIndex, " from ", pathToVertices[i], " model name is ", to!string(model_location_path));
+                    mesh = floorModel[i].meshes[meshIndex]; // Получаем текущий меш
+                    LoadVerticesFromFile(toStringz(pathToVertices[i]), &mesh, modelLocationSize[i]);
+                }
                 break;
             case "light":
                 JSONValue color = objects[i]["color"];
@@ -57,18 +172,21 @@ Camera3D createCamera() {
     // Set the field of view and projection type
     float fov = 45.0f;
     CameraProjection projection = CameraProjection.CAMERA_PERSPECTIVE;
-    
+
     // Create and return the camera
     return Camera3D(positionCam, targetCam, upCam, fov, projection);
 }
 
 // Function to initialize the window and camera
 void initWindowAndCamera(ref Camera3D camera) {
-    
-    
+
+
     // Initialize the camera
     camera = createCamera();
 }
+
+
+bool collisionPretty;
 
 void inputName() {
     char[8] name;
@@ -156,11 +274,17 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
         } else {
             movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
         }
-
         // Check for collisions before moving
         BoundingBox cubeBoundingBox;
         Nullable!Cube collidedCube = handleCollisions(cubePosition + movement, cubes, cubeBoundingBox);
-        
+        for (int j = 0; j < floorModel.length; j++) {
+            for (int i = 0; i < floorModel[j].meshCount; i++) {
+                if (CheckCollisionWithVertices(cubePosition, floorModel[j].meshes[i], 0.5)) {
+                    collisionPretty = true;
+                    debug_writeln("Collision state: ", collisionPretty);
+                }
+            }
+        }
         if (collidedCube.isNull) {
             // No collision detected, move the cube
             camera.position += movement;
@@ -175,11 +299,11 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
 
     // Existing tracking logic
     if (!trackingCube.isNull) {
-        Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max - 
+        Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max -
         trackingCube.get.boundingBox.min) / 2.0f;
         Vector3 direction = Vector3Normalize(Vector3Subtract(targetPosition, camera.position));
         camera.target = Vector3Lerp(camera.target, targetPosition, deltaTime * cameraSpeed);
-        camera.position = Vector3Lerp(camera.position, Vector3Subtract(camera.target, 
+        camera.position = Vector3Lerp(camera.position, Vector3Subtract(camera.target,
         Vector3Scale(direction, desiredDistance)), deltaTime * cameraSpeed);
     }
 }
@@ -201,7 +325,7 @@ void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float
         cameraAngle += (angleDifference > 0) ? rotationAmount : -rotationAmount;
     } else {
         cameraAngle = targetAngle;
-        isCameraRotating = false; 
+        isCameraRotating = false;
     }
 
     // Update camera position based on the new angle
@@ -210,7 +334,7 @@ void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
 
-void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, 
+void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle,
                   float rotationStep, float radius) {
     if (allowControl) {
         float targetAngle;
@@ -246,11 +370,11 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
 
-void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
+void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle,
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
     SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
-    ShaderUniformDataType.SHADER_UNIFORM_VEC3);    
+    ShaderUniformDataType.SHADER_UNIFORM_VEC3);
 
     float playerScale = modelCharacterSize;
     BeginMode3D(camera);
@@ -259,14 +383,14 @@ void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float 
         Vector3 position = cubes[i].boundingBox.min;
         DrawModelEx(cubeModel, position, Vector3(0.0f, 1.0f, 0.0f), cubes[i].rotation, Vector3(modelCubeSize, modelCubeSize, modelCubeSize), Colors.WHITE);
     }
-
     // Draw player model with rotation
     Vector3 playerPosition = cubePosition;
-    float additionalRotation = 270.0f * std.math.PI / 180.0f; 
+    float additionalRotation = 270.0f * std.math.PI / 180.0f;
     float playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation;
     if (drawPlayer == true) {
-        DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
+        DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI,
         Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
+    } else {
     }
     // Draw floor model
     for (int i = 0; i < floorModel.length; i++) {
@@ -285,7 +409,7 @@ Nullable!Cube handleCollisions(Vector3 cubePosition, Cube[] cubes, ref BoundingB
             return Nullable!Cube(cube); // Return the collided cube
         }
     }
-    
+
     return Nullable!Cube.init; // Return an empty Nullable!Cube if no collision is detected
 }
 
@@ -294,7 +418,7 @@ Nullable!Cube handleCollisionsDialog(Vector3 cubePosition, Cube[] cubes, ref Bou
     // Expand the bounding box by 3.0f in all directions
     Vector3 expandedPosition = Vector3Subtract(cubePosition, Vector3(3.0f, 3.0f, 3.0f));
     Vector3 expandedSize = Vector3Add(cubePosition, Vector3(3.0f, 3.0f, 3.0f));
-    
+
     cubeBoundingBox = BoundingBox(expandedPosition, expandedSize);
 
     // Check for collisions with other cubes
@@ -303,6 +427,6 @@ Nullable!Cube handleCollisionsDialog(Vector3 cubePosition, Cube[] cubes, ref Bou
             return Nullable!Cube(cube); // Return the collided cube
         }
     }
-    
+
     return Nullable!Cube.init; // Return an empty Nullable!Cube if no collision is detected
 }

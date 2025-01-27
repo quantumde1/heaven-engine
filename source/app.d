@@ -18,7 +18,6 @@ void main(string[] args) {
     } else {
         SetTraceLogLevel(0);
     }
-    validateRaylibBinding();
     SetExitKey(KeyboardKey.KEY_NULL);
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();

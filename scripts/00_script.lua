@@ -53,6 +53,7 @@ function startDialogCoroutine()
         if dialogStage == 1 then
             setFriendlyZone(1)
             hideUI()
+            --[[
             load2Dtexture("user_counter.png",0)
             draw2Dtexture(0)
             dialogBox("Announcer", {
@@ -727,7 +728,7 @@ function startDialogCoroutine()
                         coroutine.yield()
                     end
                     stopDraw2Dcharacter(0)
-                    
+                    ]]--
                     setFriendlyZone(0)
                     --initBattle(3, "test", "test", 1)
                     loadMusic("paradigm_x.mp3")
@@ -736,8 +737,8 @@ function startDialogCoroutine()
                     showUI()
                     allowControl()
                 end
-            end
-        end
+            --end
+        --end
     end)
 end
 
@@ -766,7 +767,7 @@ function _2dEventLoop()
 end
 
 shadersState(0)
-local dungeonCrawler = true
+local dungeonCrawler = false
 if dungeonCrawler == true then
     changeCameraPosition(0.0, 7.0, 0.1)
     changeCameraTarget(0.0, 7.0, 0.0)

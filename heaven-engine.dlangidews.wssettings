@@ -1,0 +1,20 @@
+{
+    "startupProject": "heaven-engine",
+    "expandedItems": [
+        "/home/quantumde1/Documents/heaven-engine/source",
+        "/home/quantumde1/Documents/heaven-engine/dub.json"
+    ],
+    "selectedWorkspaceItem": "/home/quantumde1/Documents/heaven-engine/source/app.d",
+    "buildConfiguration": 0,
+    "breakpoints": [
+    ],
+    "bookmarks": [
+    ],
+    "files": [
+        {
+            "file": "/home/quantumde1/Documents/heaven-engine/source/app.d",
+            "column": 29,
+            "row": 1
+        }
+    ]
+}
