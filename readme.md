@@ -20,7 +20,7 @@
 
 For building, you need install this packages(at least on Alpine linux):
 ```
-raylib-dev lua5.3-dev dub ldc gcc
+lua5.3-dev dub gcc-gdc gcc vlc vlc-dev
 ```
 after installing, in source directory, run for debug build:
 ```
