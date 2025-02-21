@@ -66,6 +66,7 @@ struct BattleState {
 
 // struct
 struct Enemy {
+    string name;
     Texture2D texture;
     int maxHealth;
     int currentHealth;
@@ -75,6 +76,10 @@ struct Enemy {
     bool isShaking;
     float shakeTimer;
     Vector2 shakeOffset;
+    int mood; // 0 - neutral, 1 - happy, 2 - scared, 3 - angry
+    string[] initial_message;
+    string[] questions;
+    string[] answers;
 }
 
 bool fromSave;

@@ -89,6 +89,7 @@ void loadAssets(string[] demons_filenames) {
         enemies[i].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
         UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
         enemies[i].maxHealth = demon_data["hp"].get!int;
+        enemies[i].name = demon_data["name"].get!string;
         enemies[i].currentHealth = enemies[i].maxHealth;
         enemies[i].maxMana = demon_data["mp"].get!int;
         enemies[i].currentMana = enemies[i].maxMana;
@@ -243,14 +244,14 @@ void drawBattleMenu() {
         // Button dimensions
         int buttonHeight = 50;
         int buttonMargin = 10;
+        if (!showDialog) {
+            // Draw the menu bar
+            drawMenuBar(barHeight, tabWidth, menuTabs, semiTransparentBlack);
+            drawPartyHealthAndManaBars();
 
-        // Draw the menu bar
-        drawMenuBar(barHeight, tabWidth, menuTabs, semiTransparentBlack);
-        drawPartyHealthAndManaBars();
-
-        // Draw the button panel
-        drawButtonPanel(rectX, rectY, rectWidth, rectHeight, buttonText, numberOfButtons, buttonHeight, buttonMargin);
-
+            // Draw the button panel
+            drawButtonPanel(rectX, rectY, rectWidth, rectHeight, buttonText, numberOfButtons, buttonHeight, buttonMargin);
+        }
         // Handle input for menu navigation
         handleMenuInput(numberOfButtons, numberOfTabs);
     }
@@ -313,7 +314,6 @@ void drawBattleMenu() {
     }
 }
 
-
 void handleMenuInput(int numberOfButtons, int numberOfTabs) {
     // Handle input for navigating through buttons and tabs
     if ((IsKeyPressed(KeyboardKey.KEY_DOWN) && !selectingEnemy) || 
@@ -367,6 +367,35 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
                         selectingEnemy = false;
                     }
                 }
+            }
+            break;
+        case 3:
+             if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedTabIndex == 3 && !selectingEnemy
+            || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)  && selectedTabIndex == 3 && !selectingEnemy) {
+                debug_writeln("Enter pressed with selecting enemy to true");
+                selectingEnemy = true;
+                if (selectedEnemyIndex != enemies.length) {
+                    if (enemies[selectedEnemyIndex].currentHealth == 0) {
+                        debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
+                    }
+                } else {
+                    debug_writeln("Enemy no x.", selectedEnemyIndex, " destroyed!");
+                }
+            } else if (selectingEnemy && IsKeyPressed(KeyboardKey.KEY_ENTER)
+            || selectingEnemy && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+                debug_writeln("enter pressed for acting");
+                debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp before attack is ", enemies[selectedEnemyIndex].currentHealth);
+                import dialogs.dialog_system;
+                pageChoice_glob = -1;
+                name_global = enemies[selectedEnemyIndex].name;
+                emotion_global = cast(char*)"Empty";
+                message_global = ["Test", "gay porn"];
+                showDialog = true;
+                allowControl = false;
+                show_sec_dialog = true;
+                debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp after attack is ", enemies[selectedEnemyIndex].currentHealth);
+                debug_writeln("selecting enemy to false");
+                selectingEnemy = false;
             }
             break;
         default:

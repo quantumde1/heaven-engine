@@ -399,13 +399,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
                         draw_navigation(cameraAngle, navFont, fontdialog);
                     }
-                    if (show_sec_dialog && showDialog) {
-                        allow_exit_dialog = allowControl = false;
-                        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
-                    } else {
-                        displayDialogs(collidedCubeDialog, controlConfig.dialog_button, allowControl, showDialog, 
-                        allow_exit_dialog, partyMembers[0].name);
-                    }
                     float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
                         1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
                     
@@ -496,6 +489,13 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             StopMusicStream(music);
                             openMap(location_name, false);
                         }
+                    }
+                    if (show_sec_dialog && showDialog) {
+                        allow_exit_dialog = allowControl = false;
+                        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
+                    } else {
+                        displayDialogs(collidedCubeDialog, controlConfig.dialog_button, allowControl, showDialog, 
+                        allow_exit_dialog, partyMembers[0].name);
                     }
                     if (!showDialog) {
                         // Flickering Effect
