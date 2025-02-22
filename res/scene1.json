@@ -21,27 +21,6 @@
                 "z": 5
             },
             "rotationAngle": 0
-        },
-        {
-            "name": "xx",
-            "type": "model",
-            "modelPath": "res/exit_sign.glb",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": -52
-            },
-            "rotation": {
-                "x": 30,
-                "y": 40,
-                "z": 90
-            },
-            "scale": {
-                "x": 5,
-                "y": 5,
-                "z": 5
-            },
-            "rotationAngle": 0
         }
     ],
     "environment": {

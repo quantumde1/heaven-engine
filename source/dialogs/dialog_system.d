@@ -162,14 +162,11 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
             currentCharIndex = 0; // Reset character index for the next page
             isTextFullyDisplayed = false; // Reset the text display state
             if (currentPage >= pages.length) {
-                if (battleDialog) {
-                    battleDialog = false;
-                    showDialog = false;
-                    allow_exit_dialog = true;
-                } else {
-                    showDialog = false;
-                    allowControl = true;
-                    allow_exit_dialog = true;
+                showDialog = false;
+                allowControl = true;
+                allow_exit_dialog = true;
+                if (selectingEnemy == true) {
+                    selectingEnemy = false;
                 }
                 UnloadTexture(dialogImage);
                 currentPage = 0; // Reset to the first page if needed

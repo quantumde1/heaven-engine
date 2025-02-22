@@ -51,19 +51,13 @@ loadScene("res/scene1.json")
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
         if dialogStage == 1 then
-            setFriendlyZone(1)
-            hideUI()
-            load2Dtexture("user_counter.png",0)
-            draw2Dtexture(0)
-            dialogBox("Announcer", {
-                "Our next story tonight concerns the upcoming virtual city, \"Paradigm X\"",
-                "While its public opening is coming soon, creator Algon Software is reportedly being flooded with beta applications.",
-                "The number of users is so great that the company is unable to shut down the site for new user registrations."
-            }, "news_reporter.png", -1, {""}, 0)
-
+            draw2Dcharacter("sans_staying.png", getScreenWidth() /2 - 150, getScreenHeight()/2 - 100, 0.3, 0)
+            dialogBox("Sans", {"take care of yourself, kid. 'cause someone really cares about you."}, "empty", -1, {""}, 0)
             while isDialogExecuted() do
                 coroutine.yield() -- Ожидание завершения диалога
             end
+            stopDraw2Dcharacter(0)
+            dialogStage = 2
         else
             local startTime = getTime() -- Get the current time
             -- Начало диалога с Сергеем

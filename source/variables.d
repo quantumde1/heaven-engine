@@ -89,7 +89,6 @@ Enemy[] enemies;
 
 int XP;
 BattleState battleState;
-bool battleDialog;
 int selectedEnemyIndex = 0;
 bool selectingEnemy = false;
 bool inBattle = false;
