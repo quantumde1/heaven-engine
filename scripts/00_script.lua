@@ -47,6 +47,7 @@ local dialogStage = 0
 
 --loading default scene
 loadScene("res/scene1.json")
+
 -- main coroutine
 function startDialogCoroutine()
     dialogCoroutine = coroutine.create(function()
@@ -741,7 +742,7 @@ end
 -- 3d event loop
 function _3dEventLoop()
     if checkCoordinatesEquality(getPlayerX(), getPlayerY(), getPlayerZ(), 0, 0, -10) == true and dialogStage == 0 then
-        showHint("Press "..getButtonName("dialog").." to exit Paradigm X")
+        showHint("Press "..getButtonName("dialog").." to talk with Sans.")
         if isKeyPressed(getButtonName("dialog")) then
             dialogStage = 1
             disallowControl()

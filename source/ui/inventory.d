@@ -53,8 +53,11 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
         case 3:
             break;
         case 4:
-            if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 1 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 1) {
+            if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 2 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 2) {
                 currentGameState = GameState.Exit;
+            }
+            if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 1 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 1) {
+                audioEnabled = !audioEnabled;
             }
             break;
         default:

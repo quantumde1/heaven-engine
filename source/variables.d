@@ -161,7 +161,7 @@ string[][] buttonTextsInventory = [
     ["Rasputin"],  // Для вкладки "Return"
     ["Agi 4MP", "Bufu 4MP", "Zio 3MP", "Dia 6MP"],  // Для вкладки "Magic"
     ["Revival Bead"], // item
-    ["Save", "Exit game"] // system
+    ["Save", "Music off/on", "Exit game"] // system
 ];
 
 int selectedButtonIndex = 0;
@@ -254,4 +254,3 @@ void assignShaderToModel(Model model) {
         model.materials[i].shader = shader;
     }
 }
-

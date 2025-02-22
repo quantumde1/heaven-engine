@@ -170,6 +170,7 @@ void unloadResources(Texture2D mapTextureAkenadai, Texture2D mapTextureShibahama
     UnloadTexture(mapTextureShibahama);
     if (audioEnabled) {
         UnloadMusicStream(musicMenu);
+        PlayMusicStream(music);
     }
     foreach (texture; arrowTextures) {
         UnloadTexture(texture);

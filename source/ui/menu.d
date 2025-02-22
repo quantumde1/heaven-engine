@@ -25,7 +25,7 @@ void showMainMenu(ref GameState currentGameState) {
     uint audio_size;
     char *audio_data = get_file_data_from_archive("res/data.bin", musicpathMenu, &audio_size);
     musicMenu = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-    if (isAudioEnabled()) {
+    if (audioEnabled) {
         audioEnabled = true;
         PlayMusicStream(musicMenu);
         if (!fromSave) {
@@ -207,18 +207,18 @@ void showMainMenu(ref GameState currentGameState) {
 
             case 3:
                 if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                audioEnabled = false;
                 menuOptions[3] = "Sound: Off";
-                if (isAudioEnabled()) {
+                if (audioEnabled) {
                     StopMusicStream(musicMenu);
                 }
+                audioEnabled = false;
             }
             if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
-                audioEnabled = true;
-                if (!isAudioEnabled()) {
+                if (!audioEnabled) {
                     PlayMusicStream(musicMenu);
                 }
                 menuOptions[3] = "Sound: On";
+                audioEnabled = true;
             }
             break;
 
