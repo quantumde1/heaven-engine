@@ -61,6 +61,11 @@ cd ../../
 ## Return to the original directory
 #cd ..
 
+printf "enter repo address with https:\n"
+read babah
+printf "Done, cloning $babah...\n"
+git clone $babah
+printf "Move data from cloned folder to current folder with engine binary(aka heaven-engine)\n"
 # Check for the --release flag
 if [ "$1" = "--release" ]; then
     BUILD_CMD="dub build --build=release --force"

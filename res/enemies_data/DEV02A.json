@@ -1,8 +1,0 @@
-{
-    "name": "huesos",
-    "level": 1,
-    "hp": 40,
-    "mp": 30,
-    "maxDamage": 13,
-    "minDamage": 2
-}
