@@ -755,15 +755,9 @@ extern (C) nothrow int luaL_loadScript(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int luaL_openInputNameMenu(lua_State *L) {
-    showCharacterNameInputMenu = true;
-    return 0;
-}
-
 // Register functions in Lua
 extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "loadMusic", &lua_LoadMusic);
-    lua_register(L, "showNameInput", &luaL_openInputNameMenu);
     lua_register(L, "playMusic", &lua_PlayMusic);
     lua_register(L, "stopMusic", &lua_StopMusic);
     lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);

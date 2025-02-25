@@ -16,6 +16,12 @@
 
 ## Guide
 
+## Engine usage examples placed here:
+
+[heaven-example](https://github.com/quantumde1/heaven-example)
+
+[Heaven Engine's SMT Soul Hackers port](https://github.com/quantumde1/heaven-soul-hackers)
+
 ### Building on POSIX
 
 For building, you need install this packages(at least on Alpine linux):

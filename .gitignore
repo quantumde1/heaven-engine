@@ -21,3 +21,6 @@ sky.sh
 a.out
 *.so*
 sky
+res/
+scripts/
+docs/
