@@ -238,8 +238,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     version (osx) {
         debug debug_writeln("XNU/Darwin version detected");
     }
-    partyMembers[0] = PartyMember(120, 120, 0, 0, "quantumde1", 1, 0);
-    partyMembers[1] = PartyMember(100, 100, 30, 30, "Nemissa", 1, 0);
     debug_writeln("Engine version: ", ver);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(KeyboardKey.KEY_NULL);
@@ -311,7 +309,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     initWindowAndCamera(camera);
     // Load Models
     float cameraSpeed = 5.0f;
-    float rotationStep = 1.6f;
     float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
     shader = LoadShaderFromMemory(vscode, fscode);

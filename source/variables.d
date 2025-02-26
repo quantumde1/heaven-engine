@@ -160,6 +160,8 @@ string[][] buttonTexts = [
 string[][] buttonTextsInventory;
 string[] menuTabs;
 
+float rotationStep = 1.6f;
+
 int selectedButtonIndex = 0;
 int selectedSubmenuButtonIndex = 0;
 

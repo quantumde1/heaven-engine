@@ -764,10 +764,29 @@ extern (C) nothrow int lua_addToInventoryTab(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_setCameraRotationSpeed(lua_State *L) {
+    rotationStep = luaL_checknumber(L, 1);
+    return 0;
+}
+
+extern (C) nothrow int lua_addPartyMember(lua_State *L) {
+    int HP = cast(int)luaL_checkinteger(L, 1);
+    int mana = cast(int)luaL_checkinteger(L, 2);
+    string name = to!string(cast(char*)luaL_checkstring(L, 3));
+    int level = cast(int)luaL_checkinteger(L, 4);
+    int XP = cast(int)luaL_checkinteger(L, 5);
+    int counter =  cast(int)luaL_checkinteger(L, 6);
+    //partyMembers[0] = PartyMember(120, 120, 0, 0, "quantumde1", 1, 0);
+    partyMembers[counter] = PartyMember(HP, HP, mana, mana, name, level, XP);
+    return 0;
+}
+
 // Register drawing functions
 extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "addCube", &lua_addCube);
+    lua_register(L, "addPartyMember", &lua_addPartyMember);
     lua_register(L, "checkInventoryForObject", &lua_checkObjectInInventory);
+    lua_register(L, "setCameraRotationSpeed", &lua_setCameraRotationSpeed);
     lua_register(L, "configureInventoryTabs", &lua_configureInventoryTabs);
     lua_register(L, "addToInventoryTab", &lua_addToInventoryTab);
     lua_register(L, "isCubeMoving", &lua_cubeMoveStatus);
