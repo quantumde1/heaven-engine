@@ -58,6 +58,8 @@ bool fogEnabled = false;
 Model[20] floorModel;
 bool loadedShader;
 
+float stamina = 25;
+
 struct BattleState {
     int playerTurns;
     int enemyTurns;

@@ -283,8 +283,10 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
     Random encounter enemy count: %d
 
     player XP: %d
+
+    Stamina: %f
 }.format(cubePosition, inBattle ? "battle" : "non battle", playerHealth, cameraAngle, 
-        playerStepCounter, encounterThreshold,  audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled, musicpath.to!string, randomNumber+1, XP);
+        playerStepCounter, encounterThreshold,  audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled, musicpath.to!string, randomNumber+1, XP, stamina);
     if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
     else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
     DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
@@ -505,6 +507,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         ModelAnimation anim = modelAnimations[modelAnimationIdle];
                         animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
                         UpdateModelAnimation(playerModel, anim, animCurrentFrame);
+                        if (stamina < 25.0f) {
+                            stamina += 0.2f;
+                        } else if (stamina > 25.0f && stamina < 29.0f) {
+                            stamina = 25.0f;
+                        }
                     }
                     if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
                         DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
