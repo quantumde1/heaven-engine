@@ -796,9 +796,15 @@ extern (C) nothrow int lua_setRunAnimation(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_switchFog(lua_State *L) {
+    try { fogEnabled = to!bool(luaL_checkinteger(L, 1)); } catch (Exception e) {};
+    return 0;
+}
+
 // Register drawing functions
 extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "addCube", &lua_addCube);
+    lua_register(L, "fogSwitcher", &lua_switchFog);
     lua_register(L, "walkAnimationValue", &lua_setWalkAnimation);
     lua_register(L, "idleAnimationValue", &lua_setIdleAnimation);
     lua_register(L, "runAnimationValue", &lua_setRunAnimation);

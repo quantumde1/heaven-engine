@@ -353,7 +353,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     ToggleFullscreen();
     Font navFont = LoadFont("res/font_16x16_en.png");
     SetTargetFPS(FPS);
-    fontdialog = LoadFont("res/font.ttf");
+    fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     InitAudioDevice();
     debug_writeln("Showing logo..");
@@ -410,11 +410,17 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     float cameraSpeed = 5.0f;
     float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
-    shader = LoadShaderFromMemory(vscode, fscode_fog);
+    if (fogEnabled == true) {
+        shader = LoadShaderFromMemory(vscode, fscode_fog);
+    } else {
+        shader = LoadShaderFromMemory(vscode, fscode);
+    }
     if (shaderEnabled == true) {
-        int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
-        float fogDensity = 0.026f; // Initial fog density
-        SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
+        if (fogEnabled == true) {
+            int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
+            float fogDensity = 0.026f; // Initial fog density
+            SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
+        }
         // Set Shader Locations
         shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
         shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");

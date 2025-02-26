@@ -54,7 +54,7 @@ enum SpeedMultiplier = 2.0f;
 int randomNumber;
 Model playerModel;
 Model[] cubeModels;
-
+bool fogEnabled = false;
 Model[20] floorModel;
 bool loadedShader;
 
