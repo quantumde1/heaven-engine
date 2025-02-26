@@ -16,6 +16,7 @@ import graphics.video;
 import std.file;
 import graphics.map;
 import std.array;
+import std.algorithm;
 
 /* 
  * This module provides Lua bindings for various engine functionalities.
@@ -723,9 +724,52 @@ extern (C) nothrow int lua_cubeMoveStatus(lua_State *L) {
     return 1;
 }
 
+import ui.inventory;
+
+extern (C) nothrow int lua_checkObjectInInventory(lua_State *L) {
+    try {
+        debug_writeln("Searching object in inventory...");
+        string target = to!string(luaL_checkstring(L, 1));
+        bool found = canFind(buttonTextsInventory[to!int(luaL_checkinteger(L, 2))], target);
+        lua_pushboolean(L, found);
+    } catch (Exception e) {
+
+    }
+    return 1;
+}
+
+extern (C) nothrow int lua_configureInventoryTabs(lua_State *L) {
+    try {
+        int textTableLength = cast(int)lua_objlen(L, 1);
+        string[] tabsNames = new string[](textTableLength); // Allocate exact size needed
+        
+        for (int i = 0; i < textTableLength; i++) { // Start index from 0
+            lua_rawgeti(L, 1, i + 1); // Lua indices start from 1
+            tabsNames[i] = luaL_checkstring(L, -1).to!string;
+            lua_pop(L, 1);
+        }
+        configureTabs(tabsNames);
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
+extern (C) nothrow int lua_addToInventoryTab(lua_State *L) {
+    try {
+        addToTab(to!string(luaL_checkstring(L, 1)), to!int(luaL_checkinteger(L, 2)));
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
 // Register drawing functions
 extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "addCube", &lua_addCube);
+    lua_register(L, "checkInventoryForObject", &lua_checkObjectInInventory);
+    lua_register(L, "configureInventoryTabs", &lua_configureInventoryTabs);
+    lua_register(L, "addToInventoryTab", &lua_addToInventoryTab);
     lua_register(L, "isCubeMoving", &lua_cubeMoveStatus);
     lua_register(L, "setCubeModel", &lua_setCubeModel);
     lua_register(L, "removeCubeModel", &lua_removeCubeModel);

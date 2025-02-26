@@ -47,7 +47,7 @@ Next, you must get LDC/DMD/GDC/another D compiler(and if not included, install `
 
 ### API
 its placed here:
-[api](docs/api.md)
+[api](https://github.com/quantumde1/heaven-example/blob/main/documentation/lua_api.md)
 
 ## FAQ(maybe, lmao)
 

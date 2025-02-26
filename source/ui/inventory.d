@@ -43,26 +43,6 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
         showInventory = false;
         return;
     }
-    switch (selectedTabIndex) {
-        case 0: // Attack
-            break;
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 2 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 2) {
-                currentGameState = GameState.Exit;
-            }
-            if (IsKeyPressed(KeyboardKey.KEY_ENTER)  && selectedTabIndex == 4 && selectedButtonIndex == 1 || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) && selectedTabIndex == 4 && selectedButtonIndex == 1) {
-                audioEnabled = !audioEnabled;
-            }
-            break;
-        default:
-            break;
-    }
 }
 
 void drawInventory() {
@@ -71,7 +51,6 @@ void drawInventory() {
     int screenHeight = GetScreenHeight();
     int barHeight = screenHeight / 9;
     Color semiTransparentBlack = Color(0, 0, 0, 210); // RGBA: Black with 210 alpha
-    string[] menuTabs = ["Summon", "Return", "Skill", "Item", "System"];
     int numberOfTabs = cast(int)menuTabs.length;
     int tabWidth = screenWidth / numberOfTabs;
     string[] buttonText = buttonTextsInventory[selectedTabIndex];
@@ -94,4 +73,15 @@ void drawInventory() {
 
     // Handle input for menu navigation
     handleMenuInput(numberOfButtons, numberOfTabs);
+}
+
+void configureTabs(string[] tabsNames) {
+    menuTabs = tabsNames;
+}
+
+void addToTab(string whatToAdd, int countOfTab) {
+    if (buttonTextsInventory.length <= countOfTab) {
+        buttonTextsInventory.length += 1+ countOfTab - buttonTextsInventory.length;
+    }
+    buttonTextsInventory[countOfTab] ~= whatToAdd;
 }

@@ -156,13 +156,9 @@ string[][] buttonTexts = [
     ["Seduce", "Pester", "Default"],
     ["Rethreat"]
 ];
-string[][] buttonTextsInventory = [
-    ["Rasputin"], // Для вкладки "Summon"
-    ["Rasputin"],  // Для вкладки "Return"
-    ["Agi 4MP", "Bufu 4MP", "Zio 3MP", "Dia 6MP"],  // Для вкладки "Magic"
-    ["Revival Bead"], // item
-    ["Save", "Music off/on", "Exit game"] // system
-];
+
+string[][] buttonTextsInventory;
+string[] menuTabs;
 
 int selectedButtonIndex = 0;
 int selectedSubmenuButtonIndex = 0;
