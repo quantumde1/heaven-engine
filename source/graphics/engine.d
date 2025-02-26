@@ -353,27 +353,28 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     ToggleFullscreen();
     Font navFont = LoadFont("res/font_16x16_en.png");
     SetTargetFPS(FPS);
-    fontdialog = LoadFont("res/font_en.png");
+    fontdialog = LoadFont("res/font.ttf");
     // Fade In and Out Effects
     InitAudioDevice();
+    debug_writeln("Showing logo..");
     debug {
         if (play == false) { videoFinished = true; goto debug_lab; }
     }
     else {
-    fadeEffect(0.0f, true, "powered by\n\n\nHeaven Engine");
-    fadeEffect(fadeAlpha, false, "powered by\n\n\nHeaven Engine");
-    fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
-    fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
-    fadeEffect(0.0f, true, "\n\nunder\n\nlevel\n\n\npresents");
-    fadeEffect(fadeAlpha, false, "\n\nunder\n\nlevel\n\n\npresents");
-    // Play Opening Video
-    BeginDrawing();
-    version (Windows) {
-        playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
-    }
-    version (Posix) {
-        playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
-    }
+        fadeEffect(0.0f, true, "powered by\n\n\nHeaven Engine");
+        fadeEffect(fadeAlpha, false, "powered by\n\n\nHeaven Engine");
+        fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
+        fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
+        fadeEffect(0.0f, true, "\n\nunder\n\nlevel\n\n\npresents");
+        fadeEffect(fadeAlpha, false, "\n\nunder\n\nlevel\n\n\npresents");
+        // Play Opening Video
+        BeginDrawing();
+        version (Windows) {
+            playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+        }
+        version (Posix) {
+            playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+        }
     }
     debug_lab:
     //videoFinished = true;
@@ -429,7 +430,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     }
     // Load gltf model animations
     int animsCount = 0;
-    int animIndex = 10;
     int animCurrentFrame = 0;
     ModelAnimation* modelAnimations = LoadModelAnimations("res/mc.glb", &animsCount);
     // Lighting Setup
@@ -482,10 +482,12 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
                     if (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
-                    IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+                    IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
+                    IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
+                    IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
                         currentFrame = 0;
                         ModelAnimation anim;
-                        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT)) {
+                        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
                             anim = modelAnimations[modelAnimationRun];
                         } else {
                             anim = modelAnimations[modelAnimationWalk];

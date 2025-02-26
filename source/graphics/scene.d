@@ -132,6 +132,9 @@ void inputName() {
         }
 }
 
+float playerModelRotation = 180;
+bool isMoving = false;
+
 void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, float cameraSpeed, float deltaTime,
                                  char fwd, char bkd, char lft, char rgt, bool allowControl, Cube[] cubes) {
     if (!allowControl || isCubeMoving) return;
@@ -143,40 +146,68 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     float currentSpeedMultiplier = IsKeyDown(KeyboardKey.KEY_RIGHT_SHIFT) ? SpeedMultiplier : 3.0f;
 
     Vector3 movement = Vector3(0, 0, 0);
-    if (IsKeyDown(fwd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) 
-    {
-        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT)) {
+    bool isMovingForward = IsKeyDown(fwd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP);
+    bool isMovingBackward = IsKeyDown(bkd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+    bool isMovingLeft = IsKeyDown(lft) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+    bool isMovingRight = IsKeyDown(rgt) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+
+    // Вычисление угла поворота на основе комбинаций клавиш
+    if (isMovingForward && isMovingLeft) {
+        playerModelRotation = 45.0f; // 45 градусов влево от направления вперед
+    } else if (isMovingForward && isMovingRight) {
+        playerModelRotation = 315.0f; // 45 градусов вправо от направления вперед
+    } else if (isMovingBackward && isMovingLeft) {
+        playerModelRotation = 135.0f; // 45 градусов влево от направления назад
+    } else if (isMovingBackward && isMovingRight) {
+        playerModelRotation = 225.0f; // 45 градусов вправо от направления назад
+    } else if (isMovingForward) {
+        playerModelRotation = 0.0f; // Вперед
+    } else if (isMovingBackward) {
+        playerModelRotation = 180.0f; // Назад
+    } else if (isMovingLeft) {
+        playerModelRotation = 90.0f; // Влево
+    } else if (isMovingRight) {
+        playerModelRotation = 270.0f; // Вправо
+    } else {
+        isMoving = false;
+    }
+
+    // Обновление движения
+    if (isMovingForward) {
+        isMoving = true;
+        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
             movement += forward * 1.7;
         }
         movement += forward;
     }
-    if (IsKeyDown(bkd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) 
-    {
+    if (isMovingBackward) {
+        isMoving = true;
         movement -= forward;
     }
-
+    if (isMovingLeft) {
+        isMoving = true;
+        movement -= right;
+    }
+    if (isMovingRight) {
+        isMoving = true;
+        movement += right;
+    }
     if (!Vector3Equals(movement, Vector3Zero())) {
         if (dungeonCrawlerMode) {
-            // Normalize movement to ensure it only moves in increments of 2.0
             movement = Vector3Normalize(movement);
-            movement = Vector3Scale(movement, 0.5f); // Move exactly 2.0 units
+            movement = Vector3Scale(movement, 0.5f);
         } else {
             movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
         }
 
-        // Check for collisions before moving
         BoundingBox cubeBoundingBox;
         Nullable!Cube collidedCube = handleCollisions(cubePosition + movement, cubes, cubeBoundingBox);
         
         if (collidedCube.isNull) {
-            // No collision detected, move the cube
             camera.position += movement;
             camera.target += movement;
             cubePosition += movement;
             if (!friendlyZone) playerStepCounter++;
-        } else {
-            // Collision detected, handle response (e.g., stop movement or slide)
-            // For simplicity, we will just not move the cube in this example.
         }
     }
 
@@ -222,36 +253,46 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     if (allowControl) {
         float targetAngle;
         if (!dungeonCrawlerMode) {
+            // Обработка ввода от правого стика
+            float rightStickX = GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
+            if (fabs(rightStickX) > 0.3) {
+                cameraAngle = fmod(cameraAngle + rotationStep * rightStickX, 360.0f);
+                if (cameraAngle < 0) cameraAngle += 360.0f;
+            }
+
+            // Обработка ввода от клавиш и триггеров
             if (IsKeyDown(KeyboardKey.KEY_RIGHT)
             || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle + rotationStep, 360.0f);
-                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
+                if (cameraAngle < 0) cameraAngle += 360.0f;
             }
             if (IsKeyDown(KeyboardKey.KEY_LEFT)
             || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle - rotationStep, 360.0f);
-                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
+                if (cameraAngle < 0) cameraAngle += 360.0f;
             }
         } else {
             targetAngle = 90.0f;
             if (IsKeyPressed(KeyboardKey.KEY_LEFT)
             || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle - targetAngle, 360.0f);
-                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
+                if (cameraAngle < 0) cameraAngle += 360.0f;
             }
             if (IsKeyPressed(KeyboardKey.KEY_RIGHT)
             || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle + targetAngle, 360.0f);
-                if (cameraAngle < 0) cameraAngle += 360.0f; // Ensure positive angle
+                if (cameraAngle < 0) cameraAngle += 360.0f;
             }
         }
     }
 
-    // Update camera position
+    // Обновление позиции камеры
     float cameraX = cubePosition.x + radius * cos(cameraAngle * std.math.PI / 180.0f);
     float cameraZ = cubePosition.z + radius * sin(cameraAngle * std.math.PI / 180.0f);
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
+
+float plrttn = 135.0f;
 
 void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
@@ -270,7 +311,13 @@ void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float 
     // Draw player model with rotation
     Vector3 playerPosition = cubePosition;
     float additionalRotation = 270.0f * std.math.PI / 180.0f; 
-    float playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation;
+    float playerRotation;
+    if (isMoving == true) {
+        playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation + playerModelRotation * std.math.PI / 180.0f;
+        plrttn = playerRotation;
+    } else {
+        playerRotation = plrttn;
+    }
     if (drawPlayer == true) {
         DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
         Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
