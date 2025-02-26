@@ -211,6 +211,10 @@ bool videoFinished;
 /* lighting */
 Light[8] lights;
 
+int modelAnimationWalk;
+int modelAnimationIdle;
+int modelAnimationRun;
+
 /* models and locations */
 Vector3[70] modelLocationSize;
 Vector3[70] modelLocationRotate;

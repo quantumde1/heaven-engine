@@ -72,6 +72,104 @@ char* vscode = cast(char*)("
     }"
 );
 
+char* fscode_fog = cast(char*)("
+#version 330
+
+// Input vertex attributes (from vertex shader)
+in vec2 fragTexCoord;
+in vec4 fragColor;
+in vec3 fragPosition;
+in vec3 fragNormal;
+
+// Input uniform values
+uniform sampler2D texture0;
+uniform vec4 colDiffuse;
+
+// Output fragment color
+out vec4 finalColor;
+
+// NOTE: Add your custom variables here
+
+#define     MAX_LIGHTS              4
+#define     LIGHT_DIRECTIONAL       0
+#define     LIGHT_POINT             1
+
+struct MaterialProperty {
+    vec3 color;
+    int useSampler;
+    sampler2D sampler;
+};
+
+struct Light {
+    int enabled;
+    int type;
+    vec3 position;
+    vec3 target;
+    vec4 color;
+};
+
+// Input lighting values
+uniform Light lights[MAX_LIGHTS];
+uniform vec4 ambient;
+uniform vec3 viewPos;
+uniform float fogDensity;
+
+void main()
+{
+    // Texel color fetching from texture sampler
+    vec4 texelColor = texture(texture0, fragTexCoord);
+    vec3 lightDot = vec3(0.0);
+    vec3 normal = normalize(fragNormal);
+    vec3 viewD = normalize(viewPos - fragPosition);
+    vec3 specular = vec3(0.0);
+
+    // NOTE: Implement here your fragment shader code
+
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        if (lights[i].enabled == 1)
+        {
+            vec3 light = vec3(0.0);
+
+            if (lights[i].type == LIGHT_DIRECTIONAL) light = -normalize(lights[i].target - lights[i].position);
+            if (lights[i].type == LIGHT_POINT) light = normalize(lights[i].position - fragPosition);
+
+            float NdotL = max(dot(normal, light), 0.0);
+            lightDot += lights[i].color.rgb*NdotL;
+
+            float specCo = 0.0;
+            if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0); // Shine: 16.0
+            specular += specCo;
+        }
+    }
+
+    finalColor = (texelColor*((colDiffuse + vec4(specular,1))*vec4(lightDot, 1.0)));
+    finalColor += texelColor*(ambient/10.0);
+
+    // Gamma correction
+    finalColor = pow(finalColor, vec4(1.0/2.2));
+
+    // Fog calculation
+    float dist = length(viewPos - fragPosition);
+
+    // these could be parameters...
+    const vec4 fogColor = vec4(0.5, 0.5, 0.5, 1.0);
+    //const float fogDensity = 0.16;
+
+    // Exponential fog
+    float fogFactor = 1.0/exp((dist*fogDensity)*(dist*fogDensity));
+
+    // Linear fog (less nice)
+    //const float fogStart = 2.0;
+    //const float fogEnd = 10.0;
+    //float fogFactor = (fogEnd - dist)/(fogEnd - fogStart);
+
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+
+    finalColor = mix(fogColor, finalColor, fogFactor);
+}
+");
+
 char* fscode = cast(char*)("
 #version 330 core
 
@@ -311,8 +409,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     float cameraSpeed = 5.0f;
     float radius = Vector3Distance(camera.position, camera.target);
     BoundingBox cubeBoundingBox;
-    shader = LoadShaderFromMemory(vscode, fscode);
+    shader = LoadShaderFromMemory(vscode, fscode_fog);
     if (shaderEnabled == true) {
+        int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
+        float fogDensity = 0.026f; // Initial fog density
+        SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
         // Set Shader Locations
         shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
         shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
@@ -324,10 +425,13 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
             assignShaderToModel(cubeModel);
         }
         for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-        lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.LIGHTGRAY, shader);
-        lights[1] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 150), Vector3Zero(), Colors.LIGHTGRAY, shader);
-        lights[2] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, -150), Vector3Zero(), Colors.LIGHTGRAY, shader);
+        lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.WHITE, shader);
     }
+    // Load gltf model animations
+    int animsCount = 0;
+    int animIndex = 10;
+    int animCurrentFrame = 0;
+    ModelAnimation* modelAnimations = LoadModelAnimations("res/mc.glb", &animsCount);
     // Lighting Setup
     //modelCharacterSize = 5.0f;
     luaL_initDialogs(L);
@@ -355,7 +459,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (audioEnabled) {
                         UpdateMusicStream(music);
                     }
-                    if (shaderEnabled) UpdateLightValues(shader, lights[0]);    
+                    if (shaderEnabled) {
+                        UpdateLightValues(shader, lights[0]);
+                    }
                     luaL_updateDialog(L);
                     // Update camera and player positions
                     updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
@@ -375,7 +481,23 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         isNewLocationNeeded = false;
                         for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
-
+                    if (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
+                    IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+                        currentFrame = 0;
+                        ModelAnimation anim;
+                        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT)) {
+                            anim = modelAnimations[modelAnimationRun];
+                        } else {
+                            anim = modelAnimations[modelAnimationWalk];
+                        }
+                        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
+                        UpdateModelAnimation(playerModel, anim, animCurrentFrame);
+                    } else {
+                        currentFrame = 0;
+                        ModelAnimation anim = modelAnimations[modelAnimationIdle];
+                        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
+                        UpdateModelAnimation(playerModel, anim, animCurrentFrame);
+                    }
                     if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
                         DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                         drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);

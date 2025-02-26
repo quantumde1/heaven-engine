@@ -143,10 +143,17 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     float currentSpeedMultiplier = IsKeyDown(KeyboardKey.KEY_RIGHT_SHIFT) ? SpeedMultiplier : 3.0f;
 
     Vector3 movement = Vector3(0, 0, 0);
-    if (IsKeyDown(fwd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) movement += forward;
-    if (IsKeyDown(bkd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) movement -= forward;
-    if (IsKeyDown(lft) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) movement -= right;
-    if (IsKeyDown(rgt) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) movement += right;
+    if (IsKeyDown(fwd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) 
+    {
+        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT)) {
+            movement += forward * 1.7;
+        }
+        movement += forward;
+    }
+    if (IsKeyDown(bkd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) 
+    {
+        movement -= forward;
+    }
 
     if (!Vector3Equals(movement, Vector3Zero())) {
         if (dungeonCrawlerMode) {
@@ -250,7 +257,7 @@ void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
     SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
-    ShaderUniformDataType.SHADER_UNIFORM_VEC3);    
+    ShaderUniformDataType.SHADER_UNIFORM_VEC3);
 
     float playerScale = modelCharacterSize;
     BeginMode3D(camera);

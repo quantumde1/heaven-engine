@@ -781,9 +781,27 @@ extern (C) nothrow int lua_addPartyMember(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_setWalkAnimation(lua_State *L) {
+    modelAnimationWalk = cast(int)luaL_checkinteger(L, 1);
+    return 0;
+}
+
+extern (C) nothrow int lua_setIdleAnimation(lua_State *L) {
+    modelAnimationIdle = cast(int)luaL_checkinteger(L, 1);
+    return 0;
+}
+
+extern (C) nothrow int lua_setRunAnimation(lua_State *L) {
+    modelAnimationRun = cast(int)luaL_checkinteger(L, 1);
+    return 0;
+}
+
 // Register drawing functions
 extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "addCube", &lua_addCube);
+    lua_register(L, "walkAnimationValue", &lua_setWalkAnimation);
+    lua_register(L, "idleAnimationValue", &lua_setIdleAnimation);
+    lua_register(L, "runAnimationValue", &lua_setRunAnimation);
     lua_register(L, "addPartyMember", &lua_addPartyMember);
     lua_register(L, "checkInventoryForObject", &lua_checkObjectInInventory);
     lua_register(L, "setCameraRotationSpeed", &lua_setCameraRotationSpeed);
