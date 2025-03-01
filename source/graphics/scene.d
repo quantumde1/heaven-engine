@@ -171,21 +171,9 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     } else {
         isMoving = false;
     }
-
     // Обновление движения
     if (isMovingForward) {
         isMoving = true;
-        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
-            float startTime = GetFrameTime();
-            if (stamina <= 10.0f) {
-                debug_writeln("Stamina below 10. Slowing.");
-                movement += forward * 1.07f;
-                stamina -= startTime * 2;
-            } else {
-                movement += forward * 1.7f;
-            }
-            stamina -= startTime * 4;
-        }
         movement += forward;
     }
     if (isMovingBackward) {
@@ -199,6 +187,18 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     if (isMovingRight) {
         isMoving = true;
         movement += right;
+    }
+    if ((IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || 
+    IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) && isMoving == true) {
+        float startTime = GetFrameTime();
+        if (stamina <= 10.0f) {
+            debug_writeln("Stamina below 10. Slowing.");
+            movement *= 1.07f;
+            stamina -= startTime * 2;
+        } else {
+            movement *= 1.7f;
+        }
+        stamina -= startTime * 4;
     }
     if (!Vector3Equals(movement, Vector3Zero())) {
         if (dungeonCrawlerMode) {
