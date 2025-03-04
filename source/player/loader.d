@@ -4,6 +4,8 @@ import std.stdio;
 
 import raylib;
 
+import scene.objects;
+
 class PartyMember {
     string name;
     int health;
@@ -17,13 +19,11 @@ class PartyMember {
     }
 }
 
-class Player : PartyMember {
-    Model model;
-    Vector3 coordinates;
-    this(string name, int health, int experience, int level, Model model, Vector3 coordinates) {
-        super(name, health, experience, level);
-        this.model = model;
-        this.coordinates = coordinates;
+class Player : Object3D {
+    PartyMember partyMember;
+    this(string name, int health, int experience, int level, Model model, Vector3 coordinates, Vector3 scale) {
+        super(model, coordinates, scale);
+        this.partyMember = new PartyMember(name, health, experience, level);
     }
 
     void playAnimation() {

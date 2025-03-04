@@ -14,22 +14,23 @@ char[4] readControlsFromFile(string filepath) {
             string key = parts[0];
             char value = parts[1].to!char;
             switch (key) {
-                case "right":
-                    controlButtons[3] = value;
-                    break;
                 case "left":
-                    controlButtons[2] = value;
+                    controlButtons[1] = value;
                     break;
-                case "forward":
+                case "right":
                     controlButtons[0] = value;
                     break;
+                case "forward":
+                    controlButtons[3] = value;
+                    break;
                 case "backward":
-                    controlButtons[1] = value;
+                    controlButtons[2] = value;
                     break;
                 default:
                     break;
             }
         }
     }
+    writeln("Configured layout: ", controlButtons);
     return controlButtons;
 }
