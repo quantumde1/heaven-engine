@@ -340,7 +340,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     }
     debug_writeln("Engine version: ", ver);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
-    SetExitKey(KeyboardKey.KEY_NULL);
+    SetExitKey(0);
     float fadeAlpha = 2.0f;
     uint seed = cast(uint)Clock.currTime().toUnixTime();
     auto rnd = Random(seed);
@@ -427,14 +427,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
         shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
         int ambientLoc = GetShaderLocation(shader, "ambient");
-        float[3] values = [ 0.1f, 0.1f, 0.1f ];
+        float[4] values = [ 0.0001f, 0.0001f, 0.0001f, 1.0f];
         SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
         assignShaderToModel(playerModel);
         foreach (ref cubeModel; cubeModels) {
             assignShaderToModel(cubeModel);
         }
         for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-        lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(0, 9, 0), Vector3Zero(), Colors.WHITE, shader);
+        lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(20.3, 9, 5), Vector3Zero(), Colors.WHITE, shader);
     }
     // Load gltf model animations
     int animsCount = 0;
@@ -452,6 +452,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     }
     // Main Game Loop
     while (WindowShouldClose() == false) {
+        SetExitKey(0);
         // Check if the window should close
         if (WindowShouldClose()) {
             debug_writeln("Window initialization error");
@@ -478,7 +479,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                     Nullable!Cube collidedCubeDialog = handleCollisionsDialog(cubePosition, cubes, cubeBoundingBox);
                     BeginDrawing();
-                    ClearBackground(Colors.RAYWHITE);
+                    ClearBackground(Colors.BLACK);
                     if (isNewLocationNeeded == true) {
                         playerStepCounter = 0;
                         cubePosition = Vector3(0, 0, 0);

@@ -203,6 +203,9 @@ extern (C) nothrow int luaL_getButtonDialog(lua_State *L) {
                     case "opmenu":
                         button = controlConfig.opmenu_button;
                         break;
+                    case "buttonmap":
+                        button = 'P';
+                        break;
                     default:
                         break;
                 }
