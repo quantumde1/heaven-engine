@@ -21,22 +21,27 @@ struct KeyAction {
 }
 
 class Engine {
-    char[4] buttonLayout; //if someone here would need it, but not outside
-    Player player;
+    char[4] buttonLayout;
     ControlConfig controls;
+
+    //screen
     int screenWidth;
     int screenHeight;
     string nameOfWindow;
+    
     Scene scene;
     Camera3D camera;
+    Player player;
+    Object3D objects;
 
     this(ControlConfig controls) {
         this.controls = controls;
     }
 
-    void engineConfigurator() {
+    void configure() {
         //models
         Model playerModel = LoadModel("res/mc.glb");
+        objects = new Object3D(playerModel, Vector3(10, 0, 10), Vector3(1,1,1));
         player = new Player("quantumde1", 120, 0, 1, playerModel, Vector3(0, 0, 0), Vector3(1, 1, 1));
         scene = new Scene(camera, player.coordinates);
         scene.camera.position = Vector3(0.0, 10.0, 15.0);
@@ -46,13 +51,13 @@ class Engine {
         scene.camera.fovy = 45.0f;
     }
 
-    void engineStarter() {
+    void initialize() {
         InitWindow(screenWidth, screenHeight, nameOfWindow.toStringz);
         SetTargetFPS(60);
         InitAudioDevice();
     }
 
-    void engineMain() {    
+    void run() {    
         immutable int forward = controls.forward.to!int;
         immutable int backward = controls.backward.to!int;
         immutable int left = controls.left.to!int;
@@ -81,19 +86,20 @@ class Engine {
             }},
         ];
         while (WindowShouldClose() == false) {
-            BeginDrawing();
-            ClearBackground(Colors.WHITE);
-            DrawText(player.coordinates.z.to!string.toStringz, 40, 40, 30, Colors.BLACK);
-            BeginMode3D(scene.camera);
-            DrawModel(player.model, player.coordinates, player.scale.x, Colors.WHITE);
-            DrawGrid(20, 3);
             scene.rotateCamera(player.coordinates);
             foreach (keyAction; keyActionsPlayer) {
                 if (IsKeyDown(keyAction.key)) {
                     keyAction.action();
                 }
             }
-
+            BeginDrawing();
+            ClearBackground(Colors.WHITE);
+            DrawText(player.coordinates.z.to!string.toStringz, 40, 40, 30, Colors.BLACK);
+            DrawFPS(40, 80);
+            BeginMode3D(scene.camera);
+            DrawModel(player.model, player.coordinates, player.scale.x, Colors.WHITE);
+            DrawModel(objects.model, objects.coordinates, objects.scale.x, Colors.WHITE);
+            DrawGrid(20, 3);
             EndMode3D();
             EndDrawing();
         }
