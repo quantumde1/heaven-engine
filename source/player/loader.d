@@ -21,9 +21,12 @@ class PartyMember {
 
 class Player : Object3D {
     PartyMember partyMember;
-    this(string name, int health, int experience, int level, Model model, Vector3 coordinates, Vector3 scale) {
+    float speed;
+
+    this(string name, int health, int experience, int level, Model model, Vector3 coordinates, Vector3 scale, float speed) {
         super(model, coordinates, scale);
         this.partyMember = new PartyMember(name, health, experience, level);
+        this.speed = speed;
     }
 
     void playAnimation() {

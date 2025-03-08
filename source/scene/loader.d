@@ -14,7 +14,7 @@ class Scene {
     float cameraAngle = 90;
     float rotationStep = 1;
     float radius = 10;
-
+    
     this(Camera3D camera, Vector3 playerPosition) {
         this.camera = camera;
         this.playerPosition = playerPosition;
