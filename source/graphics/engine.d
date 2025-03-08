@@ -411,7 +411,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     // Load Models
     float cameraSpeed = 5.0f;
     float radius = Vector3Distance(camera.position, camera.target);
-    BoundingBox cubeBoundingBox;
+
     if (fogEnabled == true) {
         shader = LoadShaderFromMemory(vscode, fscode_fog);
     } else {
@@ -473,11 +473,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
                     luaL_updateDialog(L);
                     // Update camera and player positions
-                    updateCameraAndCubePosition(camera, cubePosition, cameraSpeed, deltaTime,
-                        controlConfig.forward_button,
-                        controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, cubes);
+                    controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
-                    Nullable!Cube collidedCubeDialog = handleCollisionsDialog(cubePosition, cubes, cubeBoundingBox);
                     BeginDrawing();
                     ClearBackground(Colors.BLACK);
                     if (isNewLocationNeeded == true) {
@@ -628,9 +625,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (show_sec_dialog && showDialog) {
                         allow_exit_dialog = allowControl = false;
                         display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
-                    } else {
-                        displayDialogs(collidedCubeDialog, controlConfig.dialog_button, allowControl, showDialog, 
-                        allow_exit_dialog, partyMembers[0].name);
                     }
                     if (!showDialog) {
                         // Flickering Effect
@@ -666,7 +660,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
                         lua_pop(L, 2);
                     } else {
-                        debug_writeln("Error in 2DEventLoop: ", to!string(lua_tostring(L, -1)));
+                        debug_writeln("Error in _3dEventLoop: ", to!string(lua_tostring(L, -1)));
                     }
 
                     // Draw Debug Information

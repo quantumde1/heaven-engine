@@ -70,81 +70,17 @@ void initWindowAndCamera(ref Camera3D camera) {
     camera = createCamera();
 }
 
-void inputName() {
-    char[8] name;
-    char[8] surname;
-    int currentField = 0; // 0 for Name, 1 for Surname
-    int letterCount = 0; // To track the number of letters in the input
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER)) {
-            if (currentField == 0) {
-                currentField = 1; // Move to Surname field
-                letterCount = 0; // Reset letter count for surname
-            } else {
-                // Optionally handle submission of both fields
-                // For example, print to console
-                // Reset fields
-                currentField = 0;
-                letterCount = 0;
-                name[0] = '\0';
-                surname[0] = '\0';
-            }
-        }
-
-        if (currentField == 0) {
-            // Input for Name
-            if (letterCount < 8 - 1) {
-                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE)) {
-                    name[--letterCount] = '\0'; // Remove last character
-                } else {
-                    for (int key = 32; key < 126; key++) {
-                        if (IsKeyPressed(key)) {
-                            name[letterCount++] = cast(char)key; // Add character
-                            name[letterCount] = '\0'; // Null-terminate string
-                        }
-                    }
-                }
-            }
-        } else {
-            // Input for Surname
-            if (letterCount < 8 - 1) {
-                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE)) {
-                    surname[--letterCount] = '\0'; // Remove last character
-                } else {
-                    for (int key = 32; key < 126; key++) {
-                        if (IsKeyPressed(key)) {
-                            surname[letterCount++] = cast(char)key; // Add character
-                            surname[letterCount] = '\0'; // Null-terminate string
-                        }
-                    }
-                }
-            }
-        }
-        ClearBackground(Colors.RAYWHITE);
-
-        DrawText("Enter your Name:", 10, 10, 20, Colors.DARKGRAY);
-        DrawText(cast(char*)name, 10, 40, 20, Colors.BLACK);
-        DrawText("Press Enter to continue to Surname", 10, 70, 20, Colors.DARKGRAY);
-
-        if (currentField == 1) {
-            DrawText("Enter your Surname:", 10, 100, 20,Colors.DARKGRAY);
-            DrawText(cast(char*)surname, 10, 130, 20, Colors.BLACK);
-            DrawText("Press Enter to submit", 10, 160, 20, Colors.DARKGRAY);
-        }
-}
-
 float playerModelRotation = 180;
 bool isMoving = false;
 
-void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, float cameraSpeed, float deltaTime,
-                                 char fwd, char bkd, char lft, char rgt, bool allowControl, Cube[] cubes) {
+void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
+char fwd, char bkd, char lft, char rgt, bool allowControl) {
     if (!allowControl || isCubeMoving) return;
 
     Vector3 forward = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
     forward.y = 0;
     Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera.up));
-
-    float currentSpeedMultiplier = IsKeyDown(KeyboardKey.KEY_RIGHT_SHIFT) ? SpeedMultiplier : 3.0f;
-
+    
     Vector3 movement = Vector3(0, 0, 0);
     bool isMovingForward = IsKeyDown(fwd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP);
     bool isMovingBackward = IsKeyDown(bkd) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN);
@@ -171,6 +107,7 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
     } else {
         isMoving = false;
     }
+
     // Обновление движения
     if (isMovingForward) {
         isMoving = true;
@@ -188,6 +125,7 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
         isMoving = true;
         movement += right;
     }
+
     if ((IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || 
     IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) && isMoving == true) {
         float startTime = GetFrameTime();
@@ -200,34 +138,10 @@ void updateCameraAndCubePosition(ref Camera3D camera, ref Vector3 cubePosition, 
         }
         stamina -= startTime * 4;
     }
-    if (!Vector3Equals(movement, Vector3Zero())) {
-        if (dungeonCrawlerMode) {
-            movement = Vector3Normalize(movement);
-            movement = Vector3Scale(movement, 0.5f);
-        } else {
-            movement = Vector3Scale(movement, cameraSpeed * deltaTime * currentSpeedMultiplier);
-        }
-
-        BoundingBox cubeBoundingBox;
-        Nullable!Cube collidedCube = handleCollisions(cubePosition + movement, cubes, cubeBoundingBox);
-        
-        if (collidedCube.isNull) {
-            camera.position += movement;
-            camera.target += movement;
-            cubePosition += movement;
-            if (!friendlyZone) playerStepCounter++;
-        }
-    }
-
-    // Existing tracking logic
-    if (!trackingCube.isNull) {
-        Vector3 targetPosition = trackingCube.get.boundingBox.min + (trackingCube.get.boundingBox.max - 
-        trackingCube.get.boundingBox.min) / 2.0f;
-        Vector3 direction = Vector3Normalize(Vector3Subtract(targetPosition, camera.position));
-        camera.target = Vector3Lerp(camera.target, targetPosition, deltaTime * cameraSpeed);
-        camera.position = Vector3Lerp(camera.position, Vector3Subtract(camera.target, 
-        Vector3Scale(direction, desiredDistance)), deltaTime * cameraSpeed);
-    }
+    camera.position += movement;
+    camera.target += movement;
+    cubePosition += movement;
+    if (!friendlyZone) playerStepCounter++;
 }
 
 void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, float targetAngle,
@@ -300,16 +214,14 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
 
-float plrttn = 135.0f;
-
 void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
     SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
     ShaderUniformDataType.SHADER_UNIFORM_VEC3);
 
-    float playerScale = modelCharacterSize;
     BeginMode3D(camera);
+
     // Draw cubes as models
     foreach (i, cubeModel; cubeModels) {
         Vector3 position = cubes[i].boundingBox.min;
@@ -322,49 +234,14 @@ void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float 
     float playerRotation;
     if (isMoving == true) {
         playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation + playerModelRotation * std.math.PI / 180.0f;
-        plrttn = playerRotation;
-    } else {
-        playerRotation = plrttn;
     }
     if (drawPlayer == true) {
         DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
-        Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
+        Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), Colors.WHITE);
     }
     // Draw floor model
     for (int i = 0; i < floorModel.length; i++) {
         DrawModelEx(floorModel[i], modelPosition[i], modelLocationRotate[i], rotateAngle[i], modelLocationSize[i], Colors.WHITE);
     }
     EndMode3D();
-}
-
-Nullable!Cube handleCollisions(Vector3 cubePosition, Cube[] cubes, ref BoundingBox cubeBoundingBox) {
-        // Define the bounding box for the cube at the current position
-    cubeBoundingBox = BoundingBox(cubePosition, Vector3Add(cubePosition, Vector3(CubeSize, CubeSize, CubeSize)));
-
-    // Check for collisions with other cubes
-    foreach (cube; cubes) {
-        if (CheckCollisionBoxes(cubeBoundingBox, cube.boundingBox)) {
-            return Nullable!Cube(cube); // Return the collided cube
-        }
-    }
-    
-    return Nullable!Cube.init; // Return an empty Nullable!Cube if no collision is detected
-}
-
-Nullable!Cube handleCollisionsDialog(Vector3 cubePosition, Cube[] cubes, ref BoundingBox cubeBoundingBox) {
-    // Define the bounding box for the cube at the current position
-    // Expand the bounding box by 3.0f in all directions
-    Vector3 expandedPosition = Vector3Subtract(cubePosition, Vector3(3.0f, 3.0f, 3.0f));
-    Vector3 expandedSize = Vector3Add(cubePosition, Vector3(3.0f, 3.0f, 3.0f));
-    
-    cubeBoundingBox = BoundingBox(expandedPosition, expandedSize);
-
-    // Check for collisions with other cubes
-    foreach (cube; cubes) {
-        if (CheckCollisionBoxes(cubeBoundingBox, cube.boundingBox)) {
-            return Nullable!Cube(cube); // Return the collided cube
-        }
-    }
-    
-    return Nullable!Cube.init; // Return an empty Nullable!Cube if no collision is detected
 }
