@@ -473,7 +473,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     }
                     luaL_updateDialog(L);
                     // Update camera and player positions
-                    controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl);
+                    controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                     BeginDrawing();
                     ClearBackground(Colors.BLACK);

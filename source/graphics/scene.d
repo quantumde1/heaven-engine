@@ -74,9 +74,8 @@ float playerModelRotation = 180;
 bool isMoving = false;
 
 void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
-char fwd, char bkd, char lft, char rgt, bool allowControl) {
+char fwd, char bkd, char lft, char rgt, bool allowControl, float deltaTime, float cameraSpeed) {
     if (!allowControl || isCubeMoving) return;
-
     Vector3 forward = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
     forward.y = 0;
     Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera.up));
@@ -138,10 +137,19 @@ char fwd, char bkd, char lft, char rgt, bool allowControl) {
         }
         stamina -= startTime * 4;
     }
-    camera.position += movement;
-    camera.target += movement;
-    cubePosition += movement;
-    if (!friendlyZone) playerStepCounter++;
+    if (!Vector3Equals(movement, Vector3Zero())) {
+        if (dungeonCrawlerMode) {
+            movement = Vector3Normalize(movement);
+            movement = Vector3Scale(movement, 0.5f);
+        } else {
+            movement = Vector3Scale(movement, cameraSpeed * deltaTime * 3.0f);
+        }
+
+        camera.position += movement;
+        camera.target += movement;
+        cubePosition += movement;
+        if (!friendlyZone) playerStepCounter++;
+    }
 }
 
 void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, float targetAngle,
@@ -214,14 +222,17 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
 
+
+float plrttn = 135.0f;
+
 void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
     SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
     ShaderUniformDataType.SHADER_UNIFORM_VEC3);
 
+    float playerScale = modelCharacterSize;
     BeginMode3D(camera);
-
     // Draw cubes as models
     foreach (i, cubeModel; cubeModels) {
         Vector3 position = cubes[i].boundingBox.min;
@@ -234,10 +245,13 @@ void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float 
     float playerRotation;
     if (isMoving == true) {
         playerRotation = (-cameraAngle * std.math.PI / 180.0f) + additionalRotation + playerModelRotation * std.math.PI / 180.0f;
+        plrttn = playerRotation;
+    } else {
+        playerRotation = plrttn;
     }
     if (drawPlayer == true) {
         DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
-        Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), Colors.WHITE);
+        Vector3(playerScale, playerScale, playerScale), Colors.WHITE);
     }
     // Draw floor model
     for (int i = 0; i < floorModel.length; i++) {
