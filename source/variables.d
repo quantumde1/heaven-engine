@@ -39,6 +39,7 @@ float targetAngle; // = cast(float) luaL_checknumber(L, 2);
 float targetSpeed; // = cast(float) luaL_checknumber(L, 3);
 float duration; // = cast(float) luaL_checknumber(L, 4);
 bool runRotationCube;
+long shadersReload = true;
 
 /* character & npc */
 bool hintNeeded;
@@ -258,3 +259,5 @@ void assignShaderToModel(Model model) {
         model.materials[i].shader = shader;
     }
 }
+
+Vector3[] light_pos;

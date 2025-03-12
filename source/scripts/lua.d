@@ -78,6 +78,25 @@ extern (C) nothrow int lua_setFriendlyZone(lua_State *L) {
     return 0;
 }
 
+char* fragment;
+char* vertex;
+
+extern (C) nothrow int lua_reloadShaderVertex(lua_State *L) {
+    UnloadShader(shader);
+    vertex = cast(char*)luaL_checkstring(L, 1);
+    shader = LoadShader(vertex, fragment);
+    shadersReload = 1;
+    return 0;
+}
+
+extern (C) nothrow int lua_reloadShaderFragment(lua_State *L) {
+    UnloadShader(shader);
+    fragment = cast(char*)luaL_checkstring(L, 1);
+    shader = LoadShader(vertex, fragment);
+    shadersReload = 1;
+    return 0;
+}
+
 extern (C) nothrow int lua_removeCube(lua_State *L) {
     try { debug {
     debug_writeln("Removing: ", to!string(luaL_checkstring(L, 1))); }
@@ -163,6 +182,7 @@ extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L) {
 extern (C) nothrow int lua_parseScene(lua_State *L) {
     try {
         parseSceneFile(luaL_checkstring(L, 1).to!string);
+        shadersReload = 1;
     } catch (Exception e) {
         
     }
@@ -513,7 +533,9 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
     lua_register(L, "getButtonName", &luaL_getButtonDialog);
+    lua_register(L, "reloadShaderVertex", &lua_reloadShaderVertex);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
+    lua_register(L, "reloadShaderFragment", &lua_reloadShaderFragment);
     lua_register(L, "isKeyPressed", &luaL_isKeyPressed);
     lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
     lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
@@ -799,15 +821,9 @@ extern (C) nothrow int lua_setRunAnimation(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_switchFog(lua_State *L) {
-    try { fogEnabled = to!bool(luaL_checkinteger(L, 1)); } catch (Exception e) {};
-    return 0;
-}
-
 // Register drawing functions
 extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "addCube", &lua_addCube);
-    lua_register(L, "fogSwitcher", &lua_switchFog);
     lua_register(L, "walkAnimationValue", &lua_setWalkAnimation);
     lua_register(L, "idleAnimationValue", &lua_setIdleAnimation);
     lua_register(L, "runAnimationValue", &lua_setRunAnimation);

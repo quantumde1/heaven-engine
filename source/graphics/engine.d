@@ -38,215 +38,6 @@ ControlConfig loadControlConfig() {
     );
 }
 
-char* vscode = cast(char*)("
-    #version 330
-    // Input vertex attributes
-    in vec3 vertexPosition;
-    in vec2 vertexTexCoord;
-    in vec3 vertexNormal;
-    in vec4 vertexColor;
-
-    // Input uniform values
-    uniform mat4 mvp;
-    uniform mat4 matModel;
-    uniform mat4 matNormal;
-
-    // Output vertex attributes (to fragment shader)
-    out vec3 fragPosition;
-    out vec2 fragTexCoord;
-    out vec4 fragColor;
-    out vec3 fragNormal;
-
-    // NOTE: Add here your custom variables
-
-    void main()
-    {
-        // Send vertex attributes to fragment shader
-        fragPosition = vec3(matModel*vec4(vertexPosition, 1.0));
-        fragTexCoord = vertexTexCoord;
-        fragColor = vertexColor;
-        fragNormal = normalize(vec3(matNormal*vec4(vertexNormal, 1.0)));
-
-        // Calculate final vertex position
-        gl_Position = mvp*vec4(vertexPosition, 1.0);
-    }"
-);
-
-char* fscode_fog = cast(char*)("
-#version 330
-
-// Input vertex attributes (from vertex shader)
-in vec2 fragTexCoord;
-in vec4 fragColor;
-in vec3 fragPosition;
-in vec3 fragNormal;
-
-// Input uniform values
-uniform sampler2D texture0;
-uniform vec4 colDiffuse;
-
-// Output fragment color
-out vec4 finalColor;
-
-// NOTE: Add your custom variables here
-
-#define     MAX_LIGHTS              4
-#define     LIGHT_DIRECTIONAL       0
-#define     LIGHT_POINT             1
-
-struct MaterialProperty {
-    vec3 color;
-    int useSampler;
-    sampler2D sampler;
-};
-
-struct Light {
-    int enabled;
-    int type;
-    vec3 position;
-    vec3 target;
-    vec4 color;
-};
-
-// Input lighting values
-uniform Light lights[MAX_LIGHTS];
-uniform vec4 ambient;
-uniform vec3 viewPos;
-uniform float fogDensity;
-
-void main()
-{
-    // Texel color fetching from texture sampler
-    vec4 texelColor = texture(texture0, fragTexCoord);
-    vec3 lightDot = vec3(0.0);
-    vec3 normal = normalize(fragNormal);
-    vec3 viewD = normalize(viewPos - fragPosition);
-    vec3 specular = vec3(0.0);
-
-    // NOTE: Implement here your fragment shader code
-
-    for (int i = 0; i < MAX_LIGHTS; i++)
-    {
-        if (lights[i].enabled == 1)
-        {
-            vec3 light = vec3(0.0);
-
-            if (lights[i].type == LIGHT_DIRECTIONAL) light = -normalize(lights[i].target - lights[i].position);
-            if (lights[i].type == LIGHT_POINT) light = normalize(lights[i].position - fragPosition);
-
-            float NdotL = max(dot(normal, light), 0.0);
-            lightDot += lights[i].color.rgb*NdotL;
-
-            float specCo = 0.0;
-            if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0); // Shine: 16.0
-            specular += specCo;
-        }
-    }
-
-    finalColor = (texelColor*((colDiffuse + vec4(specular,1))*vec4(lightDot, 1.0)));
-    finalColor += texelColor*(ambient/10.0);
-
-    // Gamma correction
-    finalColor = pow(finalColor, vec4(1.0/2.2));
-
-    // Fog calculation
-    float dist = length(viewPos - fragPosition);
-
-    // these could be parameters...
-    const vec4 fogColor = vec4(0.5, 0.5, 0.5, 1.0);
-    //const float fogDensity = 0.16;
-
-    // Exponential fog
-    float fogFactor = 1.0/exp((dist*fogDensity)*(dist*fogDensity));
-
-    // Linear fog (less nice)
-    //const float fogStart = 2.0;
-    //const float fogEnd = 10.0;
-    //float fogFactor = (fogEnd - dist)/(fogEnd - fogStart);
-
-    fogFactor = clamp(fogFactor, 0.0, 1.0);
-
-    finalColor = mix(fogColor, finalColor, fogFactor);
-}
-");
-
-char* fscode = cast(char*)("
-#version 330 core
-
-// Input vertex attributes (from vertex shader)
-in vec3 fragPosition;
-in vec2 fragTexCoord;
-in vec4 fragColor;
-in vec3 fragNormal;
-
-// Input uniform values
-uniform sampler2D texture0;
-uniform vec4 colDiffuse;
-
-// Output fragment color
-out vec4 finalColor;
-
-// Define maximum number of lights
-#define MAX_LIGHTS 8
-#define LIGHT_DIRECTIONAL 0
-#define LIGHT_POINT 1
-
-struct Light {
-    int enabled;
-    int type;
-    vec3 position;
-    vec3 target;
-    vec4 color;
-};
-
-// Input lighting values
-uniform Light lights[MAX_LIGHTS];
-uniform vec4 ambient;
-uniform vec3 viewPos;
-
-void main()
-{
-    // Fetch texel color from texture sampler
-    vec4 texelColor = texture(texture0, fragTexCoord);
-    vec3 lightDot = vec3(0.0);
-    vec3 normal = normalize(fragNormal);
-    vec3 viewD = normalize(viewPos - fragPosition);
-    vec3 specular = vec3(0.0);
-
-    // Loop through active lights
-    for (int i = 0; i < MAX_LIGHTS; i++)
-    {
-        if (lights[i].enabled == 1)
-        {
-            vec3 light = vec3(0.0);
-
-            if (lights[i].type == LIGHT_DIRECTIONAL)
-            {
-                light = -normalize(lights[i].target - lights[i].position);
-            }
-            else if (lights[i].type == LIGHT_POINT)
-            {
-                light = normalize(lights[i].position - fragPosition);
-            }
-
-            float NdotL = max(dot(normal, light), 0.0);
-            lightDot += lights[i].color.rgb * NdotL;
-
-            float specCo = 0.0;
-            if (NdotL > 0.0) 
-                specCo = pow(max(0.0, dot(viewD, reflect(-light, normal))), 16.0); // 16 refers to shininess
-            specular += specCo * lights[i].color.rgb; // Include light color in specular
-        }
-    }
-
-    finalColor = texelColor * ((colDiffuse + vec4(specular, 1.0)) * vec4(lightDot, 1.0));
-    finalColor += texelColor * (ambient / 10.0);
-
-    // Gamma correction
-    finalColor = pow(finalColor, vec4(1.0 / 2.2));
-}
-");
-
 // Constants
 enum FontSize = 20;
 enum FadeIncrement = 0.02f;
@@ -363,12 +154,12 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         if (play == false) { videoFinished = true; goto debug_lab; }
     }
     else {
-        fadeEffect(0.0f, true, "powered by\n\n\nHeaven Engine");
-        fadeEffect(fadeAlpha, false, "powered by\n\n\nHeaven Engine");
-        fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
-        fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
-        fadeEffect(0.0f, true, "\n\nunder\n\nlevel\n\n\npresents");
-        fadeEffect(fadeAlpha, false, "\n\nunder\n\nlevel\n\n\npresents");
+        fadeEffect(0.0f, true, "powered by\n\nHeaven Engine");
+        fadeEffect(fadeAlpha, false, "powered by\n\nHeaven Engine");
+        //fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
+        //fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
+        fadeEffect(0.0f, true, "under\n\nlevel\n\npresents");
+        fadeEffect(fadeAlpha, false, "under\n\nlevel\n\npresents");
         // Play Opening Video
         BeginDrawing();
         version (Windows) {
@@ -402,8 +193,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         }
     } else {
         if (luaL_dofile(L, "scripts/00_script.bin") != LUA_OK) {
-            debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
-            debug_writeln("Non-typical situation occured. Contact developers.");
+            writeln("Lua error: ", to!string(lua_tostring(L, -1)));
+            writeln("Non-typical situation occured. Contact developers.");
             return;
         }
     }
@@ -411,31 +202,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     // Load Models
     float cameraSpeed = 5.0f;
     float radius = Vector3Distance(camera.position, camera.target);
-
-    if (fogEnabled == true) {
-        shader = LoadShaderFromMemory(vscode, fscode_fog);
-    } else {
-        shader = LoadShaderFromMemory(vscode, fscode);
-    }
-    if (shaderEnabled == true) {
-        if (fogEnabled == true) {
-            int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
-            float fogDensity = 0.026f; // Initial fog density
-            SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
-        }
-        // Set Shader Locations
-        shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
-        shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-        int ambientLoc = GetShaderLocation(shader, "ambient");
-        float[4] values = [ 0.0001f, 0.0001f, 0.0001f, 1.0f];
-        SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
-        assignShaderToModel(playerModel);
-        foreach (ref cubeModel; cubeModels) {
-            assignShaderToModel(cubeModel);
-        }
-        for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-        lights[0] = CreateLight(LightType.LIGHT_POINT, Vector3(20.3, 9, 5), Vector3Zero(), Colors.WHITE, shader);
-    }
+    
     // Load gltf model animations
     int animsCount = 0;
     int animCurrentFrame = 0;
@@ -464,6 +231,28 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     showMainMenu(currentGameState);
                     break;
                 case GameState.InGame:
+                    if (shadersReload == 1) {
+                        if (shaderEnabled == true) {
+                            int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
+                            float fogDensity = 0.026f; // Initial fog density
+                            SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
+                            // Set Shader Locations
+                            shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
+                            shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+                            int ambientLoc = GetShaderLocation(shader, "ambient");
+                            float[4] values = [ 0.0001f, 0.0001f, 0.0001f, 1.0f];
+                            SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
+                            assignShaderToModel(playerModel);
+                            foreach (ref cubeModel; cubeModels) {
+                                assignShaderToModel(cubeModel);
+                            }
+                            for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
+                            for (int i = 0; i < light_pos.length; i++) {
+                                lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i], Vector3Zero(), Colors.WHITE, shader);
+                            }
+                        }
+                        shadersReload = 0;
+                    }
                     deltaTime = GetFrameTime();
                     if (audioEnabled) {
                         UpdateMusicStream(music);

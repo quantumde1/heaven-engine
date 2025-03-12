@@ -17,6 +17,7 @@ import std.conv;
 import scripts.config;
 import std.json;
 import std.array;
+import raylib_lights;
 
 // Constants
 private const float TWO_PI = 2.0f * std.math.PI;
@@ -24,6 +25,9 @@ private const float FULL_ROTATION = 360.0f;
 private const float HALF_ROTATION = 180.0f;
 
 void parseSceneFile(string path) {
+    for (int i = 0; i < floorModel.length; i++) {
+        UnloadModel(floorModel[i]);
+    }
     JSONValue scene = parseJSON(readText(path));
     JSONValue objects = scene["objects"];
     for (int i = 0; i < objects.array.length; i++) {
@@ -38,12 +42,13 @@ void parseSceneFile(string path) {
                 modelLocationRotate[i] = Vector3(rotation["x"].get!float, rotation["y"].get!float, rotation["z"].get!float);
                 rotateAngle[i] = objects[i]["rotationAngle"].get!float;
                 floorModel[i] = LoadModel(model_location_path);
-                
                 break;
+            
             case "light":
-                JSONValue color = objects[i]["color"];
                 JSONValue position = objects[i]["position"];
+                light_pos ~= Vector3(position["x"].get!float, position["y"].get!float, position["z"].get!float);
                 break;
+            
             default:
                 break;
         }
