@@ -240,16 +240,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
                             shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
                             int ambientLoc = GetShaderLocation(shader, "ambient");
-                            float[4] values = [ 0.0001f, 0.0001f, 0.0001f, 1.0f];
+                            float[4] values = [ 0.00005f, 0.00005f, 0.00005f, 1.0f ]; // Уменьшаем яркость окружающего света
                             SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
                             assignShaderToModel(playerModel);
                             foreach (ref cubeModel; cubeModels) {
                                 assignShaderToModel(cubeModel);
                             }
                             for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
+                            debug_writeln("Lights size before clean and after shader reloading:", lights);
                             for (int i = 0; i < light_pos.length; i++) {
                                 lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i], Vector3Zero(), Colors.WHITE, shader);
                             }
+                            lights = null;
+                            light_pos = null;
+                            debug_writeln("Lights size after clean and after shader reloading:", lights);
                         }
                         shadersReload = 0;
                     }
