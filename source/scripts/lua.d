@@ -148,6 +148,11 @@ extern (C) nothrow int lua_changeCameraUp(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_disableAnimations(lua_State *L) {
+    animations = cast(int)luaL_checkinteger(L, 1);
+    return 0;
+}
+
 extern (C) nothrow int lua_changeCameraTarget(lua_State *L) {
     newCameraNeeded = true;
     targetCam = Vector3(
@@ -530,6 +535,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "dungeonCrawlerMode", &lua_setRotationCrowler);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
     lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
+    lua_register(L, "animationsState", &lua_disableAnimations);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
     lua_register(L, "getButtonName", &luaL_getButtonDialog);

@@ -11,6 +11,7 @@ extern (C) char* get_file_data_from_archive(const char *input_file, const char *
 
 ControlConfig controlConfig;
 
+int animations = 0;
 
 /* camera related things */
 Vector3 positionCam; // = Vector3(0.0f, 10.0f, 10.0f);    

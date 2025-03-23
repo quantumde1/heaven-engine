@@ -280,28 +280,30 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         isNewLocationNeeded = false;
                         for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
-                    if (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
-                    IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
-                    IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
-                    IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                        currentFrame = 0;
-                        ModelAnimation anim;
-                        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
-                            anim = modelAnimations[modelAnimationRun];
+                    if (animations == 1) {
+                        if (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
+                        IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
+                        IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
+                        IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
+                            currentFrame = 0;
+                            ModelAnimation anim;
+                            if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
+                                anim = modelAnimations[modelAnimationRun];
+                            } else {
+                                anim = modelAnimations[modelAnimationWalk];
+                            }
+                            animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
+                            UpdateModelAnimation(playerModel, anim, animCurrentFrame);
                         } else {
-                            anim = modelAnimations[modelAnimationWalk];
-                        }
-                        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-                        UpdateModelAnimation(playerModel, anim, animCurrentFrame);
-                    } else {
-                        currentFrame = 0;
-                        ModelAnimation anim = modelAnimations[modelAnimationIdle];
-                        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-                        UpdateModelAnimation(playerModel, anim, animCurrentFrame);
-                        if (stamina < 25.0f) {
-                            stamina += 0.2f;
-                        } else if (stamina > 25.0f && stamina < 29.0f) {
-                            stamina = 25.0f;
+                            currentFrame = 0;
+                            ModelAnimation anim = modelAnimations[modelAnimationIdle];
+                            animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
+                            UpdateModelAnimation(playerModel, anim, animCurrentFrame);
+                            if (stamina < 25.0f) {
+                                stamina += 0.2f;
+                            } else if (stamina > 25.0f && stamina < 29.0f) {
+                                stamina = 25.0f;
+                            }
                         }
                     }
                     if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
