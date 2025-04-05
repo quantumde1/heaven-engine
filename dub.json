@@ -21,7 +21,7 @@
 		"hpff"
 	],
 	"license": "MIT License",
-	"name": "heaven-engine",
+	"name": "amaterasu-engine",
 	"subConfigurations": {
 		"bindbc-lua": "static"
 	},

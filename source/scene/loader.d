@@ -34,6 +34,9 @@ class Scene {
         float cameraZ = playerPosition.z + radius * sin(cameraAngle * std.math.PI / 180.0f);
         camera.position = Vector3(cameraX, camera.position.y, cameraZ);
     }
+    float getCameraAngle() {
+        return cameraAngle;
+    }
 }
 
 class NPC {

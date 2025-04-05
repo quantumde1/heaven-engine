@@ -42,8 +42,8 @@ class Engine {
         void configure() {
             //models
             Model playerModel = LoadModel("res/mc.glb");
-            objects = new Object3D(playerModel, Vector3(10, 0, 10), Vector3(1,1,1));
-            player = new Player("quantumde1", 120, 0, 1, playerModel, Vector3(0, 0, 0), Vector3(1, 1, 1), 0.2);
+            objects = new Object3D(playerModel, Vector3(10, 0, 10), Vector3(1,1,1), 0);
+            player = new Player("quantumde1", 120, 0, 1, playerModel, Vector3(0, 0, 0), Vector3(1, 1, 1), 0.2, 180);
             scene = new Scene(camera, player.coordinates);
             scene.camera.position = Vector3(0.0, 10.0, 15.0);
             scene.camera.target = Vector3(0.0, 4.0, 0.0);
@@ -53,9 +53,10 @@ class Engine {
         }
 
         void initialize() {
-            InitWindow(screenWidth, screenHeight, nameOfWindow.toStringz);
+            InitWindow(screenWidth, screenHeight, nameOfWindow.toStringz());
             SetTargetFPS(60);
             SetWindowState(ConfigFlags.FLAG_VSYNC_HINT);
+            ToggleFullscreen();
             InitAudioDevice();
         }
 
@@ -100,8 +101,22 @@ class Engine {
                 DrawText(player.coordinates.z.to!string.toStringz, 40, 40, 30, Colors.BLACK);
                 DrawFPS(40, 80);
                 BeginMode3D(scene.camera);
-                DrawModel(player.model, player.coordinates, player.scale.x, Colors.WHITE);
-                DrawModel(objects.model, objects.coordinates, objects.scale.x, Colors.WHITE);
+                DrawModelEx(
+                    player.model, 
+                    player.coordinates, 
+                    Vector3(0, 1, 0),
+                    player.rotationAngle,
+                    player.scale, 
+                    Colors.WHITE
+                );
+                DrawModelEx(
+                    objects.model, 
+                    objects.coordinates,
+                    Vector3(0, 1, 0),
+                    objects.rotationAngle,
+                    objects.scale,
+                    Colors.WHITE
+                );
                 DrawGrid(20, 3);
                 EndMode3D();
                 EndDrawing();
