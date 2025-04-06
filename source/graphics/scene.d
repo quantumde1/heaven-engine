@@ -46,7 +46,10 @@ void parseSceneFile(string path) {
             
             case "light":
                 JSONValue position = objects[i]["position"];
-                light_pos ~= Vector3(position["x"].get!float, position["y"].get!float, position["z"].get!float);
+                JSONValue color = objects[i]["color"];
+                light_pos ~= LightEngine(Vector3(position["x"].get!float, position["y"].get!float, 
+                position["z"].get!float), Color(color["r"].get!int.to!ubyte, color["g"].get!int.to!ubyte, 
+                color["b"].get!int.to!ubyte, color["a"].get!int.to!ubyte));
                 break;
             
             default:
@@ -233,8 +236,7 @@ float plrttn = 135.0f;
 void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
-    SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0],
-    ShaderUniformDataType.SHADER_UNIFORM_VEC3);
+    if (shaderEnabled) SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0], ShaderUniformDataType.SHADER_UNIFORM_VEC3);
 
     float playerScale = modelCharacterSize;
     BeginMode3D(camera);

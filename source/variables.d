@@ -261,4 +261,9 @@ void assignShaderToModel(Model model) {
     }
 }
 
-Vector3[] light_pos;
+struct LightEngine {
+    Vector3 lights;
+    Color color;
+}
+
+LightEngine[] light_pos;

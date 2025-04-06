@@ -248,8 +248,11 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             }
                             for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
                             debug_writeln("Lights size before clean and after shader reloading:", lights);
-                            for (int i = 0; i < light_pos.length; i++) {
-                                lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i], Vector3Zero(), Colors.WHITE, shader);
+                            if (lights.length > 0) {
+                                for (int i = 0; i < light_pos.length; i++) {
+                                    lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i].lights, Vector3Zero(), 
+                                    light_pos[i].color, shader);
+                                }
                             }
                             lights = null;
                             light_pos = null;

@@ -507,6 +507,11 @@ extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_setGameFont(lua_State *L) {
+    fontdialog = LoadFont(luaL_checkstring(L, 1));
+    return 0;
+}
+
 extern (C) nothrow int lua_shadersState(lua_State *L) {
     shaderEnabled = cast(bool)luaL_checkinteger(L, 1);
     return 0;
@@ -534,6 +539,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "showUI", &luaL_showUI);
     lua_register(L, "dungeonCrawlerMode", &lua_setRotationCrowler);
     lua_register(L, "updateCubeDialog", &lua_updateCubeDialog);
+    lua_register(L, "setFont", &lua_setGameFont);
     lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
     lua_register(L, "animationsState", &lua_disableAnimations);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
