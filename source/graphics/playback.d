@@ -112,21 +112,21 @@ extern (C) void end_vlc_rendering(void* data, void* id, void* p_pixels) {
 extern (C) void videoEndCallback(void* data) {
     auto video = cast(Video*)data;
     videoFinished = true;
-    debug_writeln("Video ended");
+    debug debug_writeln("Video ended");
     cleanup_video(video);
 }
 
 Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* protocol) {
     auto video = cast(Video*)malloc(Video.sizeof);
     if (video is null) {
-        debug_writeln("Failed to allocate memory for video.");
+        debug debug_writeln("Failed to allocate memory for video.");
         return null;
     }
 
     video.mutex = new Mutex;
     auto location = cast(char*)malloc(strlen(protocol) + strlen(src) + 3);
     if (location is null) {
-        debug_writeln("Failed to allocate memory for location.");
+        debug debug_writeln("Failed to allocate memory for location.");
         free(video);
         return null;
     }
@@ -136,7 +136,7 @@ Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* p
     free(location);
 
     if (media is null) {
-        debug_writeln("Failed to create media.");
+        debug debug_writeln("Failed to create media.");
         free(video);
         return null;
     }
@@ -145,7 +145,7 @@ Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* p
     libvlc_media_release(media);
 
     if (video.player is null) {
-        debug_writeln("Failed to create media player.");
+        debug debug_writeln("Failed to create media player.");
         free(video);
         return null;
     }
@@ -186,7 +186,7 @@ extern (C) int playVideo(char* argv) {
     }
     auto libvlc = libvlc_new(cast(int)vlcArgs.length, cast(const(char)**)vlcArgs.ptr);
     if (libvlc is null) {
-        debug_writeln("Something went wrong with libvlc init. Turn on DEBUG in conf/build_type.conf at BUILD_TYPE field to get more logs.");
+        debug debug_writeln("Something went wrong with libvlc init. Turn on DEBUG in conf/build_type.conf at BUILD_TYPE field to get more logs.");
         videoFinished = true;
         return 0;
     }

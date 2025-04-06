@@ -87,7 +87,7 @@ void showMainMenu(ref GameState currentGameState) {
             showDebug = true;
         }
         if (showDebug) {
-            drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, encounterThreshold, inBattle);
+            debug drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, encounterThreshold, inBattle);
         }
         // Check for user input and reset the inactivity timer
         if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||

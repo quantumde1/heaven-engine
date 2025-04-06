@@ -175,6 +175,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
             version (Posix) {
                 playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
             }
+        } else {
+            videoFinished = true;
         }
     }
     debug_lab:
@@ -186,17 +188,17 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     showMainMenu(currentGameState);
     // Lua Initialization
     debug { 
-        debug_writeln("loading lua");
+        debug debug_writeln("loading lua");
     }
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_registerAllLibraries(L);
     // Load Lua Script
     debug {
-        debug_writeln("Executing next lua file: ", lua_exec);
+        debug debug_writeln("Executing next lua file: ", lua_exec);
         if (luaL_dofile(L, cast(char*)lua_exec) != LUA_OK) {
-            debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
-            debug_writeln("Non-typical situation occured. Fix the script or contact developers.");
+            debug debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
+            debug debug_writeln("Non-typical situation occured. Fix the script or contact developers.");
             return;
         }
     } else {
@@ -230,7 +232,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         SetExitKey(0);
         // Check if the window should close
         if (WindowShouldClose()) {
-            debug_writeln("Window initialization error");
+            debug debug_writeln("Window initialization error");
             return;
         }
         if (videoFinished) {
@@ -255,7 +257,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                                 assignShaderToModel(cubeModel);
                             }
                             for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-                            debug_writeln("Lights size before clean and after shader reloading:", lights.length);
+                            debug debug_writeln("Lights size before clean and after shader reloading:", lights.length);
                             if (lights.length > 0) {
                                 for (int i = 0; i < light_pos.length; i++) {
                                     lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i].lights, Vector3Zero(), 
@@ -264,7 +266,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             }
                             lights = null;
                             light_pos = null;
-                            debug_writeln("Lights size after clean and after shader reloading:", lights.length);
+                            debug debug_writeln("Lights size after clean and after shader reloading:", lights.length);
                         }
                         shadersReload = 0;
                     }
@@ -466,7 +468,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         lua_pop(L, 0);
                     } else {
                         debug {
-                            debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
+                            debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
                         }
                     }
                     
@@ -480,8 +482,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
 
                     // Draw Debug Information
                     if (showDebug) {
-                        drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
-                        encounterThreshold, inBattle);
+                        debug {
+                            drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
+                            encounterThreshold, inBattle);
+                        }
                     }
 
                     // Inventory Handling

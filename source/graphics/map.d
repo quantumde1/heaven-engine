@@ -157,7 +157,7 @@ bool handleSelection(string currentArea, LocationData currentLocationData, int s
 
         if (fromScript) {
             debug {
-                debug_writeln("Map called from script, not loading model");
+                debug debug_writeln("Map called from script, not loading model");
             }
         }
         return true; // Exit the loop after loading the location

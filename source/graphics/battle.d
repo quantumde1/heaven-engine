@@ -211,7 +211,7 @@ void checkVictory() {
         }
     }
     if (allEnemiesDefeated) {
-        debug_writeln("All enemies have been defeated! Victory!");
+        debug debug_writeln("All enemies have been defeated! Victory!");
         drawBattleUI = false;
     }
 }
@@ -286,7 +286,7 @@ void drawBattleMenu() {
                 DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color(0, 0, 0, cast(ubyte)fadeOutAlpha));
                 EndDrawing();
             }
-            debug_writeln("Exiting from battle");
+            debug debug_writeln("Exiting from battle");
             for (int i = 0; i < randomNumber; i++) {
                 for (int j = randomNumber; j < enemies.length - 1; j++) {
                     enemies[j] = enemies[j + 1];
@@ -295,7 +295,7 @@ void drawBattleMenu() {
             }
             randomNumber = uniform(1, 4, rnd);
             StopMusicStream(music);
-            debug_writeln("setting music to ",to!string(musicpath));
+            debug debug_writeln("setting music to ",to!string(musicpath));
             uint audio_size;
             char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
             
@@ -340,30 +340,30 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
         case 0: // Attack
             if (IsKeyPressed(KeyboardKey.KEY_ENTER) && selectedTabIndex == 0 && !selectingEnemy
             || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)  && selectedTabIndex == 0 && !selectingEnemy) {
-                debug_writeln("Enter pressed with selecting enemy to true");
+                debug debug_writeln("Enter pressed with selecting enemy to true");
                 selectingEnemy = true;
                 if (selectedEnemyIndex != enemies.length) {
                     if (enemies[selectedEnemyIndex].currentHealth == 0) {
-                        debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
+                        debug debug_writeln("Enemy no.", selectedEnemyIndex, " destroyed!");
                     }
                 } else {
-                    debug_writeln("Enemy no x.", selectedEnemyIndex, " destroyed!");
+                    debug debug_writeln("Enemy no x.", selectedEnemyIndex, " destroyed!");
                 }
             } else if (selectingEnemy && IsKeyPressed(KeyboardKey.KEY_ENTER)
             || selectingEnemy && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-                debug_writeln("enter pressed for acting");
-                debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp before attack is ", enemies[selectedEnemyIndex].currentHealth);
+                debug debug_writeln("enter pressed for acting");
+                debug debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp before attack is ", enemies[selectedEnemyIndex].currentHealth);
                 performPhysicalAttack(selectedEnemyIndex);
-                debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp after attack is ", enemies[selectedEnemyIndex].currentHealth);
-                debug_writeln("selecting enemy to false");
+                debug debug_writeln("current selected enemy(", selectedEnemyIndex ,") hp after attack is ", enemies[selectedEnemyIndex].currentHealth);
+                debug debug_writeln("selecting enemy to false");
                 for (int i = 0; i < randomNumber; i++) {
-                    debug_writeln("HP of enemy[",i,"] is: ", enemies[i].currentHealth);
+                    debug debug_writeln("HP of enemy[",i,"] is: ", enemies[i].currentHealth);
                     if (enemies[i].currentHealth > 0) {
-                        debug_writeln("enemy turn!");
+                        debug debug_writeln("enemy turn!");
                         enemyTurn();
                         selectingEnemy = false;
                     } else {
-                        debug_writeln("ignore");
+                        debug debug_writeln("ignore");
                         selectingEnemy = false;
                     }
                 }
@@ -389,13 +389,13 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
             do {
                 selectedEnemyIndex = (selectedEnemyIndex - 1 + randomNumber) % randomNumber;
             } while (enemies[selectedEnemyIndex].currentHealth <= 0);
-            debug_writeln("Pressed left, counter: ", selectedEnemyIndex, " and enemy counter at all: ", randomNumber);
+            debug debug_writeln("Pressed left, counter: ", selectedEnemyIndex, " and enemy counter at all: ", randomNumber);
         }
         if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))) {
             do {
                 selectedEnemyIndex = (selectedEnemyIndex + 1) % randomNumber;
             } while (enemies[selectedEnemyIndex].currentHealth <= 0);
-            debug_writeln("Pressed right, counter: ", selectedEnemyIndex, " and enemy counter at all: ", randomNumber);
+            debug debug_writeln("Pressed right, counter: ", selectedEnemyIndex, " and enemy counter at all: ", randomNumber);
         }
     }
 }
@@ -407,9 +407,9 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
 void performPhysicalAttack(int enemyIndex) {
     if (enemies[enemyIndex].currentHealth > 0) {
         enemies[enemyIndex].currentHealth -= 15;
-        debug_writeln("attacked enemy no.", enemyIndex,"! HP of enemy is ", enemies[enemyIndex].currentHealth, " player HP is ", partyMembers[0].currentHealth);
+        debug debug_writeln("attacked enemy no.", enemyIndex,"! HP of enemy is ", enemies[enemyIndex].currentHealth, " player HP is ", partyMembers[0].currentHealth);
         if (enemies[enemyIndex].currentHealth <= 0) {
-            debug_writeln("Killed enemy no.", enemyIndex,"! removing...");
+            debug debug_writeln("Killed enemy no.", enemyIndex,"! removing...");
             enemies[enemyIndex].currentHealth = 0; // Mark as dead
         }
 
@@ -453,9 +453,9 @@ void enemyTurn() {
                 int damage = uniform(minDamage, maxDamage + 1, rnd); // Случайный урон в пределах minDamage и maxDamage
                 partyMembers[randomPartyMember].currentHealth -= damage;
 
-                debug_writeln("Enemy ", i, " attacked party member: ", randomPartyMember, " for ", damage, " damage.");
+                debug debug_writeln("Enemy ", i, " attacked party member: ", randomPartyMember, " for ", damage, " damage.");
             } else {
-                debug_writeln("All party members are dead. No attack performed by enemy ", i);
+                debug debug_writeln("All party members are dead. No attack performed by enemy ", i);
             }
         }
     }
