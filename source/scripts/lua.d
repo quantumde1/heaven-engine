@@ -310,11 +310,6 @@ extern (C) void luaL_initDialogs(lua_State* L) {
     lua_pcall(L, 0, 0, 0); // Call the initDialogs function in Lua
 }
 
-extern (C) void luaL_updateDialog(lua_State* L) {
-    lua_getglobal(L, "_2dEventLoop");
-    lua_pcall(L, 0, 0, 0); // Call the updateDialog function in Lua
-}
-
 extern (C) nothrow int luaL_hideUI(lua_State *L) {
     hideNavigation = true;
     return 0;
@@ -508,7 +503,9 @@ extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
 }
 
 extern (C) nothrow int lua_setGameFont(lua_State *L) {
-    fontdialog = LoadFont(luaL_checkstring(L, 1));
+    const char* x = luaL_checkstring(L, 1);
+    debug_writeln("Setting custom font: ", x.to!string);
+    fontdialog = LoadFont(x);
     return 0;
 }
 

@@ -137,7 +137,6 @@ char fwd, char bkd, char lft, char rgt, bool allowControl, float deltaTime, floa
     IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) && isMoving == true) {
         float startTime = GetFrameTime();
         if (stamina <= 10.0f) {
-            debug_writeln("Stamina below 10. Slowing.");
             movement *= 1.07f;
             stamina -= startTime * 2;
         } else {

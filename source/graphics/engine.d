@@ -44,9 +44,10 @@ enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
 
-void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
-                   int playerStepCounter, int encounterThreshold, bool inBattle) {
-    const string debugText = q{
+debug {
+    void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
+                    int playerStepCounter, int encounterThreshold, bool inBattle) {
+        const string debugText = q{
     Player Position: %s
     
     Battle State: %s
@@ -71,16 +72,19 @@ void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerH
 
     Music file: %s
 
+    Music State: %s
+
     Random encounter enemy count: %d
 
     player XP: %d
 
     Stamina: %f
-}.format(cubePosition, inBattle ? "battle" : "non battle", playerHealth, cameraAngle, 
-        playerStepCounter, encounterThreshold,  audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled, musicpath.to!string, randomNumber+1, XP, stamina);
-    if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
-    else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
-    DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
+    }.format(cubePosition, inBattle ? "battle" : "non battle", playerHealth, cameraAngle, 
+            playerStepCounter, encounterThreshold,  audioEnabled, friendlyZone, camera.position, camera.target, shaderEnabled, musicpath.to!string, audioEnabled, randomNumber+1, XP, stamina);
+        if (currentGameState == GameState.MainMenu) { DrawText(debugText.toStringz, 10, 10, 20, Colors.WHITE);}
+        else {DrawText(debugText.toStringz, 10, 10, 20, Colors.BLACK);}
+        DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 50);
+    }
 }
 
 void closeAudio() {
@@ -129,7 +133,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     version (osx) {
         debug debug_writeln("XNU/Darwin version detected");
     }
-    debug_writeln("Engine version: ", ver);
+    debug debug_writeln("Engine version: ", ver);
     Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(0);
     float fadeAlpha = 2.0f;
@@ -149,7 +153,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     InitAudioDevice();
-    debug_writeln("Showing logo..");
+    debug debug_writeln("Showing logo..");
     debug {
         if (play == false) { videoFinished = true; goto debug_lab; }
     }
@@ -162,11 +166,15 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         fadeEffect(fadeAlpha, false, "under\n\nlevel\n\npresents");
         // Play Opening Video
         BeginDrawing();
-        version (Windows) {
-            playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
-        }
-        version (Posix) {
-            playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+        debug debug_writeln("searching for video");
+        if (std.file.exists(getcwd()~"/res/videos/soul_OP.moflex.mp4")) {
+            debug debug_writeln("video found, playing");
+            version (Windows) {
+                playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+            }
+            version (Posix) {
+                playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+            }
         }
     }
     debug_lab:
@@ -247,7 +255,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                                 assignShaderToModel(cubeModel);
                             }
                             for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-                            debug_writeln("Lights size before clean and after shader reloading:", lights);
+                            debug_writeln("Lights size before clean and after shader reloading:", lights.length);
                             if (lights.length > 0) {
                                 for (int i = 0; i < light_pos.length; i++) {
                                     lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i].lights, Vector3Zero(), 
@@ -256,7 +264,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             }
                             lights = null;
                             light_pos = null;
-                            debug_writeln("Lights size after clean and after shader reloading:", lights);
+                            debug_writeln("Lights size after clean and after shader reloading:", lights.length);
                         }
                         shadersReload = 0;
                     }
@@ -267,7 +275,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (shaderEnabled) {
                         UpdateLightValues(shader, lights[0]);
                     }
-                    luaL_updateDialog(L);
                     // Update camera and player positions
                     controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
@@ -284,10 +291,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
                     if (animations == 1) {
-                        if (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
+                        if (allowControl == true && (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
                         IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
                         IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
-                        IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
+                        IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))) {
                             currentFrame = 0;
                             ModelAnimation anim;
                             if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
@@ -453,12 +460,22 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             showDebug = !showDebug;    
                         }
                     }
-                    // Check Dialog Status
+                    //2d loop worker
+                    lua_getglobal(L, "_2dEventLoop");
+                    if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
+                        lua_pop(L, 0);
+                    } else {
+                        debug {
+                            debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
+                        }
+                    }
+                    
+                    //3d loop worker
                     lua_getglobal(L, "_3dEventLoop");
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
                         lua_pop(L, 2);
                     } else {
-                        debug_writeln("Error in _3dEventLoop: ", to!string(lua_tostring(L, -1)));
+                        debug debug_writeln("Error in _3dEventLoop: ", to!string(lua_tostring(L, -1)));
                     }
 
                     // Draw Debug Information

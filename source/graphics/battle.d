@@ -33,10 +33,10 @@ Texture2D[] loadAnimationFrames(const string archivePath, const string animation
     while (true) {
         string frameFileName = format("processed_%s_frame_%04d.png", animationName, frameIndex);
         uint image_size;
-        debug_writeln(frameFileName);
+        debug debug_writeln(frameFileName);
         char* image_data = get_file_data_from_archive(cast(const(char)*)archivePath.ptr, cast(const(char)*)frameFileName.ptr, &image_size);
         if (image_data == null) {
-            debug_writeln("exiting from load anim");
+            debug debug_writeln("exiting from load anim");
             break; // Если файл не найден, завершаем цикл
         }
         Image image = LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size);
@@ -113,7 +113,7 @@ void initBattle(string[] demons_filenames) {
 
 void exitBattle() {
     // Exit the battle if all enemies are defeated
-    debug_writeln("Exiting from battle");
+    debug debug_writeln("Exiting from battle");
     for (int i = 0; i < randomNumber; i++) {
         for (int j = randomNumber; j < enemies.length - 1; j++) {
             enemies[j] = enemies[j + 1]; // Shift enemies left
@@ -121,7 +121,7 @@ void exitBattle() {
         UnloadTexture(enemies[i].texture); // Unload enemy texture
     }
     StopMusicStream(music);
-    debug_writeln("Setting music to ", musicpath.to!string);
+    debug debug_writeln("Setting music to ", musicpath.to!string);
     
     uint audio_size;
     char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
