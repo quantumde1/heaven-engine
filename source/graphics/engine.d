@@ -134,7 +134,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         debug debug_writeln("XNU/Darwin version detected");
     }
     debug debug_writeln("Engine version: ", ver);
-    Vector3 targetPosition = { 10.0f, 0.0f, 20.0f };
     SetExitKey(0);
     float fadeAlpha = 2.0f;
     uint seed = cast(uint)Clock.currTime().toUnixTime();
@@ -162,8 +161,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         fadeEffect(fadeAlpha, false, "powered by\n\nHeaven Engine");
         //fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
         //fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
-        fadeEffect(0.0f, true, "under\n\nlevel\n\npresents");
-        fadeEffect(fadeAlpha, false, "under\n\nlevel\n\npresents");
+        fadeEffect(0.0f, true, "under\nlevel\nprod.\n\npresents");
+        fadeEffect(fadeAlpha, false, "under\nlevel\nprod.\n\npresents");
         // Play Opening Video
         BeginDrawing();
         debug debug_writeln("searching for video");
@@ -219,7 +218,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     ModelAnimation* modelAnimations = LoadModelAnimations("res/mc.glb", &animsCount);
     // Lighting Setup
     //modelCharacterSize = 5.0f;
-    luaL_initDialogs(L);
     DisableCursor();
     // Gamepad Mappings
     SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,    dpright:h0.2;
@@ -257,16 +255,16 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                                 assignShaderToModel(cubeModel);
                             }
                             for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-                            debug debug_writeln("Lights size before clean and after shader reloading:", lights.length);
+                            debug debug_writeln("Lights size before clean and after shader reloading:", lights);
                             if (lights.length > 0) {
-                                for (int i = 0; i < light_pos.length; i++) {
+                                for (int i = 0; i < cast(int)light_pos.length; i++) {
                                     lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i].lights, Vector3Zero(), 
                                     light_pos[i].color, shader);
                                 }
                             }
                             lights = null;
                             light_pos = null;
-                            debug debug_writeln("Lights size after clean and after shader reloading:", lights.length);
+                            debug debug_writeln("Lights size after clean and after shader reloading:", lights);
                         }
                         shadersReload = 0;
                     }
@@ -275,7 +273,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         UpdateMusicStream(music);
                     }
                     if (shaderEnabled) {
-                        UpdateLightValues(shader, lights[0]);
+                        foreach(int i, ref light; lights) {
+                            UpdateLightValues(shader, light);
+                        }
                     }
                     // Update camera and player positions
                     controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
@@ -380,8 +380,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     if (inBattle) {
                         drawBattleMenu();
                     }
-                    // Show Map Prompt
-                    showMapPrompt = Vector3Distance(cubePosition, targetPosition) < 4.0f;
                     if (hintNeeded && !showInventory && !inBattle) {
                         if (!showDialog) {
                             Color semiTransparentBlack = Color(0, 0, 0, 200);
@@ -408,25 +406,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
                             DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
                             DrawTextEx(fontdialog, toStringz(hint), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
-                        }
-                    }
-                    if (showMapPrompt) {
-                        const int posY = GetScreenHeight() - FontSize - 40;
-                        if (IsGamepadAvailable(gamepadInt)) {
-                            const int buttonSize = 30;
-                            const int circleCenterX = 40 + buttonSize / 2;
-                            const int circleCenterY = posY + buttonSize / 2;
-                            const int textYOffset = 7;
-                            DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.GREEN);
-                            DrawText(("A"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
-                            DrawText((" to open map"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
-                        } else {
-                            DrawText(toStringz("Press "~(controlConfig.dialog_button)~" to open map"), 40, posY, 20, Colors.BLACK);
-                        }
-
-                        if (IsKeyPressed(controlConfig.dialog_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-                            StopMusicStream(music);
-                            openMap(location_name, false);
                         }
                     }
                     if (show_sec_dialog && showDialog) {

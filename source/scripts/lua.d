@@ -305,11 +305,6 @@ extern (C) nothrow int luaL_hideHint(lua_State *L) {
     return 0;
 }
 
-extern (C) void luaL_initDialogs(lua_State* L) {
-    lua_getglobal(L, "initDialogs");
-    lua_pcall(L, 0, 0, 0); // Call the initDialogs function in Lua
-}
-
 extern (C) nothrow int luaL_hideUI(lua_State *L) {
     hideNavigation = true;
     return 0;
