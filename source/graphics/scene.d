@@ -24,6 +24,10 @@ private const float TWO_PI = 2.0f * std.math.PI;
 private const float FULL_ROTATION = 360.0f;
 private const float HALF_ROTATION = 180.0f;
 
+void parseObjectFile(string path) {
+
+}
+
 void parseSceneFile(string path) {
     for (int i = 0; i < floorModel.length; i++) {
         UnloadModel(floorModel[i]);
@@ -72,8 +76,6 @@ Camera3D createCamera() {
 
 // Function to initialize the window and camera
 void initWindowAndCamera(ref Camera3D camera) {
-    
-    
     // Initialize the camera
     camera = createCamera();
 }

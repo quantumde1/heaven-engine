@@ -43,6 +43,9 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
         showInventory = false;
         return;
     }
+    if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonPressed(GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+        
+    }
 }
 
 void drawInventory() {

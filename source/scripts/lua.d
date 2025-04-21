@@ -767,6 +767,10 @@ extern (C) nothrow int lua_checkObjectInInventory(lua_State *L) {
     return 1;
 }
 
+extern (C) nothrow int lua_setButtonLogic(lua_State *L) {
+    if (luaL_checkstring(L, 1) == cast(char*)"exit") {}
+}
+
 extern (C) nothrow int lua_configureInventoryTabs(lua_State *L) {
     try {
         int textTableLength = cast(int)lua_objlen(L, 1);
