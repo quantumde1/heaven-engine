@@ -22,6 +22,8 @@
 
 [Heaven Engine's SMT Soul Hackers port](https://github.com/quantumde1/heaven-soul-hackers)
 
+[Heaven Engine Silent Hill](https://github.com/quantumde1/heaven-silent-hill)
+
 ### Building on POSIX
 
 For building, you need install this packages(at least on Alpine linux):

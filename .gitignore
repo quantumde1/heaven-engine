@@ -21,6 +21,7 @@ sky.sh
 a.out
 *.so*
 sky
+*.dylib*
 res/
 scripts/
 docs/
