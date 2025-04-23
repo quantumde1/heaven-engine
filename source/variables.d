@@ -216,6 +216,11 @@ bool videoFinished;
 /* lighting */
 Light[8] lights;
 
+// Add to your variables section
+BoundingBox[] collisionBoxes;
+BoundingBox playerBox;
+bool collisionDetected = false;
+
 int modelAnimationWalk;
 int modelAnimationIdle;
 int modelAnimationRun;

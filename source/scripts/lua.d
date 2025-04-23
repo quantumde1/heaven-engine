@@ -741,6 +741,11 @@ extern (C) nothrow int lua_setMcModel(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_setPlayerSize(lua_State *L) {
+    modelCharacterSize = luaL_checknumber(L, 1);
+    return 0;
+}
+
 extern (C) nothrow int lua_allowDemons(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int textTableLength = cast(int)lua_objlen(L, 1);
@@ -902,6 +907,7 @@ extern (C) nothrow void luaL_openaudiolib(lua_State* L) {
     lua_register(L, "loadMusic", &lua_LoadMusic);
     lua_register(L, "playMusic", &lua_PlayMusic);
     lua_register(L, "stopMusic", &lua_StopMusic);
+    lua_register(L, "setPlayerSize", &lua_setPlayerSize);
     lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);
     lua_register(L, "hideUI", &luaL_hideUI);
     lua_register(L, "openMap", &luaL_openMap);

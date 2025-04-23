@@ -287,6 +287,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         }
                     }
                     // Update camera and player positions
+                    updatePlayerBox(playerBox, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize));
                     controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                     BeginDrawing();
