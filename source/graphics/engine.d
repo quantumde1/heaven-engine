@@ -239,6 +239,15 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     showMainMenu(currentGameState);
                     break;
                 case GameState.InGame:
+                    //2d loop worker
+                    lua_getglobal(L, "_2dEventLoop");
+                    if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
+                        lua_pop(L, 0);
+                    } else {
+                        debug {
+                            debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
+                        }
+                    }
                     if (shadersReload == 1) {
                         if (shaderEnabled == true) {
                             int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
@@ -282,6 +291,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                     BeginDrawing();
                     ClearBackground(Colors.BLACK);
+                    if (neededDraw2D) {
+                        allowControl = false;
+                        DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                    }
+                    if (neededCharacterDrawing) {
+                        allowControl = false;
+                        for (int i = 0; i < tex2d.length; i++) {
+                            DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors.WHITE);
+                        }
+                    }
+                    if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
+                        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                        drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                    }
                     if (isNewLocationNeeded == true) {
                         playerStepCounter = 0;
                         cubePosition = Vector3(0, 0, 0);
@@ -316,20 +339,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             } else if (stamina > 25.0f && stamina < 29.0f) {
                                 stamina = 25.0f;
                             }
-                        }
-                    }
-                    if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
-                        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
-                        drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
-                    }
-                    if (neededDraw2D) {
-                        allowControl = false;
-                        DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
-                    }
-                    if (neededCharacterDrawing) {
-                        allowControl = false;
-                        for (int i = 0; i < tex2d.length; i++) {
-                            DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors.WHITE);
                         }
                     }
                     if (!isNaN(iShowSpeed) && !isNaN(neededDegree) && !isNewLocationNeeded) {
@@ -441,16 +450,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                             showDebug = !showDebug;    
                         }
                     }
-                    //2d loop worker
-                    lua_getglobal(L, "_2dEventLoop");
-                    if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
-                        lua_pop(L, 0);
-                    } else {
-                        debug {
-                            debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
-                        }
-                    }
-                    
                     //3d loop worker
                     lua_getglobal(L, "_3dEventLoop");
                     if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
@@ -481,10 +480,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     EndDrawing();
                     CloseWindow();
                     UnloadFont(fontdialog);
-                    for (int i = tex2d.length; i < tex2d.length; i++) {
+                    for (int i = cast(int)tex2d.length; i < tex2d.length; i++) {
                         UnloadTexture(tex2d[i].texture);
                     }
-                    for (int i = backgrounds.length; i < backgrounds.length; i++) {
+                    for (int i = cast(int)backgrounds.length; i < backgrounds.length; i++) {
                         UnloadTexture(backgrounds[i]);
                     }
                     closeAudio();

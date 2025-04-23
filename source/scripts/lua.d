@@ -380,11 +380,22 @@ extern (C) nothrow int luaL_dialogBox(lua_State *L) {
 
 extern (C) nothrow int lua_load2Dbackground(lua_State *L) {
     try {
-    UnloadTexture(backgrounds[cast(int)luaL_checkinteger(L, 2)]);
-    uint image_size;
-    char *image_data = get_file_data_from_archive("res/bg.bin", luaL_checkstring(L, 1), &image_size);
-    backgrounds[cast(int)luaL_checkinteger(L, 2)] = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+        int index = cast(int)luaL_checkinteger(L, 2);
+        
+        // Если индекс выходит за границы, расширяем массив
+        if (index >= backgrounds.length) {
+            backgrounds.length = index + 1;
+        }
+        
+        // Если текстура по этому индексу уже загружена, выгружаем её
+        if (index < backgrounds.length && backgrounds[index].id != 0) {
+            UnloadTexture(backgrounds[index]);
+        }
+        
+        uint image_size;
+        char *image_data = get_file_data_from_archive("res/bg.bin", luaL_checkstring(L, 1), &image_size);
+        backgrounds[index] = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
     } catch (Exception e) {}
     return 0;
 }
@@ -400,18 +411,22 @@ extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
 }
 
 extern (C) nothrow int lua_draw2Dobject(lua_State *L) {
-    uint image_size;
-    neededCharacterDrawing = true;
-    int count = cast(int)luaL_checkinteger(L, 5);
     try {
-    char *image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
-    tex2d[count].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    tex2d[count].x = cast(int)luaL_checkinteger(L, 2);
-    tex2d[count].y = cast(int)luaL_checkinteger(L, 3);
-    tex2d[count].scale = luaL_checknumber(L, 4);
-    } catch (Exception e) {
+        neededCharacterDrawing = true;
+        int count = cast(int)luaL_checkinteger(L, 5);
         
+        if (count >= tex2d.length) {
+            tex2d.length = count + 1;
+        }
+
+        uint image_size;
+        char* image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
+        tex2d[count].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
+        tex2d[count].x = cast(int)luaL_checkinteger(L, 2);
+        tex2d[count].y = cast(int)luaL_checkinteger(L, 3);
+        tex2d[count].scale = luaL_checknumber(L, 4);
+    } catch (Exception e) {
     }
     return 0;
 }
@@ -455,13 +470,21 @@ extern (C) nothrow int lua_getLocationName(lua_State *L) {
 
 extern (C) nothrow int lua_stop2Dbackground(lua_State *L) {
     UnloadTexture(texture_background);
-    neededDraw2D = false;
     return 0;
 }
 
 extern (C) nothrow int lua_unload2Dbackground(lua_State *L) {
-    UnloadTexture(tex2d[cast(int)luaL_checkinteger(L,1)].texture);
-    neededDraw2D = false;
+    UnloadTexture(backgrounds[cast(int)luaL_checkinteger(L,1)]);
+    return 0;
+}
+
+extern (C) nothrow int lua_2dModeEnable(lua_State *L) {
+    neededDraw2D = true;
+    return 0;
+}
+
+extern (C) nothrow int lua_2dModeDisable(lua_State *L) {
+    
     return 0;
 }
 
@@ -540,6 +563,8 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "reloadShaderVertex", &lua_reloadShaderVertex);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
     lua_register(L, "reloadShaderFragment", &lua_reloadShaderFragment);
+    lua_register(L, "Begin2D", &lua_2dModeEnable);
+    lua_register(L, "End2D", &lua_2dModeDisable);
     lua_register(L, "isKeyPressed", &luaL_isKeyPressed);
     lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
     lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);

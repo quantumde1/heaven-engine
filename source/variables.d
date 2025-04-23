@@ -184,8 +184,9 @@ struct TextureShow {
 debug {
     int background_name;
 }
-TextureShow[5] tex2d;
-Texture2D[5] backgrounds;
+
+TextureShow[] tex2d;
+Texture2D[] backgrounds;
 
 /* controls */
 struct ControlConfig {
