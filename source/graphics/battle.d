@@ -83,21 +83,20 @@ void loadAssets(string[] demons_filenames) {
     demonNumber = new int[randomNumber];
     for (int i = 0; i < randomNumber; i++) {
         demonNumber[i] = cast(int)(rand() % demons_filenames.length);
-        JSONValue demon_data = parseJSON(readText("res/enemies_data/"~demons_filenames[demonNumber[i]]~".json"));
+        JSONValue demon_data;
+        if (!isBossfight) demon_data = parseJSON(readText("res/enemies_data/"~demons_filenames[demonNumber[i]]~".json"));
+        else demon_data = parseJSON(readText("res/enemies_data/"~demonsBossfightAllowed[i]~".json"));
         uint image_size;
-        char *image_data = get_file_data_from_archive(toStringz("res/enemies.bin"), toStringz(demons_filenames[demonNumber[i]]~".png"), &image_size);
-        enemies[i].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-        enemies[i].maxHealth = demon_data["hp"].get!int;
-        enemies[i].currentHealth = enemies[i].maxHealth;
-        enemies[i].maxMana = demon_data["mp"].get!int;
-        enemies[i].currentMana = enemies[i].maxMana;
+        char *image_data = get_file_data_from_archive(toStringz("res/enemies.bin"), 
+        toStringz(demons_filenames[demonNumber[i]]~".png"), &image_size);
+        enemies ~= Enemy(demon_data["name"].get!string, LoadTextureFromImage(LoadImageFromMemory(".PNG", 
+        cast(const(ubyte)*)image_data, image_size)), demon_data["hp"].get!int, demon_data["hp"].get!int, 
+        demon_data["mp"].get!int, demon_data["mp"].get!int);
     }
 
     uint image_size;
     char *image_data = get_file_data_from_archive("res/bg.bin", "battle.png", &image_size);
     background = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data, image_size));
 }
 
 void initBattle(string[] demons_filenames) {
@@ -294,16 +293,16 @@ void drawBattleMenu() {
                 UnloadTexture(enemies[i].texture);
             }
             randomNumber = uniform(1, 4, rnd);
-            StopMusicStream(music);
-            debug debug_writeln("setting music to ",to!string(musicpath));
-            uint audio_size;
-            char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
-            
             if (audioEnabled) {
+                StopMusicStream(music);
+                debug debug_writeln("setting music to ",to!string(musicpath));
+                uint audio_size;
+                char *audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
+                
                 UnloadMusicStream(music);
                 music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+                PlayMusicStream(music);
             }
-            PlayMusicStream(music);
             XP += addXP;
             inBattle = false;
             allowControl = true;

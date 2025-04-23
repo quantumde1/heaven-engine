@@ -101,7 +101,7 @@ Texture2D background;
 int selectedTabIndex = 0;
 int secInBattle = false;
 int playerMana = 30;
-
+string[] demonsBossfightAllowed;
 /* lua things */
 lua_State* L;
 

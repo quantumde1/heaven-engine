@@ -17,6 +17,7 @@ import std.file;
 import graphics.map;
 import std.array;
 import std.algorithm;
+import core.thread;
 
 /* 
  * This module provides Lua bindings for various engine functionalities.
@@ -25,20 +26,21 @@ import std.algorithm;
 */
 
 extern (C) nothrow int lua_initBattle(lua_State *L) {
-    if (luaL_checkinteger(L, 1) == 1) {
-        isBossfight = true;
-        randomNumber = cast(int)luaL_checkinteger(L, 4)-1;
-        name_global = to!string(luaL_checkstring(L, 2));
-        message_global = [to!string(luaL_checkstring(L, 3))];
-        playerStepCounter = encounterThreshold + 1;
-    } else {
-        isBossfight = false;
-        playerStepCounter = encounterThreshold + 1;
+    int isBoss = cast(int)luaL_checkinteger(L, 1);
+    //demonsBossfightAllowed ~= to!string(cast(char*)luaL_checkstring(L, 3));
+    luaL_checktype(L, 2, LUA_TTABLE);
+    int choicesLength = cast(int)lua_objlen(L, 2);
+    demonsBossfightAllowed = new string[choicesLength];
+    for (int i = 0; i < choicesLength; i++) {
+        lua_rawgeti(L,2, i + 1); // Lua indices start from 1
+        demonsBossfightAllowed[i] = luaL_checkstring(L, -1).to!string;
+        lua_pop(L, 1);
     }
+    randomNumber = choicesLength;
     try {
-    } catch (Exception e) {
-
-    }
+        isBossfight = isBoss.to!bool;
+    } catch (Exception e) {}
+    playerStepCounter = encounterThreshold + 1;
     return 0;
 }
 

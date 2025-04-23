@@ -356,7 +356,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         }
                     }
                     if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
-                        enemies = new Enemy[randomNumber];
                         originalCubePosition = cubePosition;
                         originalCameraPosition = camera.position;
                         originalCameraTarget = camera.target;
