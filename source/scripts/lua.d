@@ -486,7 +486,7 @@ extern (C) nothrow int lua_2dModeEnable(lua_State *L) {
 }
 
 extern (C) nothrow int lua_2dModeDisable(lua_State *L) {
-    
+    neededDraw2D = false;
     return 0;
 }
 
