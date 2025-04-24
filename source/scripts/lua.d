@@ -737,12 +737,22 @@ extern (C) nothrow int lua_addCube(lua_State *L) {
 
 extern (C) nothrow int lua_setMcModel(lua_State *L) {
     playerModel = LoadModel(luaL_checkstring(L, 1));
-    modelCharacterSize = luaL_checknumber(L, 2);
+    modelCharacterSize = Vector3(luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
     return 0;
 }
 
 extern (C) nothrow int lua_setPlayerSize(lua_State *L) {
-    modelCharacterSize = luaL_checknumber(L, 1);
+    modelCharacterSize = Vector3(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+    return 0;
+}
+
+extern (C) nothrow int lua_setPlayerCollisionSize(lua_State *L) {
+    float width = luaL_checknumber(L, 1);
+    float height = luaL_checknumber(L, 2);
+    float depth = luaL_checknumber(L, 3);
+    
+    collisionCharacterSize = Vector3(width, height*2, depth);
+    
     return 0;
 }
 
@@ -873,6 +883,7 @@ extern (C) nothrow void luaL_opendrawinglib(lua_State* L) {
     lua_register(L, "setCameraRotationSpeed", &lua_setCameraRotationSpeed);
     lua_register(L, "configureInventoryTabs", &lua_configureInventoryTabs);
     lua_register(L, "addToInventoryTab", &lua_addToInventoryTab);
+    lua_register(L, "setPlayerCollisionSize", &lua_setPlayerCollisionSize);
     lua_register(L, "isCubeMoving", &lua_cubeMoveStatus);
     lua_register(L, "setCubeModel", &lua_setCubeModel);
     lua_register(L, "removeCubeModel", &lua_removeCubeModel);

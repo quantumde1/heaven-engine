@@ -84,10 +84,13 @@ void parseSceneFile(string path) {
 
 void updatePlayerOBB(ref OBB playerOBB, Vector3 playerPosition, Vector3 modelCharacterSize, float playerRotation)
 {
-    playerOBB.center = playerPosition;
+    playerOBB.center = Vector3(playerPosition.x, 
+                             playerPosition.y + modelCharacterSize.y/2,
+                             playerPosition.z);
     playerOBB.halfExtents = Vector3(modelCharacterSize.x/2, 
                                   modelCharacterSize.y/2, 
                                   modelCharacterSize.z/2);
+    playerOBB.rotation = QuaternionFromAxisAngle(Vector3(0, 1, 0), playerRotation * DEG2RAD);
 }
 
 // Function to initialize the camera
@@ -209,19 +212,20 @@ void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
         
         // Create bounding box for proposed position
         BoundingBox proposedBox;
-        proposedBox.min = Vector3(proposedPosition.x - modelCharacterSize/2,
-                                proposedPosition.y - modelCharacterSize/2,
-                                proposedPosition.z - modelCharacterSize/2);
-        proposedBox.max = Vector3(proposedPosition.x + modelCharacterSize/2,
-                                proposedPosition.y + modelCharacterSize/2,
-                                proposedPosition.z + modelCharacterSize/2);
+        proposedBox.min = Vector3(proposedPosition.x - collisionCharacterSize.x/2,
+                                proposedPosition.y - collisionCharacterSize.y/2,
+                                proposedPosition.z - collisionCharacterSize.z/2);
+        proposedBox.max = Vector3(proposedPosition.x + collisionCharacterSize.x/2,
+                                proposedPosition.y + collisionCharacterSize.y/2,
+                                proposedPosition.z + collisionCharacterSize.z/2);
 
         // Replace the bounding box collision check with:
         OBB proposedOBB;
-        proposedOBB.center = proposedPosition;
-        proposedOBB.halfExtents = Vector3(modelCharacterSize/2, modelCharacterSize/2, modelCharacterSize/2);
+        proposedOBB.center = Vector3(proposedPosition.x,
+                                proposedPosition.y + collisionCharacterSize.y/2,
+                                proposedPosition.z);
+        proposedOBB.halfExtents = collisionCharacterSize/2;
         proposedOBB.rotation = QuaternionFromAxisAngle(Vector3(0, 1, 0), playerModelRotation * DEG2RAD);
-
         collisionDetected = false;
         foreach(obb; collisionOBBs) {
             if(checkCollisionOBBvsOBB(proposedOBB, obb)) {
@@ -242,7 +246,7 @@ void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
     }
 
     // Update player's actual bounding box
-    updatePlayerOBB(playerOBB, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), playerModelRotation);
+    updatePlayerOBB(playerOBB, cubePosition, collisionCharacterSize, playerModelRotation);
 }
 
 void drawDebugCollisions() {
@@ -355,7 +359,7 @@ void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float 
     }
     if (drawPlayer == true) {
         DrawModelEx(playerModel, playerPosition, Vector3(0.0f, 1.0f, 0.0f), playerRotation * 180.0f / std.math.PI, 
-        Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), Colors.WHITE);
+        modelCharacterSize, Colors.WHITE);
     }
     // Draw floor model
     for (int i = 0; i < floorModel.length; i++) {

@@ -288,7 +288,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         }
                     }
                     // Update camera and player positions
-                    updatePlayerOBB(playerOBB, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), playerModelRotation);
+                    updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
                     controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                     BeginDrawing();
