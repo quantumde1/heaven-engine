@@ -14,6 +14,7 @@ import std.file;
 import std.random;
 import std.datetime;
 import std.conv;
+import graphics.collision;
 import scripts.config;
 import std.json;
 import std.array;
@@ -23,6 +24,10 @@ import raylib_lights;
 private const float TWO_PI = 2.0f * std.math.PI;
 private const float FULL_ROTATION = 360.0f;
 private const float HALF_ROTATION = 180.0f;
+
+OBB[] collisionOBBs;
+OBB playerOBB;
+bool collisionDetected = false;
 
 void parseSceneFile(string path) {
     for (int i = 0; i < floorModel.length; i++) {
@@ -55,13 +60,19 @@ void parseSceneFile(string path) {
             case "collision":
                 JSONValue position = objects[i]["position"];
                 JSONValue size = objects[i]["size"];
-                Vector3 min = Vector3(position["x"].get!float - size["x"].get!float/2,
-                                    position["y"].get!float - size["y"].get!float/2,
-                                    position["z"].get!float - size["z"].get!float/2);
-                Vector3 max = Vector3(position["x"].get!float + size["x"].get!float/2,
-                                    position["y"].get!float + size["y"].get!float/2,
-                                    position["z"].get!float + size["z"].get!float/2);
-                collisionBoxes ~= BoundingBox(min, max);
+                JSONValue rotation = objects[i]["rotation"];
+                
+                OBB newOBB;
+                newOBB.center = Vector3(position["x"].get!float, 
+                                    position["y"].get!float,
+                                    position["z"].get!float);
+                newOBB.halfExtents = Vector3(size["x"].get!float/2,
+                                            size["y"].get!float/2,
+                                            size["z"].get!float/2);
+                newOBB.rotation = QuaternionFromEuler(rotation["x"].get!float * DEG2RAD,
+                                                    rotation["y"].get!float * DEG2RAD,
+                                                    rotation["z"].get!float * DEG2RAD);
+                collisionOBBs ~= newOBB;
                 break;
             default:
                 break;
@@ -71,13 +82,12 @@ void parseSceneFile(string path) {
     texture_skybox = LoadTexture(cast(char*)environment["skybox"].str);
 }
 
-void updatePlayerBox(ref BoundingBox playerBox, Vector3 playerPosition, Vector3 modelCharacterSize) {
-    playerBox.min = Vector3(playerPosition.x - modelCharacterSize.x/2,
-                           playerPosition.y - modelCharacterSize.y/2,
-                           playerPosition.z - modelCharacterSize.z/2);
-    playerBox.max = Vector3(playerPosition.x + modelCharacterSize.x/2,
-                           playerPosition.y + modelCharacterSize.y/2,
-                           playerPosition.z + modelCharacterSize.z/2);
+void updatePlayerOBB(ref OBB playerOBB, Vector3 playerPosition, Vector3 modelCharacterSize, float playerRotation)
+{
+    playerOBB.center = playerPosition;
+    playerOBB.halfExtents = Vector3(modelCharacterSize.x/2, 
+                                  modelCharacterSize.y/2, 
+                                  modelCharacterSize.z/2);
 }
 
 // Function to initialize the camera
@@ -106,9 +116,6 @@ void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
     // Early exit if control is disabled or cube is moving
     if (!allowControl || isCubeMoving) return;
 
-    // Store original position for collision recovery
-    Vector3 originalPosition = cubePosition;
-    
     // Calculate forward and right vectors for movement
     Vector3 forward = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
     forward.y = 0; // Keep movement horizontal
@@ -209,10 +216,15 @@ void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
                                 proposedPosition.y + modelCharacterSize/2,
                                 proposedPosition.z + modelCharacterSize/2);
 
-        // Check for collisions
+        // Replace the bounding box collision check with:
+        OBB proposedOBB;
+        proposedOBB.center = proposedPosition;
+        proposedOBB.halfExtents = Vector3(modelCharacterSize/2, modelCharacterSize/2, modelCharacterSize/2);
+        proposedOBB.rotation = QuaternionFromAxisAngle(Vector3(0, 1, 0), playerModelRotation * DEG2RAD);
+
         collisionDetected = false;
-        foreach(box; collisionBoxes) {
-            if(CheckCollisionBoxes(proposedBox, box)) {
+        foreach(obb; collisionOBBs) {
+            if(checkCollisionOBBvsOBB(proposedOBB, obb)) {
                 collisionDetected = true;
                 break;
             }
@@ -230,18 +242,19 @@ void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
     }
 
     // Update player's actual bounding box
-    updatePlayerBox(playerBox, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize));
+    updatePlayerOBB(playerOBB, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), playerModelRotation);
 }
 
 void drawDebugCollisions() {
     BeginMode3D(camera);
-
-        DrawBoundingBox(playerBox, Colors.RED);
-        
-        // Draw other collision boxes
-        foreach(box; collisionBoxes) {
-            DrawBoundingBox(box, Colors.BLUE);
-        }
+    
+    // Draw player OBB
+    drawWireframe(playerOBB, Colors.RED);
+    
+    // Draw other collision OBBs
+    foreach(obb; collisionOBBs) {
+        drawWireframe(obb, Colors.BLUE);
+    }
     
     EndMode3D();
 }

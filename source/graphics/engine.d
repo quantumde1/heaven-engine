@@ -24,6 +24,7 @@ import scripts.lua;
 import graphics.cubes;
 import raylib_lights;
 import graphics.map;
+import graphics.collision;
 import std.array;
 import ui.inventory;
 
@@ -287,7 +288,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         }
                     }
                     // Update camera and player positions
-                    updatePlayerBox(playerBox, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize));
+                    updatePlayerOBB(playerOBB, cubePosition, Vector3(modelCharacterSize, modelCharacterSize, modelCharacterSize), playerModelRotation);
                     controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
                     rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                     BeginDrawing();
@@ -317,7 +318,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
                     }
                     if (animations == 1) {
-                        if (allowControl == true && (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
+                        if (collisionDetected == false && allowControl == true && (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
                         IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
                         IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
                         IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))) {

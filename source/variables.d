@@ -6,6 +6,7 @@ import std.typecons;
 import raylib;
 import bindbc.lua;
 import raylib_lights;
+import graphics.collision;
 
 extern (C) char* get_file_data_from_archive(const char *input_file, const char *file_name, uint *file_size_out);
 
@@ -108,7 +109,7 @@ lua_State* L;
 /* interface things */
 float flicker = 0.0;
 bool increasing = true;
-float ver = 0.6;
+float ver = 1.0;
 bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;
@@ -215,11 +216,6 @@ bool videoFinished;
 
 /* lighting */
 Light[8] lights;
-
-// Add to your variables section
-BoundingBox[] collisionBoxes;
-BoundingBox playerBox;
-bool collisionDetected = false;
 
 int modelAnimationWalk;
 int modelAnimationIdle;
