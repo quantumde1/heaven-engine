@@ -93,22 +93,6 @@ void updatePlayerOBB(ref OBB playerOBB, Vector3 playerPosition, Vector3 modelCha
     playerOBB.rotation = QuaternionFromAxisAngle(Vector3(0, 1, 0), playerRotation * DEG2RAD);
 }
 
-// Function to initialize the camera
-Camera3D createCamera() {
-    // Set the field of view and projection type
-    float fov = 45.0f;
-    CameraProjection projection = CameraProjection.CAMERA_PERSPECTIVE;
-    
-    // Create and return the camera
-    return Camera3D(positionCam, targetCam, upCam, fov, projection);
-}
-
-// Function to initialize the window and camera
-void initWindowAndCamera(ref Camera3D camera) {
-    // Initialize the camera
-    camera = createCamera();
-}
-
 float playerModelRotation = 180;
 bool isMoving = false;
 
@@ -266,23 +250,27 @@ void drawDebugCollisions() {
 void rotateScriptCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float cameraAngle, float targetAngle,
                          float rotationSpeed, float radius, float deltaTime) {
     if (!isCameraRotating) return;
+    oldDegree = cameraAngle;
+    if (rotationSpeed != 0.0) {
+        float angleDifference = targetAngle - cameraAngle;
+        // Normalize angle difference
+        if (angleDifference > HALF_ROTATION) {
+            angleDifference -= FULL_ROTATION;
+        } else if (angleDifference < -HALF_ROTATION) {
+            angleDifference += FULL_ROTATION;
+        }
 
-    float angleDifference = targetAngle - cameraAngle;
-    // Normalize angle difference
-    if (angleDifference > HALF_ROTATION) {
-        angleDifference -= FULL_ROTATION;
-    } else if (angleDifference < -HALF_ROTATION) {
-        angleDifference += FULL_ROTATION;
-    }
-
-    float rotationAmount = rotationSpeed * deltaTime;
-    if (fabs(angleDifference) > rotationAmount) {
-        cameraAngle += (angleDifference > 0) ? rotationAmount : -rotationAmount;
+        float rotationAmount = rotationSpeed * deltaTime;
+        if (fabs(angleDifference) > rotationAmount) {
+            cameraAngle += (angleDifference > 0) ? rotationAmount : -rotationAmount;
+        } else {
+            cameraAngle = targetAngle;
+            isCameraRotating = false; 
+        }
     } else {
         cameraAngle = targetAngle;
         isCameraRotating = false; 
     }
-
     // Update camera position based on the new angle
     float cameraX = cubePosition.x + radius * cos(cameraAngle * std.math.PI / 180.0f);
     float cameraZ = cubePosition.z + radius * sin(cameraAngle * std.math.PI / 180.0f);
@@ -332,7 +320,6 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     float cameraZ = cubePosition.z + radius * sin(cameraAngle * std.math.PI / 180.0f);
     camera.position = Vector3(cameraX, camera.position.y, cameraZ);
 }
-
 
 float plrttn = 135.0f;
 

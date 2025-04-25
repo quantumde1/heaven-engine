@@ -131,22 +131,35 @@ extern (C) nothrow int lua_disallowControl(lua_State *L) {
 }
 
 extern (C) nothrow int lua_changeCameraPosition(lua_State *L) {
-    newCameraNeeded = true;
     positionCam = Vector3(
         luaL_checknumber(L, 1),
         luaL_checknumber(L, 2),
         luaL_checknumber(L, 3)
     );
+    updateCamera = true;
+    return 0;
+}
+
+extern (C) nothrow int lua_resetCameraState(lua_State *L) {
+    upCam = oldCamera.up;
+    targetCam = oldCamera.target;
+    positionCam = oldCamera.position;
+    updateCamera = true;
+    return 0;
+}
+
+extern (C) nothrow int lua_saveCameraState(lua_State *L) {
+    oldCamera = camera;
     return 0;
 }
 
 extern (C) nothrow int lua_changeCameraUp(lua_State *L) {
-    newCameraNeeded = true;
     upCam = Vector3(
         luaL_checknumber(L, 1),
         luaL_checknumber(L, 2),
         luaL_checknumber(L, 3)
     );
+    updateCamera = true;
     return 0;
 }
 
@@ -156,12 +169,12 @@ extern (C) nothrow int lua_disableAnimations(lua_State *L) {
 }
 
 extern (C) nothrow int lua_changeCameraTarget(lua_State *L) {
-    newCameraNeeded = true;
     targetCam = Vector3(
         luaL_checknumber(L, 1),
         luaL_checknumber(L, 2),
         luaL_checknumber(L, 3)
     );
+    updateCamera = true;
     return 0;
 }
 
@@ -194,6 +207,11 @@ extern (C) nothrow int lua_parseScene(lua_State *L) {
         
     }
     return 0;
+}
+
+extern (C) nothrow int lua_getOldCameraAngle(lua_State *L) {
+    lua_pushnumber(L, oldDegree);
+    return 1;
 }
 
 extern (C) nothrow int luaL_rotateCam(lua_State* L) {
@@ -561,6 +579,8 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "animationsState", &lua_disableAnimations);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
+    lua_register(L, "saveCameraState", &lua_saveCameraState);
+    lua_register(L, "resetCameraState", &lua_resetCameraState);
     lua_register(L, "getButtonName", &luaL_getButtonDialog);
     lua_register(L, "reloadShaderVertex", &lua_reloadShaderVertex);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
@@ -579,6 +599,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "loadScene", &lua_parseScene);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
     lua_register(L, "getTime", &lua_getTime);
+    lua_register(L, "getOldCameraAngle", &lua_getOldCameraAngle);
 }
 
 // Music functions
@@ -737,6 +758,7 @@ extern (C) nothrow int lua_addCube(lua_State *L) {
 
 extern (C) nothrow int lua_setMcModel(lua_State *L) {
     playerModel = LoadModel(luaL_checkstring(L, 1));
+    playerModelName = cast(char*)(luaL_checkstring(L, 1));
     modelCharacterSize = Vector3(luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
     return 0;
 }

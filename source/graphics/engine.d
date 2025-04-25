@@ -208,18 +208,15 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
             return;
         }
     }
-    initWindowAndCamera(camera);
-    // Load Models
-    float cameraSpeed = 5.0f;
-    float radius = Vector3Distance(camera.position, camera.target);
-    
+    float cameraSpeed;
+    float radius;
     // Load gltf model animations
     int animsCount = 0;
     int animCurrentFrame = 0;
-    ModelAnimation* modelAnimations = LoadModelAnimations("res/mc.glb", &animsCount);
-    // Lighting Setup
-    //modelCharacterSize = 5.0f;
+    ModelAnimation* modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
     DisableCursor();
+    float fov = 45.0f;
+    cameraSpeed = 5.0f;
     // Gamepad Mappings
     SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,    dpright:h0.2;
         030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
@@ -240,6 +237,13 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     showMainMenu(currentGameState);
                     break;
                 case GameState.InGame:
+                    if (updateCamera == true) {
+                        // Create camera
+                        CameraProjection projection = CameraProjection.CAMERA_PERSPECTIVE;
+                        camera = Camera3D(positionCam, targetCam, upCam, fov, projection);
+                        radius = Vector3Distance(camera.position, camera.target);
+                        updateCamera = false;
+                    }
                     //2d loop worker
                     lua_getglobal(L, "_2dEventLoop");
                     if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
@@ -358,9 +362,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                         }
                     }
                     if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
-                        originalCubePosition = cubePosition;
-                        originalCameraPosition = camera.position;
-                        originalCameraTarget = camera.target;
                         if (audioEnabled) {
                             if (!isBossfight) {
                                 uint audio_size;

@@ -19,9 +19,7 @@ Vector3 positionCam; // = Vector3(0.0f, 10.0f, 10.0f);
 Vector3 targetCam; // = Vector3(0.0f, 4.0f, 0.0f); 
 Vector3 upCam; // = Vector3(0.0f, 1.0f, 0.0f);
 Camera3D camera;
-Vector3 originalCameraPosition;
-Vector3 originalCameraTarget;
-bool newCameraNeeded;
+Camera3D oldCamera;
 int encounterThreshold;
 float radius;
 float cameraAngle = 90.0f;
@@ -56,11 +54,11 @@ enum CubeSize = 2;
 enum SpeedMultiplier = 2.0f;
 int randomNumber;
 Model playerModel;
+char* playerModelName;
 Model[] cubeModels;
 bool fogEnabled = false;
 Model[20] floorModel;
 bool loadedShader;
-
 float stamina = 25;
 
 struct BattleState {
@@ -231,6 +229,7 @@ Texture2D texture_skybox;
 bool friendlyZone;
 Vector3 modelCharacterSize;
 Vector3 collisionCharacterSize;
+bool updateCamera = true;
 Texture2D dialogImage;
 Texture2D texture_background;
 Texture2D texture_character;
