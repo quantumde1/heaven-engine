@@ -203,7 +203,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         }
     } else {
         if (luaL_dofile(L, "scripts/00_script.bin") != LUA_OK) {
-            writeln("Lua error: ", to!string(lua_tostring(L, -1)));
+            writeln("Script execution error: ", to!string(lua_tostring(L, -1)));
             writeln("Non-typical situation occured. Contact developers.");
             return;
         }

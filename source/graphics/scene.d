@@ -30,6 +30,7 @@ OBB playerOBB;
 bool collisionDetected = false;
 
 void parseSceneFile(string path) {
+    collisionOBBs = [];
     for (int i = 0; i < floorModel.length; i++) {
         UnloadModel(floorModel[i]);
     }
