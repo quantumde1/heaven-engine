@@ -241,7 +241,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                 }
                 if (!neededDraw2D && !inBattle) {
                     DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
-                    drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                    drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
                 }
                 showHintLogic();
                 navigationDrawLogic(navFont);

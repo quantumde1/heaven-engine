@@ -56,7 +56,7 @@ int randomNumber;
 Model playerModel;
 char* playerModelName;
 Model[] cubeModels;
-Model[20] floorModel;
+Model[] floorModel;
 bool loadedShader;
 float stamina = 25;
 
@@ -209,10 +209,10 @@ int modelAnimationIdle;
 int modelAnimationRun;
 
 /* models and locations */
-Vector3[70] modelLocationSize;
-Vector3[70] modelLocationRotate;
-float[70] rotateAngle;
-Vector3[70] modelPosition;
+Vector3[] modelLocationSize;
+Vector3[] modelLocationRotate;
+float[] rotateAngle;
+Vector3[] modelPosition;
 string location_name;
 Texture2D texture_skybox;
 bool friendlyZone;

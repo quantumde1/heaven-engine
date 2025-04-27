@@ -31,9 +31,17 @@ bool collisionDetected = false;
 
 void parseSceneFile(string path) {
     collisionOBBs = [];
-    for (int i = 0; i < floorModel.length; i++) {
-        UnloadModel(floorModel[i]);
+    foreach(model; floorModel) {
+        UnloadModel(model);
     }
+    
+    // Clear dynamic arrays
+    modelLocationSize = [];
+    modelLocationRotate = [];
+    rotateAngle = [];
+    modelPosition = [];
+    floorModel = [];
+    
     JSONValue scene = parseJSON(readText(path));
     JSONValue objects = scene["objects"];
     for (int i = 0; i < objects.array.length; i++) {
@@ -43,11 +51,13 @@ void parseSceneFile(string path) {
                 JSONValue scale = objects[i]["scale"];
                 JSONValue position = objects[i]["position"];
                 JSONValue rotation = objects[i]["rotation"];
-                modelPosition[i] = Vector3(position["x"].get!float, position["y"].get!float, position["z"].get!float);
-                modelLocationSize[i] = Vector3(scale["x"].get!float, scale["y"].get!float, scale["z"].get!float);
-                modelLocationRotate[i] = Vector3(rotation["x"].get!float, rotation["y"].get!float, rotation["z"].get!float);
-                rotateAngle[i] = objects[i]["rotationAngle"].get!float;
-                floorModel[i] = LoadModel(model_location_path);
+                
+                // Append to dynamic arrays
+                modelPosition ~= Vector3(position["x"].get!float, position["y"].get!float, position["z"].get!float);
+                modelLocationSize ~= Vector3(scale["x"].get!float, scale["y"].get!float, scale["z"].get!float);
+                modelLocationRotate ~= Vector3(rotation["x"].get!float, rotation["y"].get!float, rotation["z"].get!float);
+                rotateAngle ~= objects[i]["rotationAngle"].get!float;
+                floorModel ~= LoadModel(model_location_path);
                 break;
             
             case "light":
@@ -195,16 +205,7 @@ void controlFunction(ref Camera3D camera, ref Vector3 cubePosition,
         // Calculate proposed new position
         Vector3 proposedPosition = cubePosition + movement;
         
-        // Create bounding box for proposed position
-        BoundingBox proposedBox;
-        proposedBox.min = Vector3(proposedPosition.x - collisionCharacterSize.x/2,
-                                proposedPosition.y - collisionCharacterSize.y/2,
-                                proposedPosition.z - collisionCharacterSize.z/2);
-        proposedBox.max = Vector3(proposedPosition.x + collisionCharacterSize.x/2,
-                                proposedPosition.y + collisionCharacterSize.y/2,
-                                proposedPosition.z + collisionCharacterSize.z/2);
-
-        // Replace the bounding box collision check with:
+        // Create OBB for proposed position
         OBB proposedOBB;
         proposedOBB.center = Vector3(proposedPosition.x,
                                 proposedPosition.y + collisionCharacterSize.y/2,
@@ -283,14 +284,12 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
     if (allowControl) {
         float targetAngle;
         if (!dungeonCrawlerMode) {
-            // Обработка ввода от правого стика
             float rightStickX = GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_RIGHT_X);
             if (fabs(rightStickX) > 0.3) {
                 cameraAngle = fmod(cameraAngle + rotationStep * rightStickX, 360.0f);
                 if (cameraAngle < 0) cameraAngle += 360.0f;
             }
 
-            // Обработка ввода от клавиш и триггеров
             if (IsKeyDown(KeyboardKey.KEY_RIGHT)
             || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
                 cameraAngle = fmod(cameraAngle + rotationStep, 360.0f);
@@ -324,7 +323,7 @@ void rotateCamera(ref Camera3D camera, ref Vector3 cubePosition, ref float camer
 
 float plrttn = 135.0f;
 
-void drawScene(Model[] floorModel, Camera3D camera, Vector3 cubePosition, float cameraAngle, 
+void drawScene(Camera3D camera, Vector3 cubePosition, float cameraAngle, 
                 Model[] cubeModels, Model playerModel) {
     float[3] cameraPos = [camera.position.x, camera.position.y, camera.position.z];
     if (shaderEnabled) SetShaderValue(shader, shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], &cameraPos[0], ShaderUniformDataType.SHADER_UNIFORM_VEC3);
