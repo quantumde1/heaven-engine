@@ -161,10 +161,9 @@ void luaEventLoop() {
     lua_pop(L, 0);
 }
 
-void animationsLogic(ref int currentFrame, ref int animCurrentFrame,  bool collisionDetected) {
+void animationsLogic(ref int currentFrame, ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected) {
     if (animations != 1) return;
-    int animsCount = 0;
-    ModelAnimation* modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
+
     currentFrame = 0;
     ModelAnimation anim;
     

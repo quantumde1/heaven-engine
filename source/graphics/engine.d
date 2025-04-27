@@ -146,7 +146,7 @@ void helloScreen() {
     }
 }
 
-void engine_loader(string window_name, int screenWidth, int screenHeight, string lua_exec, bool play) {
+void engine_loader(string window_name, int screenWidth, int screenHeight, bool play) {
     // Initialization
     gamepadInt = 0;
     version (linux) {
@@ -199,15 +199,20 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         import core.stdc.time;
         srand(cast(uint)time(null));
         gameInit();
-        luaInit(lua_exec);
         // Load gltf model animations
+        int animsCount = 0;
         int animCurrentFrame = 0;
+        ModelAnimation* modelAnimations;
         float fov = 45.0f;
+        defaultCamera = camera;
         while (!WindowShouldClose()) {
             SetExitKey(0);
+            if (luaReload) {
+                luaInit(lua_exec);
+                modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
+                luaReload = false;
+            }
             luaEventLoop();
-                /* battle block */
-                battleLogic();
                 cameraLogic(camera, fov);
                 shadersLogic();
                 deltaTime = GetFrameTime();
@@ -217,7 +222,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                 BeginDrawing();
                 ClearBackground(Colors.BLACK);
                 playerLogic(cameraSpeed);
-                animationsLogic(currentFrame, animCurrentFrame, collisionDetected);
+                animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
+
+                //all drawing must be here
 
                 // Inventory Handling
                 if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
@@ -226,7 +233,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                 if (showInventory) {
                     drawInventory();
                 }
-                //all drawing must be here
 
                 /* visual novel element block */
                 if (neededDraw2D) {
@@ -243,12 +249,15 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                     drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
                 }
+                showHintLogic();
+                navigationDrawLogic(navFont);
+
+                /* battle block(not theather btw) */
+                battleLogic();
                 if (inBattle) {
                     drawBattleMenu();
                 }
-                showHintLogic();
-                navigationDrawLogic(navFont);
-                
+
                 // Debug Toggle
                 debug {
                     if (IsKeyPressed(KeyboardKey.KEY_F4)) {

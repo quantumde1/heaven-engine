@@ -20,6 +20,7 @@ Vector3 targetCam; // = Vector3(0.0f, 4.0f, 0.0f);
 Vector3 upCam; // = Vector3(0.0f, 1.0f, 0.0f);
 Camera3D camera;
 Camera3D oldCamera;
+Camera3D defaultCamera;
 int encounterThreshold;
 float radius;
 float cameraAngle = 90.0f;
@@ -254,6 +255,30 @@ struct LightEngine {
 
 LightEngine[] light_pos;
 
-void resetAllScriptValues() {
+string lua_exec;
+bool luaReload = true;
 
+void resetAllScriptValues() {
+    import scripts.config : debug_writeln;
+    debug_writeln("Resetting all values!");
+    animations = 0;
+    model_location_path = cast(char*)"";
+    modelPosition = [];
+    rotateAngle = [];
+    rotationCube = 0.0f;
+    modelLocationSize = [];
+    modelLocationSize = [];
+    lights = [];
+    light_pos = [];
+    answer_num = 0;
+    cubes = [];
+    cubeModels = [];
+    cubePosition = Vector3(0, 0, 0);
+    demonsAllowed = [];
+    targetAngle = 0;
+    tex2d = [];
+    backgrounds = [];
+    demonsBossfightAllowed = [];
+    camera = defaultCamera;
+    shadersReload = true;
 }

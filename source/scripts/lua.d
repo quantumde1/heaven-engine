@@ -64,6 +64,27 @@ extern (C) nothrow int lua_getAnswerValue(lua_State *L) {
     return 1;
 }
 
+extern (C) nothrow int lua_loadScript(lua_State *L) {
+    for (int i = cast(int)tex2d.length; i < tex2d.length; i++) {
+        UnloadTexture(tex2d[i].texture);
+    }
+    for (int i = cast(int)backgrounds.length; i < backgrounds.length; i++) {
+        UnloadTexture(backgrounds[i]);
+    }
+    for (int i = cast(int)floorModel.length; i < floorModel.length; i++) {
+        UnloadModel(floorModel[i]);
+    }
+    for (int i = cast(int)cubeModels.length; i < cubeModels.length; i++) {
+        UnloadModel(cubeModels[i]);
+    }
+    try {
+        lua_exec = to!string(luaL_checkstring(L, 1));
+        resetAllScriptValues();
+    } catch (Exception e) {}
+    luaReload = true;
+    return 0;
+}
+
 // Lua State Functions
 extern (C) nothrow int lua_isDialogExecuted(lua_State *L) {
     lua_pushboolean(L, event_initialized);
@@ -570,6 +591,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "animationsState", &lua_disableAnimations);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
+    lua_register(L, "loadScript", &lua_loadScript);
     lua_register(L, "saveCameraState", &lua_saveCameraState);
     lua_register(L, "resetCameraState", &lua_resetCameraState);
     lua_register(L, "getButtonName", &luaL_getButtonDialog);

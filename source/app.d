@@ -23,9 +23,11 @@ void main(string[] args) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     // Check if there are enough arguments
+    lua_exec = "scripts/00_script.lua";
     if (args.length > 2) {
-        engine_loader("made in heaven", screenWidth, screenHeight, getcwd().to!string~"/"~args[1], args[2].to!bool);    
+        lua_exec = getcwd().to!string~"/"~args[1];
+        engine_loader("made in heaven", screenWidth, screenHeight, args[2].to!bool);    
     } else {
-        engine_loader("made in heaven", screenWidth, screenHeight, "scripts/00_script.lua", false);
+        engine_loader("made in heaven", screenWidth, screenHeight, false);
     }
 }
