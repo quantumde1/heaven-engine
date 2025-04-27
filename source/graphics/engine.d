@@ -153,6 +153,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     InitAudioDevice();
+    audioEnabled = isAudioEnabled();
     debug debug_writeln("Showing logo..");
     debug {
         if (play == false) { videoFinished = true; goto debug_lab; }
