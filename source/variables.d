@@ -39,7 +39,7 @@ float targetAngle; // = cast(float) luaL_checknumber(L, 2);
 float targetSpeed; // = cast(float) luaL_checknumber(L, 3);
 float duration; // = cast(float) luaL_checknumber(L, 4);
 bool runRotationCube;
-long shadersReload = true;
+bool shadersReload = true;
 
 /* character & npc */
 bool hintNeeded;
@@ -56,7 +56,6 @@ int randomNumber;
 Model playerModel;
 char* playerModelName;
 Model[] cubeModels;
-bool fogEnabled = false;
 Model[20] floorModel;
 bool loadedShader;
 float stamina = 25;
@@ -84,8 +83,6 @@ struct Enemy {
     string[] questions;
     string[] answers;
 }
-
-bool fromSave;
 
 string[] demonsAllowed;
 Enemy[] enemies;
@@ -115,7 +112,6 @@ bool audioEnabled;
 int gamepadInt;
 
 /* dialogs */
-Texture2D texture_old;
 bool allowControl = true; //for checking is control allowed at this moment
 bool showDialog = false; //is dialog must be shown now
 bool allow_exit_dialog = true; //can you exit from dialog
@@ -123,7 +119,6 @@ int selectedChoice = 0;
 int pageChoice_glob;
 int answer_num;
 bool isTextFullyDisplayed;
-bool isTextureImageLoaded;
 char* emotion_global;
 string name_global;
 string[] message_global;
@@ -180,10 +175,6 @@ struct TextureShow {
     float scale;
 }
 
-debug {
-    int background_name;
-}
-
 TextureShow[] tex2d;
 Texture2D[] backgrounds;
 
@@ -200,20 +191,18 @@ struct ControlConfig {
 char button;
 
 /* main menu */
-bool debugBuild = false;
 
 enum GameState {
     MainMenu,
     InGame,
-    Options,
     Exit,
-    LuaReload
 }
-GameState currentGameState = GameState.MainMenu;
+
+GameState currentGameState;
 bool videoFinished;
 
 /* lighting */
-Light[8] lights;
+Light[] lights;
 
 int modelAnimationWalk;
 int modelAnimationIdle;
@@ -233,23 +222,18 @@ bool updateCamera = true;
 Texture2D dialogImage;
 Texture2D texture_background;
 Texture2D texture_character;
-int posY_tex_char;
-int posX_tex_char;
-float scaleUp_char;
 bool neededDraw2D;
 bool drawPlayer;
 float modelCubeSize;
 bool pos;
 int FPS = 60;
 Shader shader;
-bool isNewLocationNeeded = false;
-bool showCharacterNameInputMenu;
 bool hideNavigation;
 bool neededCharacterDrawing;
 float rotationCube;
 bool needRotationCube;
 bool shaderEnabled = true;
-char* fsdata; // Use dynamic arrays instead of char*
+char* fsdata;
 char* vsdata;
 
 /* textures */
@@ -269,3 +253,7 @@ struct LightEngine {
 }
 
 LightEngine[] light_pos;
+
+void resetAllScriptValues() {
+
+}

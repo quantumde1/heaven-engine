@@ -176,7 +176,6 @@ void display_dialog(string character, char* emotion, string[] pages, int choiceP
         // If the text is not fully displayed, pressing Enter will show the full text
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             isTextFullyDisplayed = true; // Set the flag to indicate the text is fully displayed
-            isTextureImageLoaded = false;
         }
     }
 

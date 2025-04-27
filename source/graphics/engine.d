@@ -2,11 +2,11 @@
 module graphics.engine;
 
 import raylib;
-import bindbc.lua;
 import graphics.video;
 import std.stdio;
 import std.math;
 import std.file;
+import graphics.gamelogic;
 import std.string;
 import std.conv;
 import ui.flicker;
@@ -121,6 +121,30 @@ void fadeEffectLogo(float alpha, bool fadeIn, immutable(char*) name, bool fullsc
     }
 }
 
+void helloScreen() {
+    float fadeAlpha = 2.0f;
+    fadeEffect(0.0f, true, "powered by\n\nHeaven Engine");
+    fadeEffect(fadeAlpha, false, "powered by\n\nHeaven Engine");
+    //fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
+    //fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
+    fadeEffect(0.0f, true, "under\nlevel\nprod.\n\npresents");
+    fadeEffect(fadeAlpha, false, "under\nlevel\nprod.\n\npresents");
+    // Play Opening Video
+    BeginDrawing();
+    debug debug_writeln("searching for video");
+    if (std.file.exists(getcwd()~"/res/videos/soul_OP.moflex.mp4")) {
+        debug debug_writeln("video found, playing");
+        version (Windows) {
+            playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+        }
+        version (Posix) {
+            playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
+        }
+    } else {
+        videoFinished = true;
+    }
+}
+
 void engine_loader(string window_name, int screenWidth, int screenHeight, string lua_exec, bool play) {
     // Initialization
     gamepadInt = 0;
@@ -132,18 +156,10 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         debug debug_writeln("Windows version detected");
     }
     version (osx) {
-        debug debug_writeln("XNU/Darwin version detected");
+        debug debug_writeln("macOS version detected");
     }
     debug debug_writeln("Engine version: ", ver);
     SetExitKey(0);
-    float fadeAlpha = 2.0f;
-    uint seed = cast(uint)Clock.currTime().toUnixTime();
-    auto rnd = Random(seed);
-    auto rnd_sec = Random(seed);
-    
-    encounterThreshold = uniform(900, 3000, rnd);
-    randomNumber = uniform(1, 4, rnd_sec);
-    
     // Window and Audio Initialization
     InitWindow(screenWidth, screenHeight, cast(char*)window_name);
     DisableCursor();
@@ -154,355 +170,162 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
     // Fade In and Out Effects
     InitAudioDevice();
     audioEnabled = isAudioEnabled();
-    debug debug_writeln("Showing logo..");
+    debug debug_writeln("hello screen showing");
     debug {
         if (play == false) { videoFinished = true; goto debug_lab; }
     }
     else {
-        fadeEffect(0.0f, true, "powered by\n\nHeaven Engine");
-        fadeEffect(fadeAlpha, false, "powered by\n\nHeaven Engine");
-        //fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
-        //fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
-        fadeEffect(0.0f, true, "under\nlevel\nprod.\n\npresents");
-        fadeEffect(fadeAlpha, false, "under\nlevel\nprod.\n\npresents");
-        // Play Opening Video
-        BeginDrawing();
-        debug debug_writeln("searching for video");
-        if (std.file.exists(getcwd()~"/res/videos/soul_OP.moflex.mp4")) {
-            debug debug_writeln("video found, playing");
-            version (Windows) {
-                playVideo(cast(char*)("/"~getcwd()~"/res/videos/soul_OP.moflex.mp4"));
-            }
-            version (Posix) {
-                playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
-            }
-        } else {
-            videoFinished = true;
-        }
+        helloScreen();
     }
     debug_lab:
     //videoFinished = true;
     ClearBackground(Colors.BLACK);
     EndDrawing();
-    // Load Control Configuration and Initialize Audio
-    controlConfig = loadControlConfig();
-    showMainMenu(currentGameState);
-    // Lua Initialization
-    debug { 
-        debug debug_writeln("loading lua");
-    }
-    L = luaL_newstate();
-    luaL_openlibs(L);
-    luaL_registerAllLibraries(L);
-    // Load Lua Script
-    debug {
-        debug debug_writeln("Executing next lua file: ", lua_exec);
-        if (luaL_dofile(L, cast(char*)lua_exec) != LUA_OK) {
-            debug debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
-            debug debug_writeln("Non-typical situation occured. Fix the script or contact developers.");
-            return;
-        }
-    } else {
-        if (luaL_dofile(L, "scripts/00_script.bin") != LUA_OK) {
-            writeln("Script execution error: ", to!string(lua_tostring(L, -1)));
-            writeln("Non-typical situation occured. Contact developers.");
-            return;
-        }
-    }
-    float cameraSpeed;
-    float radius;
-    // Load gltf model animations
-    int animsCount = 0;
-    int animCurrentFrame = 0;
-    ModelAnimation* modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
-    DisableCursor();
-    float fov = 45.0f;
-    cameraSpeed = 5.0f;
     // Gamepad Mappings
     SetGamepadMappings("030000005e040000ea020000050d0000,Xbox Controller,a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,    dpright:h0.2;
         030000004c050000c405000011010000,PS4 Controller,a:b1,b:b2,x:b0,y:b3,back:b8,guide:b12,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b11,dpdown:b14,dpleft:b7,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a5,lefttrigger:a3,righttrigger:a4;");
     foreach (i, cubeModel; cubeModels) {
         cubes[i].rotation = 0.0f;
     }
-    // Main Game Loop
-    while (WindowShouldClose() == false) {
-        SetExitKey(0);
-        // Check if the window should close
-        if (WindowShouldClose()) {
-            debug debug_writeln("Window initialization error");
-            return;
-        }
-        if (videoFinished) {
-            switch (currentGameState) {
-                case GameState.MainMenu:
-                    showMainMenu(currentGameState);
-                    break;
-                case GameState.InGame:
-                    if (updateCamera == true) {
-                        // Create camera
-                        CameraProjection projection = CameraProjection.CAMERA_PERSPECTIVE;
-                        camera = Camera3D(positionCam, targetCam, upCam, fov, projection);
-                        radius = Vector3Distance(camera.position, camera.target);
-                        updateCamera = false;
+    while (true) {
+    switch (currentGameState) {
+    case GameState.MainMenu:
+        debug_writeln("Showing menu.");
+        showMainMenu(currentGameState);
+        break;
+    case GameState.InGame:
+        import core.stdc.stdlib;
+        import core.stdc.time;
+        srand(cast(uint)time(null));
+        gameInit();
+        luaInit(lua_exec);          
+        float cameraSpeed = 5.0f;
+        // Load gltf model animations
+        int animsCount = 0;
+        int animCurrentFrame = 0;
+        ModelAnimation* modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
+        float fov = 45.0f;
+        while (!WindowShouldClose()) {
+            SetExitKey(0);
+            luaEventLoop();
+                cameraLogic(camera, fov);
+                shadersLogic();
+                deltaTime = GetFrameTime();
+                if (audioEnabled) {
+                    UpdateMusicStream(music);
+                }
+                // Update camera and player positions
+                updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
+                controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
+                rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
+                BeginDrawing();
+                ClearBackground(Colors.BLACK);
+                if (neededDraw2D) {
+                    allowControl = false;
+                    DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                }
+                if (neededCharacterDrawing) {
+                    allowControl = false;
+                    for (int i = 0; i < tex2d.length; i++) {
+                        DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors.WHITE);
                     }
-                    //2d loop worker
-                    lua_getglobal(L, "_2dEventLoop");
-                    if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
-                        lua_pop(L, 0);
-                    } else {
-                        debug {
-                            debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
-                        }
+                }
+                if (!neededDraw2D && !inBattle) {
+                    DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
+                    drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
+                }
+                if (animations == 1) {
+                    animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
+                }
+                if (!isNaN(iShowSpeed) && !isNaN(neededDegree)) {
+                    rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
+                }
+                if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
+                    draw_navigation(cameraAngle, navFont, fontdialog);
+                }
+                float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
+                    1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
+                
+                debug {
+                    if (IsKeyPressed(KeyboardKey.KEY_F4)) {
+                        playerStepCounter = encounterThreshold + 1;
                     }
-                    if (shadersReload == 1) {
-                        if (shaderEnabled == true) {
-                            int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
-                            float fogDensity = 0.026f; // Initial fog density
-                            SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
-                            // Set Shader Locations
-                            shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
-                            shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-                            int ambientLoc = GetShaderLocation(shader, "ambient");
-                            float[4] values = [ 0.00005f, 0.00005f, 0.00005f, 1.0f ]; // Уменьшаем яркость окружающего света
-                            SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
-                            assignShaderToModel(playerModel);
-                            foreach (ref cubeModel; cubeModels) {
-                                assignShaderToModel(cubeModel);
-                            }
-                            for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-                            debug debug_writeln("Lights size before clean and after shader reloading:", lights);
-                            if (lights.length > 0) {
-                                for (int i = 0; i < cast(int)light_pos.length; i++) {
-                                    lights[i] = CreateLight(LightType.LIGHT_POINT, light_pos[i].lights, Vector3Zero(), 
-                                    light_pos[i].color, shader);
-                                }
-                            }
-                            lights = null;
-                            light_pos = null;
-                            debug debug_writeln("Lights size after clean and after shader reloading:", lights);
-                        }
-                        shadersReload = 0;
+                }
+                battleLogic();
+                showHintLogic();
+                if (show_sec_dialog && showDialog) {
+                    allow_exit_dialog = allowControl = false;
+                    display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
+                }
+                if (!showDialog) {
+                    // Flickering Effect
+                    int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
+                    if (!inBattle && !friendlyZone && !hideNavigation) {
+                        draw_flickering_rhombus(colorChoice, colorIntensity);
                     }
-                    deltaTime = GetFrameTime();
-                    if (audioEnabled) {
-                        UpdateMusicStream(music);
-                    }
-                    if (shaderEnabled) {
-                        foreach(int i, ref light; lights) {
-                            UpdateLightValues(shader, light);
-                        }
-                    }
-                    // Update camera and player positions
-                    updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
-                    controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
-                    rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
-                    BeginDrawing();
-                    ClearBackground(Colors.BLACK);
-                    if (neededDraw2D) {
-                        allowControl = false;
-                        DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
-                    }
-                    if (neededCharacterDrawing) {
-                        allowControl = false;
-                        for (int i = 0; i < tex2d.length; i++) {
-                            DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors.WHITE);
-                        }
-                    }
-                    if (!showCharacterNameInputMenu && !neededDraw2D && !inBattle) {
-                        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
-                        drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
-                    }
-                    if (isNewLocationNeeded == true) {
-                        playerStepCounter = 0;
-                        cubePosition = Vector3(0, 0, 0);
-                        camera.position = Vector3(0, 5, 0.1);
-                        camera.target = Vector3(0, 5, 0);
-                        cameraAngle = 90.0f;
-                        for (int i = 0; i < floorModel.length; i++) UnloadModel(floorModel[i]);
-                        isNewLocationNeeded = false;
-                        for (int i = 0; i < floorModel.length; i++) assignShaderToModel(floorModel[i]);
-                    }
-                    if (animations == 1) {
-                        if (collisionDetected == false && allowControl == true && (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
-                        IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
-                        IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
-                        IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))) {
-                            currentFrame = 0;
-                            ModelAnimation anim;
-                            if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
-                                anim = modelAnimations[modelAnimationRun];
-                            } else {
-                                anim = modelAnimations[modelAnimationWalk];
-                            }
-                            animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-                            UpdateModelAnimation(playerModel, anim, animCurrentFrame);
+                }
+                // Update Moving Cubes
+                foreach (ref cube; cubes) {
+                    if (cube.isMoving) {
+                        float elapsedTime = GetTime() - cube.moveStartTime;
+                        if (elapsedTime >= cube.moveDuration) {
+                            cube.boundingBox.min = cube.endPosition;
+                            cube.isMoving = false;
+                            beginNextMove(cube);
                         } else {
-                            currentFrame = 0;
-                            ModelAnimation anim = modelAnimations[modelAnimationIdle];
-                            animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-                            UpdateModelAnimation(playerModel, anim, animCurrentFrame);
-                            if (stamina < 25.0f) {
-                                stamina += 0.2f;
-                            } else if (stamina > 25.0f && stamina < 29.0f) {
-                                stamina = 25.0f;
-                            }
+                            float t = elapsedTime / cube.moveDuration;
+                            cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);
+                            cube.boundingBox.max = Vector3Add(cube.boundingBox.min, Vector3(2.0f, 2.0f, 2.0f));
                         }
                     }
-                    if (!isNaN(iShowSpeed) && !isNaN(neededDegree) && !isNewLocationNeeded) {
-                        rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
+                }
+
+                // Debug Toggle
+                debug {
+                    if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame) {
+                        showDebug = !showDebug;    
                     }
-                    if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
-                        draw_navigation(cameraAngle, navFont, fontdialog);
-                    }
-                    float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
-                        1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
-                    
+                }
+                // Draw Debug Information
+                if (showDebug) {
                     debug {
-                        if (IsKeyPressed(KeyboardKey.KEY_F4)) {
-                            playerStepCounter = encounterThreshold + 1;
-                        }
+                        drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
+                        encounterThreshold, inBattle);
                     }
-                    if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
-                        if (audioEnabled) {
-                            if (!isBossfight) {
-                                uint audio_size;
-                                char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
-                                StopMusicStream(music);
-                                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-                                PlayMusicStream(music);
-                                UpdateMusicStream(music);
-                            } else {
-                                uint audio_size;
-                                char *audio_data = get_file_data_from_archive("res/data.bin", "boss_battle.mp3", &audio_size);
-                                StopMusicStream(music);
-                                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-                                PlayMusicStream(music);
-                                UpdateMusicStream(music);
-                            }
-                        } else {
-                            StopMusicStream(music);
-                        }
-                        allowControl = false;
-                        playerStepCounter = 0;
-                        encounterThreshold = uniform(900, 3000, rnd);
-                        inBattle = true;
-                        isBossfight = false;
-                        initBattle(demonsAllowed);
-                    }
-                    if (inBattle) {
-                        drawBattleMenu();
-                    }
-                    if (hintNeeded && !showInventory && !inBattle) {
-                        if (!showDialog) {
-                            Color semiTransparentBlack = Color(0, 0, 0, 200);
-                            
-                            // Measure the text size
-                            Vector2 textSize = MeasureTextEx(fontdialog, toStringz(hint), 30, 1.0f);
-                            
-                            // Define padding around the text
-                            int padding = 20; // You can adjust this value as needed
-                            
-                            // Calculate the rectangle dimensions based on the text size and padding
-                            int rectWidth = to!int(textSize.x + 2 * padding);
-                            int rectHeight = to!int(textSize.y + 2 * padding);
-                            
-                            // Center the rectangle on the screen
-                            int rectX = (GetScreenWidth() - rectWidth) / 2;
-                            int rectY = (GetScreenHeight() - rectHeight) - rectHeight + (rectHeight / 2);
-                            
-                            // Calculate the text position within the rectangle
-                            float textX = rectX + padding;
-                            float textY = rectY + padding;
-                            
-                            // Draw the rectangle and text
-                            DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
-                            DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
-                            DrawTextEx(fontdialog, toStringz(hint), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
-                        }
-                    }
-                    if (show_sec_dialog && showDialog) {
-                        allow_exit_dialog = allowControl = false;
-                        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
-                    }
-                    if (!showDialog) {
-                        // Flickering Effect
-                        int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
-                        if (!inBattle && !friendlyZone && !hideNavigation) {
-                            draw_flickering_rhombus(colorChoice, colorIntensity);
-                        }
-                    }
-                    // Update Moving Cubes
-                    foreach (ref cube; cubes) {
-                        if (cube.isMoving) {
-                            float elapsedTime = GetTime() - cube.moveStartTime;
-                            if (elapsedTime >= cube.moveDuration) {
-                                cube.boundingBox.min = cube.endPosition;
-                                cube.isMoving = false;
-                                beginNextMove(cube);
-                            } else {
-                                float t = elapsedTime / cube.moveDuration;
-                                cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);
-                                cube.boundingBox.max = Vector3Add(cube.boundingBox.min, Vector3(2.0f, 2.0f, 2.0f));
-                            }
-                        }
-                    }
+                }
 
-                    // Debug Toggle
-                    debug {
-                        if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame) {
-                            showDebug = !showDebug;    
-                        }
-                    }
-                    //3d loop worker
-                    lua_getglobal(L, "_3dEventLoop");
-                    if (lua_pcall(L, 0, 2, 0) == LUA_OK) {
-                        lua_pop(L, 2);
-                    } else {
-                        debug debug_writeln("Error in _3dEventLoop: ", to!string(lua_tostring(L, -1)));
-                    }
+                // Inventory Handling
+                if (IsKeyPressed(controlConfig.opmenu_button) && !showDialog || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP) && !showDialog) {
+                    showInventory = true;
+                }
+                if (showInventory) {
+                    drawInventory();
+                }
+                EndDrawing();
+                }
+                break;
+            case GameState.Exit:
+                debug_writeln("Exiting. See ya'!");
+                StopMusicStream(music);
+                EndDrawing();
+                CloseWindow();
+                UnloadFont(fontdialog);
+                for (int i = cast(int)tex2d.length; i < tex2d.length; i++) {
+                    UnloadTexture(tex2d[i].texture);
+                }
+                for (int i = cast(int)backgrounds.length; i < backgrounds.length; i++) {
+                    UnloadTexture(backgrounds[i]);
+                }
+                closeAudio();
+                return;
 
-                    // Draw Debug Information
-                    if (showDebug) {
-                        debug {
-                            drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
-                            encounterThreshold, inBattle);
-                        }
-                    }
-
-                    // Inventory Handling
-                    if (IsKeyPressed(controlConfig.opmenu_button) && !showDialog || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP) && !showDialog) {
-                        showInventory = true;
-                    }
-                    if (showInventory) {
-                        drawInventory();
-                    }
-                    EndDrawing();
-                    break;
-                case GameState.Exit:
-                    StopMusicStream(music);
-                    EndDrawing();
-                    CloseWindow();
-                    UnloadFont(fontdialog);
-                    for (int i = cast(int)tex2d.length; i < tex2d.length; i++) {
-                        UnloadTexture(tex2d[i].texture);
-                    }
-                    for (int i = cast(int)backgrounds.length; i < backgrounds.length; i++) {
-                        UnloadTexture(backgrounds[i]);
-                    }
-                    closeAudio();
-                    lua_close(L);
-                    return;
-
-                default:
-                    break;
-            }
+            default:
+                break;
         }
     }
-
     // Cleanup
     EndDrawing();
     UnloadShader(shader); 
     scope(exit) closeAudio();
     scope(exit) CloseWindow();
-    lua_close(L);
 }

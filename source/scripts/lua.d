@@ -201,6 +201,8 @@ extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L) {
 
 extern (C) nothrow int lua_parseScene(lua_State *L) {
     try {
+        light_pos = [];
+        lights = [];
         parseSceneFile(luaL_checkstring(L, 1).to!string);
         shadersReload = 1;
     } catch (Exception e) {
@@ -422,7 +424,6 @@ extern (C) nothrow int lua_load2Dbackground(lua_State *L) {
 
 extern (C) nothrow int lua_draw2Dbackground(lua_State *L) {
     try {
-        debug { background_name = backgrounds[luaL_checkinteger(L,1)].id; }
         texture_background = backgrounds[luaL_checkinteger(L, 1)];
         neededDraw2D = true;
     } catch (Exception e) {
@@ -461,15 +462,6 @@ extern (C) nothrow int lua_stopDraw2Dobject(lua_State *L) {
     int count = cast(int)luaL_checkinteger(L, 1);
     UnloadTexture(tex2d[count].texture);
     neededCharacterDrawing = false;
-    return 0;
-}
-
-extern (C) nothrow int lua_showNameInput(lua_State *L) {
-    try {
-        showCharacterNameInputMenu = true;
-    } catch (Exception e) {
-
-    }
     return 0;
 }
 
@@ -566,7 +558,6 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "getLocationName", &lua_getLocationName);
     lua_register(L, "initBattle", &lua_initBattle);
     lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
-    lua_register(L, "inputName", &lua_showNameInput);
     lua_register(L, "getBattleStatus", &lua_getBattleStatus);
     lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "showHint", &luaL_showHint);

@@ -78,8 +78,6 @@ import std.file;
 int[] demonNumber;
 
 void loadAssets(string[] demons_filenames) {
-    // Инициализация генератора случайных чисел один раз
-    srand(cast(uint)time(null));
     demonNumber = new int[randomNumber];
     for (int i = 0; i < randomNumber; i++) {
         demonNumber[i] = cast(int)(rand() % demons_filenames.length);

@@ -14,34 +14,24 @@ import std.file;
 
 void showMainMenu(ref GameState currentGameState) {
     string[] menuOptions;
-    
-    if (std.file.exists("./save.txt") == true) {
-        fromSave = true;
-    }
+
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     char* musicpathMenu = cast(char*)("main_menu.mp3");
     Music musicMenu;
     uint audio_size;
+    bool fromSave;
+    if (std.file.exists(getcwd()~"/save.txt")) fromSave = true;
     char *audio_data = get_file_data_from_archive("res/data.bin", musicpathMenu, &audio_size);
     musicMenu = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
     if (audioEnabled) {
         audioEnabled = true;
         PlayMusicStream(musicMenu);
-        if (!fromSave) {
-            menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
-        } else {
-            menuOptions = ["Continue", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
-        }
     } else {
         audioEnabled = false;
-        if (!fromSave) {
-            menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "FPS: 60", "Exit Game"];
-        } else {
-            menuOptions = ["Continue", "Language: English", "Shaders: On", "Sound: Off", "FPS: 60", "Exit Game"];
-        }
     }
-    
+    menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "FPS: 60", "Exit Game"];
+    if (fromSave) menuOptions[0] = "Continue";
     float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
     uint image_size;
     char *image_data_logo = get_file_data_from_archive("res/data.bin", "logo.png", &image_size);
@@ -271,6 +261,7 @@ void showMainMenu(ref GameState currentGameState) {
                     UnloadTexture(logoTexture);
                     UnloadMusicStream(musicMenu);
                     currentGameState = GameState.InGame;
+                    debug_writeln("getting into game...");
                     return;
 
                 case 5:
