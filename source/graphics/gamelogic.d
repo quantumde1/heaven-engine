@@ -12,11 +12,34 @@ import std.conv;
 import raylib_lights;
 import std.string;
 import graphics.battle;
+import graphics.cubes;
+import std.math;
+import graphics.scene;
+import ui.flicker;
+import ui.navigator;
+import dialogs.dialog_system;
+
+/** 
+ * this module contains game logic, which was removed from engine.d for better readability.
+ */
+
+enum {
+    MIN_ENCOUNTER_THRESHOLD = 900,
+    MAX_ENCOUNTER_THRESHOLD = 3000,
+    STAMINA_RECOVERY_RATE = 0.2f,
+    MAX_STAMINA = 25.0f,
+    STAMINA_THRESHOLD = 29.0f,
+    HINT_PADDING = 20,
+    HINT_ROUNDNESS = 0.03f,
+    HINT_LINE_THICKNESS = 5.0f
+}
+
+immutable float FOG_DENSITY = 0.026f;
 
 void gameInit() {
     debug_writeln("Game initializing.");
-    encounterThreshold = rand() % (3000 - 900 + 1) + 900;
-    randomNumber = rand % 4;
+    encounterThreshold = uniform(MIN_ENCOUNTER_THRESHOLD, MAX_ENCOUNTER_THRESHOLD);
+    randomNumber = rand() % 4;
     controlConfig = loadControlConfig();
 }
 
@@ -25,12 +48,12 @@ void luaInit(string lua_exec) {
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_registerAllLibraries(L);
-    // Load Lua Script
+    
     debug {
-        debug debug_writeln("Executing next lua file: ", lua_exec);
-        if (luaL_dofile(L, cast(char*)lua_exec) != LUA_OK) {
-            debug debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
-            debug debug_writeln("Non-typical situation occured. Fix the script or contact developers.");
+        debug_writeln("Executing next lua file: ", lua_exec);
+        if (luaL_dofile(L, toStringz(lua_exec)) != LUA_OK) {
+            debug_writeln("Lua error: ", to!string(lua_tostring(L, -1)));
+            debug_writeln("Non-typical situation occured. Fix the script or contact developers.");
             return;
         }
     } else {
@@ -42,146 +65,204 @@ void luaInit(string lua_exec) {
     }
 }
 
-void shadersLogic() {
-    if (shadersReload == 1) {
-        if (shaderEnabled == true) {
-            int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
-            float fogDensity = 0.026f; // Initial fog density
-            SetShaderValue(shader, fogDensityLoc, &fogDensity, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
-            // Set Shader Locations
-            shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
-            shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-            int ambientLoc = GetShaderLocation(shader, "ambient");
-            float[4] values = [ 0.00005f, 0.00005f, 0.00005f, 1.0f ]; // Уменьшаем яркость окружающего света
-            SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
-            assignShaderToModel(playerModel);
-            foreach (ref cubeModel; cubeModels) {
-                assignShaderToModel(cubeModel);
-            }
-            for (int z = 0; z < floorModel.length; z++) assignShaderToModel(floorModel[z]);
-            debug debug_writeln("Lights size before clean and after shader reloading:", lights);
-            for (int i = 0; i < light_pos.length; i++) {
-                lights ~= CreateLight(LightType.LIGHT_POINT, light_pos[i].lights, Vector3Zero(), 
-                light_pos[i].color, shader);
-            }
-            debug debug_writeln("Lights size after clean and after shader reloading:", lights);
-            for (int i = 0; i < lights.length; i++) {
-                UpdateLightValues(shader, lights[i]);
-            }
-        }
-        shadersReload = 0;
+void navigationDrawLogic(Font navFont) {
+    float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
+    1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
+    if (show_sec_dialog && showDialog) {
+        allow_exit_dialog = allowControl = false;
+        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
     }
+
+    if (!showDialog) {
+        int colorChoice;
+        if (colorIntensity > 0.75) colorChoice = 3;
+        else if (colorIntensity > 0.5) colorChoice = 2;
+        else if (colorIntensity > 0.25) colorChoice = 1;
+        else colorChoice = 0;
+
+        if (!inBattle && !friendlyZone && !hideNavigation) {
+            draw_flickering_rhombus(colorChoice, colorIntensity);
+        }
+    }
+
+    if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
+        draw_navigation(cameraAngle, navFont, fontdialog);
+    }
+}
+
+void playerLogic(float cameraSpeed) {
+    updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
+    controlFunction(camera, cubePosition, 
+        controlConfig.forward_button, 
+        controlConfig.back_button, 
+        controlConfig.left_button, 
+        controlConfig.right_button, 
+        allowControl, deltaTime, cameraSpeed);
+}
+
+void shadersLogic() {
+    if (shadersReload != 1) return;
+
+    if (shaderEnabled) {
+        int fogDensityLoc = GetShaderLocation(shader, "fogDensity");
+        SetShaderValue(shader, fogDensityLoc, &FOG_DENSITY, ShaderUniformDataType.SHADER_UNIFORM_FLOAT);
+        
+        shader.locs[ShaderLocationIndex.SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
+        shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+        
+        int ambientLoc = GetShaderLocation(shader, "ambient");
+        float[4] values = [0.00005f, 0.00005f, 0.00005f, 1.0f];
+        SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
+        
+        assignShaderToModel(playerModel);
+        foreach (ref cubeModel; cubeModels) {
+            assignShaderToModel(cubeModel);
+        }
+        
+        foreach (ref model; floorModel) {
+            assignShaderToModel(model);
+        }
+        
+        debug debug_writeln("Lights size before clean and after shader reloading:", lights);
+        
+        lights.length = 0; // Очищаем массив lights
+        foreach (ref pos; light_pos) {
+            lights ~= CreateLight(LightType.LIGHT_POINT, pos.lights, Vector3Zero(), pos.color, shader);
+        }
+        
+        debug debug_writeln("Lights size after clean and after shader reloading:", lights);
+        
+        foreach (ref light; lights) {
+            UpdateLightValues(shader, light);
+        }
+    }
+    
+    shadersReload = 0;
 }
 
 void cameraLogic(ref Camera3D camera, float fov) {
-    if (updateCamera == true) {
-        CameraProjection projection = CameraProjection.CAMERA_PERSPECTIVE;
-        camera = Camera3D(positionCam, targetCam, upCam, fov, projection);
+    if (updateCamera) {
+        camera = Camera3D(positionCam, targetCam, upCam, fov, CameraProjection.CAMERA_PERSPECTIVE);
         radius = Vector3Distance(camera.position, camera.target);
         updateCamera = false;
     }
+
+    if (!isNaN(iShowSpeed) && !isNaN(neededDegree)) {
+        rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
+    }
+    rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
 }
 
 void luaEventLoop() {
-    //2d loop worker
     lua_getglobal(L, "EventLoop");
-    if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
-        lua_pop(L, 0);
-    } else {
-        debug {
-            debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
-        }
+    if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+        debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
     }
+    lua_pop(L, 0);
 }
 
 void animationsLogic(ref int currentFrame, ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected) {
-    if (collisionDetected == false && allowControl == true && (IsKeyDown(controlConfig.forward_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
-        IsKeyDown(controlConfig.back_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
-        IsKeyDown(controlConfig.left_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
-        IsKeyDown(controlConfig.right_button) || GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))) {
+    if (animations != 1) return;
+
+    currentFrame = 0;
+    ModelAnimation anim;
+    
+    bool isMoving = collisionDetected == false && allowControl == true && (
+        IsKeyDown(controlConfig.forward_button) || 
+        GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < -0.3 || 
+        IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
+        IsKeyDown(controlConfig.back_button) || 
+        GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.3 || 
+        IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
+        IsKeyDown(controlConfig.left_button) || 
+        GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) < -0.3 || 
+        IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)|| 
+        IsKeyDown(controlConfig.right_button) || 
+        GetGamepadAxisMovement(gamepadInt, GamepadAxis.GAMEPAD_AXIS_LEFT_X) > 0.3 || 
+        IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)
+    );
+
+    if (isMoving) {
+        bool isRunning = IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || 
+                        IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
         
-        currentFrame = 0;
-        ModelAnimation anim;
-        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) || IsGamepadButtonDown(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
-            anim = modelAnimations[modelAnimationRun];
-        } else {
-            anim = modelAnimations[modelAnimationWalk];
-        }
-        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-        UpdateModelAnimation(playerModel, anim, animCurrentFrame);
+        anim = modelAnimations[isRunning ? modelAnimationRun : modelAnimationWalk];
     } else {
-        currentFrame = 0;
-        ModelAnimation anim = modelAnimations[modelAnimationIdle];
-        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-        UpdateModelAnimation(playerModel, anim, animCurrentFrame);
-        if (stamina < 25.0f) {
-            stamina += 0.2f;
-        } else if (stamina > 25.0f && stamina < 29.0f) {
-            stamina = 25.0f;
+        anim = modelAnimations[modelAnimationIdle];
+        
+        if (stamina < MAX_STAMINA) {
+            stamina += STAMINA_RECOVERY_RATE;
+        } else if (stamina > MAX_STAMINA && stamina < STAMINA_THRESHOLD) {
+            stamina = MAX_STAMINA;
         }
     }
+
+    animCurrentFrame = (animCurrentFrame + 1) % anim.frameCount;
+    UpdateModelAnimation(playerModel, anim, animCurrentFrame);
 }
 
 void showHintLogic() {
-    if (hintNeeded && !showInventory && !inBattle) {
-        if (!showDialog) {
-            Color semiTransparentBlack = Color(0, 0, 0, 200);
-            
-            // Measure the text size
-            Vector2 textSize = MeasureTextEx(fontdialog, toStringz(hint), 30, 1.0f);
-            
-            // Define padding around the text
-            int padding = 20;
-            
-            // Calculate the rectangle dimensions based on the text size and padding
-            int rectWidth = to!int(textSize.x + 2 * padding);
-            int rectHeight = to!int(textSize.y + 2 * padding);
-            
-            // Center the rectangle on the screen
-            int rectX = (GetScreenWidth() - rectWidth) / 2;
-            int rectY = (GetScreenHeight() - rectHeight) - rectHeight + (rectHeight / 2);
-            
-            // Calculate the text position within the rectangle
-            float textX = rectX + padding;
-            float textY = rectY + padding;
-            
-            // Draw the rectangle and text
-            DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, semiTransparentBlack);
-            DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 0.03f, 16, 5.0f, Color(100, 54, 65, 255));
-            DrawTextEx(fontdialog, toStringz(hint), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
+    if (!hintNeeded || showInventory || inBattle || showDialog) return;
+
+    Color semiTransparentBlack = Color(0, 0, 0, 200);
+    Vector2 textSize = MeasureTextEx(fontdialog, toStringz(hint), 30, 1.0f);
+    
+    int rectWidth = to!int(textSize.x + 2 * HINT_PADDING);
+    int rectHeight = to!int(textSize.y + 2 * HINT_PADDING);
+    int rectX = (GetScreenWidth() - rectWidth) / 2;
+    int rectY = (GetScreenHeight() - rectHeight) - rectHeight + (rectHeight / 2);
+    
+    float textX = rectX + HINT_PADDING;
+    float textY = rectY + HINT_PADDING;
+    
+    DrawRectangleRounded(Rectangle(rectX, rectY, rectWidth, rectHeight), 
+                        HINT_ROUNDNESS, 16, semiTransparentBlack);
+    DrawRectangleRoundedLinesEx(Rectangle(rectX, rectY, rectWidth, rectHeight), 
+                              HINT_ROUNDNESS, 16, HINT_LINE_THICKNESS, Color(100, 54, 65, 255));
+    DrawTextEx(fontdialog, toStringz(hint), Vector2(textX, textY), 30, 1.0f, Colors.WHITE);
+}
+
+void battleLogic() {
+    if (friendlyZone || playerStepCounter < encounterThreshold || inBattle) return;
+
+    if (audioEnabled) {
+        string musicFile = isBossfight ? "boss_battle.mp3" : "battle.mp3";
+        uint audio_size;
+        char* audio_data = get_file_data_from_archive("res/data.bin", toStringz(musicFile), &audio_size);
+        
+        StopMusicStream(music);
+        music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
+        PlayMusicStream(music);
+        UpdateMusicStream(music);
+    } else {
+        StopMusicStream(music);
+    }
+
+    allowControl = false;
+    playerStepCounter = 0;
+    encounterThreshold = uniform(MIN_ENCOUNTER_THRESHOLD, MAX_ENCOUNTER_THRESHOLD);
+    inBattle = true;
+    isBossfight = false;
+    initBattle(demonsAllowed);
+}
+
+void moveCubes() {
+    foreach (ref cube; cubes) {
+        if (!cube.isMoving) continue;
+
+        float elapsedTime = GetTime() - cube.moveStartTime;
+        if (elapsedTime >= cube.moveDuration) {
+            cube.boundingBox.min = cube.endPosition;
+            cube.isMoving = false;
+            beginNextMove(cube);
+        } else {
+            float t = elapsedTime / cube.moveDuration;
+            cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);
+            cube.boundingBox.max = Vector3Add(cube.boundingBox.min, Vector3(2.0f, 2.0f, 2.0f));
         }
     }
 }
 
-void battleLogic() {
-    if (!friendlyZone && playerStepCounter >= encounterThreshold && !inBattle) {
-        if (audioEnabled) {
-            if (!isBossfight) {
-                uint audio_size;
-                char *audio_data = get_file_data_from_archive("res/data.bin", "battle.mp3", &audio_size);
-                StopMusicStream(music);
-                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-                PlayMusicStream(music);
-                UpdateMusicStream(music);
-            } else {
-                uint audio_size;
-                char *audio_data = get_file_data_from_archive("res/data.bin", "boss_battle.mp3", &audio_size);
-                StopMusicStream(music);
-                music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-                PlayMusicStream(music);
-                UpdateMusicStream(music);
-            }
-        } else {
-            StopMusicStream(music);
-        }
-        allowControl = false;
-        playerStepCounter = 0;
-        encounterThreshold = rand() % (3000 - 900 + 1) + 900;
-        inBattle = true;
-        isBossfight = false;
-        initBattle(demonsAllowed);
-    }
-    if (inBattle) {
-        drawBattleMenu();
-    }
+int uniform(int a, int b) {
+    return a + rand() % (b - a + 1);
 }

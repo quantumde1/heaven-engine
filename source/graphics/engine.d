@@ -44,6 +44,7 @@ enum FontSize = 20;
 enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
+const float cameraSpeed = 5.0f;
 
 debug {
     void drawDebugInfo(Vector3 cubePosition, GameState currentGameState, int playerHealth, float cameraAngle, 
@@ -198,8 +199,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         import core.stdc.time;
         srand(cast(uint)time(null));
         gameInit();
-        luaInit(lua_exec);          
-        float cameraSpeed = 5.0f;
+        luaInit(lua_exec);
         // Load gltf model animations
         int animsCount = 0;
         int animCurrentFrame = 0;
@@ -214,12 +214,21 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                 if (audioEnabled) {
                     UpdateMusicStream(music);
                 }
-                // Update camera and player positions
-                updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
-                controlFunction(camera, cubePosition, controlConfig.forward_button, controlConfig.back_button, controlConfig.left_button, controlConfig.right_button, allowControl, deltaTime, cameraSpeed);
-                rotateCamera(camera, cubePosition, cameraAngle, rotationStep, radius);
                 BeginDrawing();
                 ClearBackground(Colors.BLACK);
+                playerLogic(cameraSpeed);
+                animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
+
+                // Inventory Handling
+                if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
+                    showInventory = true;
+                }
+                if (showInventory) {
+                    drawInventory();
+                }
+                //all drawing must be here
+
+                /* visual novel element block */
                 if (neededDraw2D) {
                     allowControl = false;
                     DrawTexturePro(texture_background, Rectangle(0, 0, cast(float)texture_background.width, cast(float)texture_background.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
@@ -234,72 +243,23 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                     drawScene(floorModel, camera, cubePosition, cameraAngle, cubeModels, playerModel);
                 }
-                if (animations == 1) {
-                    animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
-                }
-                if (!isNaN(iShowSpeed) && !isNaN(neededDegree)) {
-                    rotateScriptCamera(camera, cubePosition, cameraAngle, neededDegree, iShowSpeed, radius, deltaTime);
-                }
-                if (!inBattle && !showInventory && !showDialog && !hideNavigation) {
-                    draw_navigation(cameraAngle, navFont, fontdialog);
-                }
-                float colorIntensity = !friendlyZone && playerStepCounter < encounterThreshold ?
-                    1.0f - (cast(float)(encounterThreshold - playerStepCounter) / encounterThreshold) : 0.0f;
-                
+                showHintLogic();
+                navigationDrawLogic(navFont);
+                /* battle block */
+                battleLogic();
+                // Debug Toggle
                 debug {
                     if (IsKeyPressed(KeyboardKey.KEY_F4)) {
                         playerStepCounter = encounterThreshold + 1;
                     }
-                }
-                battleLogic();
-                showHintLogic();
-                if (show_sec_dialog && showDialog) {
-                    allow_exit_dialog = allowControl = false;
-                    display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
-                }
-                if (!showDialog) {
-                    // Flickering Effect
-                    int colorChoice = colorIntensity > 0.75 ? 3 : colorIntensity > 0.5 ? 2 : colorIntensity > 0.25 ? 1 : 0;
-                    if (!inBattle && !friendlyZone && !hideNavigation) {
-                        draw_flickering_rhombus(colorChoice, colorIntensity);
-                    }
-                }
-                // Update Moving Cubes
-                foreach (ref cube; cubes) {
-                    if (cube.isMoving) {
-                        float elapsedTime = GetTime() - cube.moveStartTime;
-                        if (elapsedTime >= cube.moveDuration) {
-                            cube.boundingBox.min = cube.endPosition;
-                            cube.isMoving = false;
-                            beginNextMove(cube);
-                        } else {
-                            float t = elapsedTime / cube.moveDuration;
-                            cube.boundingBox.min = Vector3Lerp(cube.startPosition, cube.endPosition, t);
-                            cube.boundingBox.max = Vector3Add(cube.boundingBox.min, Vector3(2.0f, 2.0f, 2.0f));
-                        }
-                    }
-                }
-
-                // Debug Toggle
-                debug {
                     if (IsKeyPressed(KeyboardKey.KEY_F3) && currentGameState == GameState.InGame) {
                         showDebug = !showDebug;    
                     }
-                }
-                // Draw Debug Information
-                if (showDebug) {
-                    debug {
+                    // Draw Debug Information
+                    if (showDebug) {
                         drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
                         encounterThreshold, inBattle);
                     }
-                }
-
-                // Inventory Handling
-                if (IsKeyPressed(controlConfig.opmenu_button) && !showDialog || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP) && !showDialog) {
-                    showInventory = true;
-                }
-                if (showInventory) {
-                    drawInventory();
                 }
                 EndDrawing();
                 }

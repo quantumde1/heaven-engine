@@ -30,8 +30,9 @@ void showMainMenu(ref GameState currentGameState) {
     } else {
         audioEnabled = false;
     }
-    menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: Off", "FPS: 60", "Exit Game"];
+    menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
     if (fromSave) menuOptions[0] = "Continue";
+    if (!audioEnabled) menuOptions[3] = "Sound: Off";
     float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
     uint image_size;
     char *image_data_logo = get_file_data_from_archive("res/data.bin", "logo.png", &image_size);
