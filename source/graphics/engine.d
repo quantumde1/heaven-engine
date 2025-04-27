@@ -202,28 +202,27 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
         // Load gltf model animations
         int animsCount = 0;
         int animCurrentFrame = 0;
-        ModelAnimation* modelAnimations;
+        ModelAnimation* modelAnimations;// = LoadModelAnimations(playerModelName, &animsCount);
         float fov = 45.0f;
         defaultCamera = camera;
         while (!WindowShouldClose()) {
             SetExitKey(0);
             if (luaReload) {
                 luaInit(lua_exec);
-                modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
+                if (animations == 1) modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
                 luaReload = false;
             }
             luaEventLoop();
                 cameraLogic(camera, fov);
                 shadersLogic();
+                playerLogic(cameraSpeed);
+                animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
                 deltaTime = GetFrameTime();
                 if (audioEnabled) {
                     UpdateMusicStream(music);
                 }
                 BeginDrawing();
                 ClearBackground(Colors.BLACK);
-                playerLogic(cameraSpeed);
-                animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
-
                 //all drawing must be here
 
                 // Inventory Handling

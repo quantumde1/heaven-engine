@@ -162,8 +162,7 @@ void luaEventLoop() {
 }
 
 void animationsLogic(ref int currentFrame, ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected) {
-    if (animations != 1) return;
-
+    if (animations != 1 || modelAnimations is null) return;
     currentFrame = 0;
     ModelAnimation anim;
     

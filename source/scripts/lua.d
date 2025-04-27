@@ -770,8 +770,8 @@ extern (C) nothrow int lua_addCube(lua_State *L) {
 }
 
 extern (C) nothrow int lua_setMcModel(lua_State *L) {
-    playerModel = LoadModel(luaL_checkstring(L, 1));
     playerModelName = cast(char*)(luaL_checkstring(L, 1));
+    playerModel = LoadModel(luaL_checkstring(L, 1));
     modelCharacterSize = Vector3(luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
     return 0;
 }

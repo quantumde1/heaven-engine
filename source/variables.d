@@ -205,9 +205,9 @@ bool videoFinished;
 /* lighting */
 Light[] lights;
 
-int modelAnimationWalk;
-int modelAnimationIdle;
-int modelAnimationRun;
+int modelAnimationWalk = 0;
+int modelAnimationIdle = 0;
+int modelAnimationRun = 0;
 
 /* models and locations */
 Vector3[] modelLocationSize;
@@ -260,8 +260,15 @@ bool luaReload = true;
 
 void resetAllScriptValues() {
     import scripts.config : debug_writeln;
+    modelAnimationIdle = 0;
+    modelAnimationWalk = 0;
+    modelAnimationRun = 0;
     debug_writeln("Resetting all values!");
+    shaderEnabled = true;
+    shadersReload = true;
+    texture_skybox = Texture2D();
     animations = 0;
+    dungeonCrawlerMode = false;
     model_location_path = cast(char*)"";
     modelPosition = [];
     rotateAngle = [];
@@ -269,6 +276,7 @@ void resetAllScriptValues() {
     modelLocationSize = [];
     modelLocationSize = [];
     lights = [];
+    playerModelName = cast(char*)"";
     light_pos = [];
     answer_num = 0;
     cubes = [];
