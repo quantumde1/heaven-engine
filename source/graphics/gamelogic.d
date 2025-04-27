@@ -156,14 +156,15 @@ void cameraLogic(ref Camera3D camera, float fov) {
 void luaEventLoop() {
     lua_getglobal(L, "EventLoop");
     if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-        debug debug_writeln("Error in _2dEventLoop: ", to!string(lua_tostring(L, -1)));
+        debug debug_writeln("Error in EventLoop: ", to!string(lua_tostring(L, -1)));
     }
     lua_pop(L, 0);
 }
 
-void animationsLogic(ref int currentFrame, ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected) {
+void animationsLogic(ref int currentFrame, ref int animCurrentFrame,  bool collisionDetected) {
     if (animations != 1) return;
-
+    int animsCount = 0;
+    ModelAnimation* modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
     currentFrame = 0;
     ModelAnimation anim;
     

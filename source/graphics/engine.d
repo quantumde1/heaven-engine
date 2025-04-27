@@ -201,13 +201,13 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
         gameInit();
         luaInit(lua_exec);
         // Load gltf model animations
-        int animsCount = 0;
         int animCurrentFrame = 0;
-        ModelAnimation* modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
         float fov = 45.0f;
         while (!WindowShouldClose()) {
             SetExitKey(0);
             luaEventLoop();
+                /* battle block */
+                battleLogic();
                 cameraLogic(camera, fov);
                 shadersLogic();
                 deltaTime = GetFrameTime();
@@ -217,7 +217,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                 BeginDrawing();
                 ClearBackground(Colors.BLACK);
                 playerLogic(cameraSpeed);
-                animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
+                animationsLogic(currentFrame, animCurrentFrame, collisionDetected);
 
                 // Inventory Handling
                 if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
@@ -243,10 +243,12 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, string
                     DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float)texture_skybox.width, cast(float)texture_skybox.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
                     drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
                 }
+                if (inBattle) {
+                    drawBattleMenu();
+                }
                 showHintLogic();
                 navigationDrawLogic(navFont);
-                /* battle block */
-                battleLogic();
+                
                 // Debug Toggle
                 debug {
                     if (IsKeyPressed(KeyboardKey.KEY_F4)) {
