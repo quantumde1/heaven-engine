@@ -1,4 +1,4 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
+// quantumde1 developed software, licensed under MIT license.
 module ui.inventory;
 
 import raylib;
@@ -13,30 +13,39 @@ import std.string;
 import graphics.battle;
 import ui.common;
 
+void initAudioInventory() {
+    
+}
+
 void handleMenuInput(int numberOfButtons, int numberOfTabs) {
-    if (inBattle) { 
+    if (inBattle) {
         return;
     }
-    // Handle input for navigating through buttons and tabs
-    if ((IsKeyPressed(KeyboardKey.KEY_DOWN)) || 
-        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) )) {
-        selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
-    }
-    if ((IsKeyPressed(KeyboardKey.KEY_UP)) || 
-        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) )) {
-        selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
+    if (numberOfButtons > 0) {
+        if ((IsKeyPressed(KeyboardKey.KEY_DOWN)) || 
+            (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))) {
+            PlaySound(audio.menuMoveSound);
+            selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
+        }
+        if ((IsKeyPressed(KeyboardKey.KEY_UP)) || 
+            (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) )) {
+            PlaySound(audio.menuMoveSound);
+            selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
+        }
     }
     if ((IsKeyPressed(KeyboardKey.KEY_RIGHT)) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) ) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) )) {
+        PlaySound(audio.menuMoveSound);
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
-        selectedButtonIndex = 0; // Reset button selection when changing tabs
+        selectedButtonIndex = 0;
     }
     if ((IsKeyPressed(KeyboardKey.KEY_LEFT)) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) ) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) )) {
+        PlaySound(audio.menuMoveSound);
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
-        selectedButtonIndex = 0; // Reset button selection when changing tabs
+        selectedButtonIndex = 0;
     }
     if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
         allowControl = true;

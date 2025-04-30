@@ -1,4 +1,3 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
 module ui.menu;
 
 import raylib;
@@ -12,270 +11,258 @@ import graphics.engine;
 import graphics.video;
 import std.file;
 
-void showMainMenu(ref GameState currentGameState) {
-    string[] menuOptions;
-
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-    char* musicpathMenu = cast(char*)("main_menu.mp3");
-    Music musicMenu;
-    uint audio_size;
-    bool fromSave;
-    if (std.file.exists(getcwd()~"/save.txt")) fromSave = true;
-    char *audio_data = get_file_data_from_archive("res/data.bin", musicpathMenu, &audio_size);
-    musicMenu = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audio_data, audio_size);
-    if (audioEnabled) {
-        audioEnabled = true;
-        PlayMusicStream(musicMenu);
-    } else {
-        audioEnabled = false;
-    }
-    menuOptions = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
-    if (fromSave) menuOptions[0] = "Continue";
-    if (!audioEnabled) menuOptions[3] = "Sound: Off";
-    float fadeAlpha = 0.0f; // Start with 0 for fade-in effect
-    uint image_size;
-    char *image_data_logo = get_file_data_from_archive("res/data.bin", "logo.png", &image_size);
-    Texture2D logoTexture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+enum {
+    MENU_ITEM_START = 0,
+    MENU_ITEM_LANGUAGE = 1,
+    MENU_ITEM_SHADERS = 2,
+    MENU_ITEM_SOUND = 3,
+    MENU_ITEM_FPS = 4,
+    MENU_ITEM_EXIT = 5,
     
-    int logoX = (screenWidth - logoTexture.width) / 2;
-    int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
-    int selectedMenuIndex = 0;
-    float scaleX = 1.0f;
-    // Fade-in effect
-    while (fadeAlpha < 1.0f) {
-        fadeAlpha += 0.02f; // Increase alpha value for fading in
-        if (fadeAlpha > 1.0f) fadeAlpha = 1.0f; // Clamp to 1.0
-        BeginDrawing();
-        ClearBackground(Colors.BLACK);
-        DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-        for (int i = 0; i < menuOptions.length; i++) {
-            Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-            int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
-            int textX = (screenWidth - textWidth) / 2; // Center the text
-            int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
-            Color fadedTextColor = Fade(textColor, fadeAlpha);
-            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
+    FADE_SPEED_IN = 0.02f,
+    FADE_SPEED_OUT = 0.04f,
+    INACTIVITY_TIMEOUT = 20.0f
+}
+
+struct MenuState {
+    string[] options;
+    int selectedIndex;
+    float fadeAlpha;
+    float inactivityTimer;
+    Texture2D logoTexture;
+    Music menuMusic;
+    bool fromSave;
+    int logoX, logoY;
+}
+
+MenuState initMenuState() {
+    MenuState state;
+    state.fromSave = std.file.exists(getcwd()~"/save.txt");
+    state.options = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
+    
+    if (state.fromSave) 
+        state.options[MENU_ITEM_START] = "Continue";
+    if (!audioEnabled) 
+        state.options[MENU_ITEM_SOUND] = "Sound: Off";
+    
+    state.fadeAlpha = 0.0f;
+    state.inactivityTimer = 0.0f;
+    state.selectedIndex = 0;
+    
+    uint imageSize;
+    char* imageData = get_file_data_from_archive("res/data.bin", "logo.png", &imageSize);
+    state.logoTexture = LoadTextureFromImage(
+        LoadImageFromMemory(".PNG", cast(const(ubyte)*)imageData, imageSize)
+    );
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)imageData, imageSize));
+    
+    state.logoX = (GetScreenWidth() - state.logoTexture.width) / 2;
+    state.logoY = (GetScreenHeight() - state.logoTexture.height) / 2 - 50;
+    
+    uint audioSize;
+    char* audioData = get_file_data_from_archive("res/data.bin", "main_menu.mp3", &audioSize);
+    state.menuMusic = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audioData, audioSize);
+    if (audioEnabled) {
+        PlayMusicStream(state.menuMusic);
+    }
+    audio.acceptSound = LoadSound("res/sfx/10003.wav");
+    audio.menuMoveSound = LoadSound("res/sfx/10004.wav");
+    audio.menuChangeSound = LoadSound("res/sfx/00152.wav");
+    return state;
+}
+
+void cleanupMenu(ref MenuState state) {
+    UnloadTexture(state.logoTexture);
+    UnloadMusicStream(state.menuMusic);
+}
+
+void drawMenu(ref const MenuState state) {
+    BeginDrawing();
+    ClearBackground(Colors.BLACK);
+    
+    DrawTextureEx(
+        state.logoTexture, 
+        Vector2(state.logoX, state.logoY), 
+        0.0f, 1.0f, 
+        Fade(Colors.WHITE, state.fadeAlpha)
+    );
+    
+    for (int i = 0; i < state.options.length; i++) {
+        Color textColor = (i == state.selectedIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
+        float textWidth = MeasureTextEx(fontdialog, toStringz(state.options[i]), 30, 0).x;
+        float textX = (GetScreenWidth() - textWidth) / 2;
+        int textY = state.logoY + state.logoTexture.height + 100 + (30 * i);
+        
+        DrawTextEx(
+            fontdialog, 
+            toStringz(state.options[i]), 
+            Vector2(textX, textY), 
+            30, 0, 
+            Fade(textColor, state.fadeAlpha)
+        );
+    }
+    
+    EndDrawing();
+}
+
+void handleInactivity(ref MenuState state) {
+    state.inactivityTimer += GetFrameTime();
+    
+    if (state.inactivityTimer >= INACTIVITY_TIMEOUT) {
+        while (state.fadeAlpha > 0.0f) {
+            state.fadeAlpha -= FADE_SPEED_OUT;
+            if (state.fadeAlpha < 0.0f) state.fadeAlpha = 0.0f;
+            drawMenu(state);
         }
-        int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
-        int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
-        int textX = (screenWidth - textWidth) / 2; // Center the text
-        DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2(textX, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
-        EndDrawing();
+        
+        StopMusicStream(state.menuMusic);
+        version (Posix) playVideo(cast(char*)(getcwd()~"/res/videos/opening_old.mp4"));
+        version (Windows) playVideo(cast(char*)("/"~getcwd()~"/res/videos/opening_old.mp4"));
+        
+        if (audioEnabled) {
+            PlayMusicStream(state.menuMusic);
+        }
+        
+        state.inactivityTimer = 0.0f;
+        
+        while (state.fadeAlpha < 1.0f) {
+            state.fadeAlpha += FADE_SPEED_IN;
+            if (state.fadeAlpha > 1.0f) state.fadeAlpha = 1.0f;
+            drawMenu(state);
+        }
+    }
+}
+
+void handleMenuNavigation(ref MenuState state) {
+    bool moved = false;
+
+    if (IsKeyPressed(KeyboardKey.KEY_DOWN) || 
+        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+        state.selectedIndex = cast(int)((state.selectedIndex + 1) % state.options.length);
+        state.inactivityTimer = 0;
+        moved = true;
+    }
+    
+    if (IsKeyPressed(KeyboardKey.KEY_UP) || 
+        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+        state.selectedIndex = cast(int)((state.selectedIndex - 1 + state.options.length) % state.options.length);
+        state.inactivityTimer = 0;
+        moved = true;
     }
 
-    float inactivityTimer = 0.0f; // Timer for inactivity
-    const float inactivityThreshold = 20.0f; // 30 seconds threshold
+    if (moved && audioEnabled) {
+        PlaySound(audio.menuMoveSound);
+    }
+}
 
+void handleMenuSettings(ref MenuState state) {
+    bool leftPressed = IsKeyPressed(KeyboardKey.KEY_LEFT) || 
+                      IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+    bool rightPressed = IsKeyPressed(KeyboardKey.KEY_RIGHT) || 
+                       IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+    
+    if (!leftPressed && !rightPressed) return;
+    
+    state.inactivityTimer = 0;
+
+    if (audioEnabled) {
+        PlaySound(audio.menuChangeSound);
+    }
+
+    switch (state.selectedIndex) {
+        case MENU_ITEM_LANGUAGE:
+            if (rightPressed) {
+                usedLang = "russian";
+                state.options[MENU_ITEM_LANGUAGE] = "Language: Russian";
+            } else if (leftPressed) {
+                usedLang = "english";
+                state.options[MENU_ITEM_LANGUAGE] = "Language: English";
+            }
+            break;
+            
+        case MENU_ITEM_SHADERS:
+            shaderEnabled = rightPressed ? false : true;
+            state.options[MENU_ITEM_SHADERS] = shaderEnabled ? "Shaders: On" : "Shaders: Off";
+            break;
+            
+        case MENU_ITEM_SOUND:
+            audioEnabled = rightPressed ? false : true;
+            state.options[MENU_ITEM_SOUND] = audioEnabled ? "Sound: On" : "Sound: Off";
+            
+            if (audioEnabled) {
+                PlayMusicStream(state.menuMusic);
+            } else {
+                StopMusicStream(state.menuMusic);
+            }
+            break;
+            
+        case MENU_ITEM_FPS:
+            FPS = rightPressed ? 30 : 60;
+            SetTargetFPS(FPS);
+            state.options[MENU_ITEM_FPS] = format("FPS: %d", FPS);
+            break;
+            
+        default:
+            break;
+    }
+}
+
+void showMainMenu(ref GameState currentGameState) {
+    MenuState state = initMenuState();
+    
+    while (state.fadeAlpha < 1.0f) {
+        state.fadeAlpha += FADE_SPEED_IN;
+        if (state.fadeAlpha > 1.0f) state.fadeAlpha = 1.0f;
+        drawMenu(state);
+    }
+    
     while (!WindowShouldClose()) {
-        UpdateMusicStream(musicMenu);
-        BeginDrawing();
-        ClearBackground(Colors.BLACK);
+        UpdateMusicStream(state.menuMusic);
+        
         if (IsKeyPressed(KeyboardKey.KEY_F3)) {
             showDebug = true;
         }
+        
         if (showDebug) {
-            debug drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, encounterThreshold, inBattle);
+            debug drawDebugInfo(cubePosition, currentGameState, 
+                              partyMembers[0].currentHealth, 
+                              cameraAngle, playerStepCounter, 
+                              encounterThreshold, inBattle);
         }
-        // Check for user input and reset the inactivity timer
-        if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
-            IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) ||
-            IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE) || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ||
-            IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) ||
-            IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-            inactivityTimer = 0.0f; // Reset the timer on input
-        } else {
-            inactivityTimer += GetFrameTime(); // Increment the timer by the time since the last frame
-        }
-
-        // Check if the inactivity timer has reached the threshold
-        if (inactivityTimer >= inactivityThreshold) {
-            while (fadeAlpha > 0.0f) {
-                fadeAlpha -= 0.04f; // Decrease the alpha value for fading
-                if (fadeAlpha < 0.0f) fadeAlpha = 0.0f; // Clamp to 0.0
-                BeginDrawing();
-                ClearBackground(Colors.BLACK);
-                DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-                for (int i = 0; i < menuOptions.length; i++) {
-                    Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-                    int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
-                    int textX = (screenWidth - textWidth) / 2; // Center the text
-                    int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
-                    Color fadedTextColor = Fade(textColor, fadeAlpha);
-                    DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
-                }
-                int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
-                int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
-                int textX = (screenWidth - textWidth) / 2; // Center the text
-                DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2(textX, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
-                EndDrawing();
-            }
-            StopMusicStream(music);
-            videoFinished = false;
-            version (Posix) { 
-                playVideo(cast(char*)(getcwd()~"/"~"res/videos/opening_old.mp4")); // Play the video
-            }
-            version (Windows) { 
-                playVideo(cast(char*)("/"~getcwd()~"/"~"res/videos/opening_old.mp4")); // Play the video
-            }
-            PlayMusicStream(music);
-            inactivityTimer = 0.0f; // Reset the timer after playing the video
-            // Fade-in effect
-            while (fadeAlpha < 1.0f) {
-                fadeAlpha += 0.02f; // Increase alpha value for fading in
-                if (fadeAlpha > 1.0f) fadeAlpha = 1.0f; // Clamp to 1.0
-                BeginDrawing();
-                ClearBackground(Colors.BLACK);
-                DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-                for (int i = 0; i < menuOptions.length; i++) {
-                    Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-                    int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
-                    int textX = (screenWidth - textWidth) / 2; // Center the text
-                    int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
-                    Color fadedTextColor = Fade(textColor, fadeAlpha);
-                    DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
-                }
-                int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
-                int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
-                int textX = (screenWidth - textWidth) / 2; // Center the text
-                DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2(textX, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
-                EndDrawing();
-            }
-        }
-
-        // Draw the logo
-        DrawTexture(logoTexture, logoX, logoY, Colors.WHITE);
-
-        // Draw the menu options
-        for (int i = 0; i < menuOptions.length; i++) {
-            Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-            int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
-            int textX = (screenWidth - textWidth) / 2; // Center the text
-            int textY = logoY + logoTexture.height + 100 + (30 * i); // Position below the logo
-            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, textColor);
-        }
-
-        int textWidthLol = cast(int)MeasureTextEx(fontdialog, toStringz("Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions"), 20, 0).x;
-        int textYlol = cast(int)(logoY + logoTexture.height + 100 + (30 * menuOptions.length) + 50); // Position below the logo
-        DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2((screenWidth - textWidthLol) / 2, textYlol), 20, 0, Colors.WHITE);
-
-        // Handle input for menu navigation
-        if (IsKeyPressed(KeyboardKey.KEY_DOWN) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
-            selectedMenuIndex = cast(int)((selectedMenuIndex + 1) % menuOptions.length);
-        }
-
-        if (IsKeyPressed(KeyboardKey.KEY_UP) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
-            selectedMenuIndex = cast(int)((selectedMenuIndex - 1 + menuOptions.length) % menuOptions.length);
-        }
-
-        switch (selectedMenuIndex) {
-            // Handle language toggle
-            case 1:
-                if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                    usedLang = "russian";
-                    menuOptions[1] = "Language: Russian"; // Change to Russian
-                }
-                if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
-                    usedLang = "english";
-                    menuOptions[1] = "Language: English"; // Change to English
-                }
-                break;
-
-            case 2:
-                if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                    shaderEnabled = false;
-                    menuOptions[2] = "Shaders: Off";
-                }
-                if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
-                    shaderEnabled = true;
-                    menuOptions[2] = "Shaders: On";
-                }
-                break;
-
-            case 3:
-                if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                menuOptions[3] = "Sound: Off";
-                if (audioEnabled) {
-                    StopMusicStream(musicMenu);
-                }
-                audioEnabled = false;
-            }
-            if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
-                if (!audioEnabled) {
-                    PlayMusicStream(musicMenu);
-                }
-                menuOptions[3] = "Sound: On";
-                audioEnabled = true;
-            }
-            break;
-
-        case 4:
-            if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                FPS = 30;
-                SetTargetFPS(FPS);
-                menuOptions[4] = "FPS: 30"; 
-            }
-            if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
-                FPS = 60;
-                SetTargetFPS(FPS);
-                menuOptions[4] = "FPS: 60";
-            }
-            break;
-
-        default:
-            break;
-        }
-
-        // Handle selection of menu options
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsKeyPressed(KeyboardKey.KEY_SPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-            switch (selectedMenuIndex) {
-                case 0:
-                    // Calculate the positions for the menu options
-                    int[] menuOptionYPositions = new int[menuOptions.length];
-                    for (int i = 0; i < menuOptions.length; i++) {
-                        menuOptionYPositions[i] = logoY + logoTexture.height + 100 + (30 * i);
+        
+        handleInactivity(state);
+        handleMenuNavigation(state);
+        handleMenuSettings(state);
+        
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || 
+            IsKeyPressed(KeyboardKey.KEY_SPACE) || 
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+            PlaySound(audio.acceptSound);
+            switch (state.selectedIndex) {
+                case MENU_ITEM_START:
+                    while (state.fadeAlpha > 0.0f) {
+                        state.fadeAlpha -= FADE_SPEED_OUT;
+                        if (state.fadeAlpha < 0.0f) state.fadeAlpha = 0.0f;
+                        drawMenu(state);
                     }
-                fadeAlpha = 1.0f;
-                    // Fade out effect when starting the game
-                    while (fadeAlpha > 0.0f) {
-                        fadeAlpha -= 0.04f; // Decrease the alpha value for fading
-                        if (fadeAlpha < 0.0f) fadeAlpha = 0.0f; // Clamp to 0.0
-
-                        BeginDrawing();
-                        ClearBackground(Colors.BLACK);
-                        DrawTextureEx(logoTexture, Vector2(logoX, logoY), 0.0f, scaleX, Fade(Colors.WHITE, fadeAlpha));
-                        for (int i = 0; i < menuOptions.length; i++) {
-                            Color textColor = (i == selectedMenuIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-                            int textWidth = cast(int)MeasureTextEx(fontdialog, toStringz(menuOptions[i]), 30, 0).x;
-                            int textX = (screenWidth - textWidth) / 2; // Center the text
-                            int textY = menuOptionYPositions[i]; // Use the stored Y position
-                            Color fadedTextColor = Fade(textColor, fadeAlpha);
-                            DrawTextEx(fontdialog, toStringz(menuOptions[i]), Vector2(textX, textY), 30, 0, fadedTextColor);
-                        }
-                        DrawTextEx(fontdialog, "Shin Megami Tensei is copyright of ATLUS, Co. Ltd. -reload- developed by Underlevel Productions", Vector2((screenWidth - textWidthLol) / 2, textYlol), 20, 0, Fade(Colors.WHITE, fadeAlpha));
-                        EndDrawing();
-                    }
-                    UnloadTexture(logoTexture);
-                    UnloadMusicStream(musicMenu);
+                    
+                    cleanupMenu(state);
                     currentGameState = GameState.InGame;
                     debug_writeln("getting into game...");
                     return;
-
-                case 5:
+                    
+                case MENU_ITEM_EXIT:
+                    cleanupMenu(state);
                     currentGameState = GameState.Exit;
-                    UnloadTexture(logoTexture);
-                    UnloadMusicStream(musicMenu);
                     return;
-
+                    
                 default:
                     break;
             }
         }
-
-        EndDrawing();
+        
+        drawMenu(state);
     }
-    UnloadTexture(logoTexture);
-    UnloadMusicStream(musicMenu);
+    
+    cleanupMenu(state);
 }

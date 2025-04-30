@@ -1,4 +1,4 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
+// quantumde1 developed software, licensed under MIT license.
 module graphics.battle;
 
 import raylib;
@@ -52,10 +52,10 @@ void drawAttackAnimation() {
     if (isPlayingAnimation && currentFrame < attackAnimationFrames.length) {
         Texture2D currentTexture = attackAnimationFrames[currentFrame];
         Vector2 position = Vector2(
-            (GetScreenWidth() - currentTexture.width * 6) / 2, // Учитываем увеличение масштаба
-            (GetScreenHeight() - currentTexture.height * 6) / 2 // Учитываем увеличение масштаба
+            (GetScreenWidth() - currentTexture.width * 6) / 2,
+            (GetScreenHeight() - currentTexture.height * 6) / 2
         );
-        DrawTextureEx(currentTexture, position, 0, 6.0, Colors.WHITE); // Масштаб 3.0 вместо 1.0
+        DrawTextureEx(currentTexture, position, 0, 6.0, Colors.WHITE);
 
         // Обновляем время кадра
         frameTime += GetFrameTime();
@@ -112,7 +112,7 @@ void exitBattle() {
     // Exit the battle if all enemies are defeated
     debug debug_writeln("Exiting from battle");
     for (int i = 0; i < randomNumber; i++) {
-        for (int j = randomNumber; j < enemies.length - 1; j++) {
+        for (int j = randomNumber; j < cast(int)enemies.length - 1; j++) {
             enemies[j] = enemies[j + 1]; // Shift enemies left
         }
         UnloadTexture(enemies[i].texture); // Unload enemy texture
@@ -136,8 +136,8 @@ void exitBattle() {
 
 //UI block
 
-float blinkTime = 0.0f; // Переменная для отслеживания времени мигания
-const float BLINK_SPEED = 8.0f; // Скорость мигания
+float blinkTime = 0.0f;
+const float BLINK_SPEED = 8.0f;
 
 void drawEnemies() {
     long numberOfEnemies = enemies.length;
@@ -147,12 +147,10 @@ void drawEnemies() {
     static float spacing = 340.0f;
     float startX = (GetScreenWidth() - (numberOfEnemies * spacing)) / 2;
     
-    // Отрисовка фона
     DrawTexturePro(background, Rectangle(0, 0, cast(float)background.width, cast(float)background.height), 
                     Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), 
                     Vector2(0, 0), 0.0, Colors.WHITE);
     
-    // Обновление вертикального смещения для врагов
     enemyVerticalOffset += enemySpeed;
     if (enemyVerticalOffset > enemyAmplitude || enemyVerticalOffset < -enemyAmplitude) {
         enemySpeed = -enemySpeed;
@@ -161,11 +159,10 @@ void drawEnemies() {
     blinkTime += GetFrameTime() * BLINK_SPEED;
 
     for (long i = 0; i < numberOfEnemies; i++) {
-        if (enemies[i].currentHealth > 0) { // Проверяем, жив ли враг
+        if (enemies[i].currentHealth > 0) {
             float posX = startX + (i * spacing);
             float posY = (GetScreenHeight() / 2) + enemyVerticalOffset;
 
-            // Вычитаем половину ширины и высоты текстуры для центрирования
             float textureHalfWidth = enemies[i].texture.width / 2.0f;
             float textureHalfHeight = enemies[i].texture.height / 2.0f;
 
@@ -175,22 +172,18 @@ void drawEnemies() {
                 enemyColor = Color(cast(ubyte)255, cast(ubyte)255, cast(ubyte)0, cast(ubyte)cast(int)(alpha * 255));
             }
 
-            // Обновление тряски для текущего врага
             if (enemies[i].isShaking) {
                 enemies[i].shakeTimer += GetFrameTime();
                 if (enemies[i].shakeTimer >= shakeDuration) {
                     enemies[i].isShaking = false;
-                    enemies[i].shakeOffset = Vector2(0, 0); // Сбрасываем смещение после завершения тряски
+                    enemies[i].shakeOffset = Vector2(0, 0);
                 } else {
-                    // Генерация случайного смещения для тряски
                     enemies[i].shakeOffset = Vector2(GetRandomValue(-10, 10), 0);
                 }
             }
 
-            // Применяем смещение для тряски
             Vector2 finalPosition = Vector2(posX - textureHalfWidth + enemies[i].shakeOffset.x, -200 + posY - textureHalfHeight + enemies[i].shakeOffset.y);
 
-            // Рисуем текстуру с учетом центрирования и тряски
             DrawTextureEx(enemies[i].texture, finalPosition, 0, 5.0, enemyColor);
         }
     }

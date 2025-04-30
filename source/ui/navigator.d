@@ -1,4 +1,4 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
+// quantumde1 developed software, licensed under MIT license.
 module ui.navigator;
 
 import raylib;

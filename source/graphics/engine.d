@@ -1,4 +1,4 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
+// quantumde1 developed software, licensed under MIT license.
 module graphics.engine;
 
 import raylib;
@@ -295,6 +295,9 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                 StopMusicStream(music);
                 EndDrawing();
                 CloseWindow();
+                UnloadSound(audio.menuMoveSound);
+                UnloadSound(audio.acceptSound);
+                UnloadSound(audio.menuChangeSound);
                 UnloadFont(fontdialog);
                 for (int i = cast(int)tex2d.length; i < tex2d.length; i++) {
                     UnloadTexture(tex2d[i].texture);

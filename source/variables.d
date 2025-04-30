@@ -1,4 +1,4 @@
-// quantumde1 developed software, licensed under BSD-0-Clause license.
+// quantumde1 developed software, licensed under MIT license.
 module variables;
 
 import graphics.cubes;
@@ -259,6 +259,14 @@ string lua_exec;
 bool luaReload = true;
 ModelAnimation* modelAnimations;// = LoadModelAnimations(playerModelName, &animsCount);
 string usedLang = "english";
+
+struct InterfaceAudio {
+    Sound menuMoveSound;
+    Sound menuChangeSound;
+    Sound acceptSound;
+}
+
+InterfaceAudio audio;
 
 void resetAllScriptValues() {
     import scripts.config : debug_writeln;
