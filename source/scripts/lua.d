@@ -496,6 +496,11 @@ extern (C) nothrow int lua_getScreenHeight(lua_State *L) {
     return 1;
 }
 
+extern (C) nothrow int lua_getUsedLanguage(lua_State *L) {
+    lua_pushstring(L, usedLang.toStringz());
+    return 1;
+}
+
 extern (C) nothrow int lua_getLocationName(lua_State *L) {
     lua_pushstring(L, cast(char*)locationname);
     return 1;
@@ -556,7 +561,14 @@ extern (C) nothrow int lua_updateCubeDialog(lua_State *L) {
 extern (C) nothrow int lua_setGameFont(lua_State *L) {
     const char* x = luaL_checkstring(L, 1);
     debug_writeln("Setting custom font: ", x.to!string);
-    fontdialog = LoadFont(x);
+    int[512] codepoints = 0;
+    foreach (i; 0..95) {
+        codepoints[i] = 32 + i;
+    }
+    foreach (i; 0..255) {
+        codepoints[96 + i] = 0x400 + i;
+    }
+    fontdialog = LoadFontEx(x, 40, codepoints.ptr, codepoints.length);
     return 0;
 }
 
@@ -601,6 +613,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L) {
     lua_register(L, "Begin2D", &lua_2dModeEnable);
     lua_register(L, "End2D", &lua_2dModeDisable);
     lua_register(L, "isKeyPressed", &luaL_isKeyPressed);
+    lua_register(L, "getLanguage", &lua_getUsedLanguage);
     lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
     lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
     lua_register(L, "load2Dtexture", &lua_load2Dbackground);
@@ -769,8 +782,13 @@ extern (C) nothrow int lua_addCube(lua_State *L) {
     return 0;
 }
 
+extern (C) nothrow int lua_fixCameraPosition(lua_State *L) {
+    return 0;
+}
+
 extern (C) nothrow int lua_setMcModel(lua_State *L) {
     playerModelName = cast(char*)(luaL_checkstring(L, 1));
+
     playerModel = LoadModel(luaL_checkstring(L, 1));
     modelCharacterSize = Vector3(luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
     return 0;

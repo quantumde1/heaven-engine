@@ -257,6 +257,8 @@ LightEngine[] light_pos;
 
 string lua_exec;
 bool luaReload = true;
+ModelAnimation* modelAnimations;// = LoadModelAnimations(playerModelName, &animsCount);
+string usedLang = "english";
 
 void resetAllScriptValues() {
     import scripts.config : debug_writeln;

@@ -43,8 +43,6 @@ void showMainMenu(ref GameState currentGameState) {
     int logoY = (screenHeight - logoTexture.height) / 2 - 50; // Slightly higher than center
     int selectedMenuIndex = 0;
     float scaleX = 1.0f;
-    bool isEnglish = true;
-
     // Fade-in effect
     while (fadeAlpha < 1.0f) {
         fadeAlpha += 0.02f; // Increase alpha value for fading in
@@ -176,11 +174,11 @@ void showMainMenu(ref GameState currentGameState) {
             // Handle language toggle
             case 1:
                 if (IsKeyPressed(KeyboardKey.KEY_RIGHT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
-                    isEnglish = false;
+                    usedLang = "russian";
                     menuOptions[1] = "Language: Russian"; // Change to Russian
                 }
                 if (IsKeyPressed(KeyboardKey.KEY_LEFT) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
-                    isEnglish = true;
+                    usedLang = "english";
                     menuOptions[1] = "Language: English"; // Change to English
                 }
                 break;

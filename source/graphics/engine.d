@@ -202,7 +202,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
         // Load gltf model animations
         int animsCount = 0;
         int animCurrentFrame = 0;
-        ModelAnimation* modelAnimations;// = LoadModelAnimations(playerModelName, &animsCount);
         float fov = 45.0f;
         defaultCamera = camera;
         while (!WindowShouldClose()) {
@@ -216,7 +215,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                 cameraLogic(camera, fov);
                 shadersLogic();
                 playerLogic(cameraSpeed);
-                animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
+                if (animations == 1) animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
                 deltaTime = GetFrameTime();
                 if (audioEnabled) {
                     UpdateMusicStream(music);
@@ -224,14 +223,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                 BeginDrawing();
                 ClearBackground(Colors.BLACK);
                 //all drawing must be here
-
-                // Inventory Handling
-                if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
-                    showInventory = true;
-                }
-                if (showInventory) {
-                    drawInventory();
-                }
 
                 /* visual novel element block */
                 if (neededDraw2D) {
@@ -270,6 +261,14 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                         drawDebugInfo(cubePosition, currentGameState, partyMembers[0].currentHealth, cameraAngle, playerStepCounter, 
                         encounterThreshold, inBattle);
                     }
+                }
+
+                // Inventory Handling
+                if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
+                    showInventory = true;
+                }
+                if (showInventory) {
+                    drawInventory();
                 }
                 EndDrawing();
                 }
