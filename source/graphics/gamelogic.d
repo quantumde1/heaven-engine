@@ -8,6 +8,7 @@ import core.stdc.stdlib;
 import core.stdc.time;
 import graphics.engine;
 import scripts.lua;
+import std.stdio;
 import std.conv;
 import raylib_lights;
 import std.string;

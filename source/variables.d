@@ -105,7 +105,7 @@ lua_State* L;
 /* interface things */
 float flicker = 0.0;
 bool increasing = true;
-float ver = 1.0;
+string ver = "1.1.0";
 bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;
@@ -269,7 +269,7 @@ void resetAllScriptValues() {
     shaderEnabled = true;
     shadersReload = true;
     texture_skybox = Texture2D();
-    animations = 0;
+    animations = 1;
     dungeonCrawlerMode = false;
     model_location_path = cast(char*)"";
     modelPosition = [];

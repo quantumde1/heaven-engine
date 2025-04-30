@@ -94,42 +94,58 @@ void closeAudio() {
     CloseAudioDevice();
 }
 
-void fadeEffect(float alpha, bool fadeIn, immutable(char*) text) {
+void fadeEffect(float alpha, bool fadeIn, void delegate(float alpha) renderer) {
     while (fadeIn ? alpha < 2.0f : alpha > 0.0f) {
         alpha += fadeIn ? FadeIncrement : -FadeIncrement;
         BeginDrawing();
         ClearBackground(Colors.BLACK);
-        DrawTextEx(fontdialog, text, 
-            Vector2(GetScreenWidth() / 2 - MeasureText(text, 40) / 2, 
-            GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
-        );
+        renderer(alpha);
         EndDrawing();
     }
 }
 
-void fadeEffectLogo(float alpha, bool fadeIn, immutable(char*) name, bool fullscreen) {
-    while (fadeIn ? alpha < 2.0f : alpha > 0.0f) {
-        alpha += fadeIn ? FadeIncrement : -FadeIncrement;
-        uint image_size;
-        char *image_data_logo = get_file_data_from_archive("res/data.bin", name, &image_size);
-        Texture2D atlus = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
-        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
-        BeginDrawing();
-        ClearBackground(Colors.BLACK);
-        if (fullscreen) DrawTexturePro(atlus, Rectangle(0, 0, cast(float)atlus.width, cast(float)atlus.height), Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), Vector2(0, 0), 0.0, Fade(Colors.WHITE, alpha));
-        if (!fullscreen) DrawTexture(atlus, GetScreenWidth()/2, GetScreenHeight()/2, Colors.WHITE);
-        EndDrawing();
+void renderText(float alpha, immutable(char)* text) {
+    DrawTextEx(fontdialog, text, 
+        Vector2(GetScreenWidth() / 2 - MeasureText(text, 40) / 2, 
+        GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
+    );
+}
+
+void renderLogo(float alpha, immutable(char)* name, bool fullscreen) {
+    uint image_size;
+    char *image_data_logo = get_file_data_from_archive("res/data.bin", name, &image_size);
+    Texture2D atlus = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)image_data_logo, image_size));
+    
+    if (fullscreen) {
+        DrawTexturePro(atlus, 
+            Rectangle(0, 0, cast(float)atlus.width, cast(float)atlus.height), 
+            Rectangle(0, 0, cast(float)GetScreenWidth(), cast(float)GetScreenHeight()), 
+            Vector2(0, 0), 0.0, Fade(Colors.WHITE, alpha));
+    } else {
+        DrawTexture(atlus, GetScreenWidth()/2, GetScreenHeight()/2, Colors.WHITE);
     }
 }
 
 void helloScreen() {
     float fadeAlpha = 2.0f;
-    fadeEffect(0.0f, true, "powered by\n\nHeaven Engine");
-    fadeEffect(fadeAlpha, false, "powered by\n\nHeaven Engine");
-    //fadeEffectLogo(0.0f, true, "atlus_logo.png".toStringz, true);
-    //fadeEffectLogo(fadeAlpha, false, "atlus_logo.png".toStringz, true);
-    fadeEffect(0.0f, true, "under\nlevel\nprod.\n\npresents");
-    fadeEffect(fadeAlpha, false, "under\nlevel\nprod.\n\npresents");
+    
+    fadeEffect(0.0f, true, (float alpha) {
+        renderText(alpha, "powered by\n\nHeaven Engine");
+    });
+    
+    fadeEffect(fadeAlpha, false, (float alpha) {
+        renderText(alpha, "powered by\n\nHeaven Engine");
+    });
+    /*
+    fadeEffect(0.0f, true, (float alpha) {
+        renderLogo(alpha, "atlus_logo.png".toStringz, true);
+    });
+    
+    fadeEffect(fadeAlpha, false, (float alpha) {
+        renderLogo(alpha, "atlus_logo.png".toStringz, true);
+    });
+    */
     // Play Opening Video
     BeginDrawing();
     debug debug_writeln("searching for video");
@@ -142,6 +158,7 @@ void helloScreen() {
             playVideo(cast(char*)(getcwd()~"/res/videos/soul_OP.moflex.mp4"));
         }
     } else {
+        debug debug_writeln("video not found, skipping");
         videoFinished = true;
     }
 }
