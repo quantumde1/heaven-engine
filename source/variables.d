@@ -265,6 +265,7 @@ struct InterfaceAudio {
     Sound menuChangeSound;
     Sound acceptSound;
     Sound declineSound;
+    Sound nonSound;
 }
 
 InterfaceAudio audio;

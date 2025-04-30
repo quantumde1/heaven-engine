@@ -21,16 +21,34 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
     if (inBattle) {
         return;
     }
-    if (numberOfButtons > 0) {
-        if ((IsKeyPressed(KeyboardKey.KEY_DOWN)) || 
-            (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))) {
-            PlaySound(audio.menuMoveSound);
-            selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
+    if ((IsKeyPressed(KeyboardKey.KEY_DOWN)) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))) {
+        if (numberOfButtons > 0) {
+            debug debug_writeln("Selected button index: ", selectedButtonIndex, " buttonTextsInventory length:", 
+            buttonTextsInventory[selectedTabIndex].length);
+            if (selectedButtonIndex == 0 && buttonTextsInventory[selectedTabIndex].length == 1) {
+                PlaySound(audio.nonSound);
+            } else {
+                PlaySound(audio.menuMoveSound);
+                selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
+            }
+        } else {
+            PlaySound(audio.nonSound);
         }
-        if ((IsKeyPressed(KeyboardKey.KEY_UP)) || 
-            (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) )) {
-            PlaySound(audio.menuMoveSound);
-            selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
+    }
+    if ((IsKeyPressed(KeyboardKey.KEY_UP)) || 
+        (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP) )) {
+        if (numberOfButtons > 0) {
+            debug debug_writeln("Selected button index: ", selectedButtonIndex, " buttonTextsInventory length:", 
+            buttonTextsInventory[selectedTabIndex].length);
+            if (selectedButtonIndex == 0 && buttonTextsInventory[selectedTabIndex].length == 1) {
+                PlaySound(audio.nonSound);
+            } else {
+                PlaySound(audio.menuMoveSound);
+                selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
+            }
+        } else {
+            PlaySound(audio.nonSound);
         }
     }
     if ((IsKeyPressed(KeyboardKey.KEY_RIGHT)) || 
@@ -47,13 +65,15 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
         selectedButtonIndex = 0;
     }
-    if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
+    if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || 
+    IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
         PlaySound(audio.declineSound);
         allowControl = true;
         showInventory = false;
         return;
     }
-    if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+    if (IsKeyPressed(KeyboardKey.KEY_ENTER) || 
+    IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
         
     }
 }
@@ -86,7 +106,8 @@ void drawInventory() {
 
     // Handle input for menu navigation
     handleMenuInput(numberOfButtons, numberOfTabs);
-    DrawTextEx(fontdialog, "Paused", Vector2(screenWidth/2, screenHeight/2), 30, 1.0f, Colors.WHITE);
+    DrawTextEx(fontdialog, "Paused", Vector2(screenWidth/2-(MeasureText("Paused", 30)/2), screenHeight/2), 30, 1.0f, 
+    Colors.WHITE);
 }
 
 void configureTabs(string[] tabsNames) {

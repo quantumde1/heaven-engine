@@ -268,6 +268,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
 
                 // Inventory Handling
                 if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
+                    PlaySound(audio.acceptSound);
                     showInventory = true;
                 }
                 if (showInventory) {

@@ -69,6 +69,7 @@ MenuState initMenuState() {
     audio.acceptSound = LoadSound("res/sfx/10003.wav");
     audio.menuMoveSound = LoadSound("res/sfx/10004.wav");
     audio.menuChangeSound = LoadSound("res/sfx/00152.wav");
+    audio.nonSound = LoadSound("res/sfx/00154.wav");
     return state;
 }
 
