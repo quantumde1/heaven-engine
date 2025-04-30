@@ -48,6 +48,7 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
         selectedButtonIndex = 0;
     }
     if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
+        PlaySound(audio.declineSound);
         allowControl = true;
         showInventory = false;
         return;
@@ -85,6 +86,7 @@ void drawInventory() {
 
     // Handle input for menu navigation
     handleMenuInput(numberOfButtons, numberOfTabs);
+    DrawTextEx(fontdialog, "Paused", Vector2(screenWidth/2, screenHeight/2), 30, 1.0f, Colors.WHITE);
 }
 
 void configureTabs(string[] tabsNames) {

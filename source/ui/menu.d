@@ -65,6 +65,7 @@ MenuState initMenuState() {
     if (audioEnabled) {
         PlayMusicStream(state.menuMusic);
     }
+    audio.declineSound = LoadSound("res/sfx/10002.wav");
     audio.acceptSound = LoadSound("res/sfx/10003.wav");
     audio.menuMoveSound = LoadSound("res/sfx/10004.wav");
     audio.menuChangeSound = LoadSound("res/sfx/00152.wav");

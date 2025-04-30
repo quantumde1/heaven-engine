@@ -228,6 +228,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                 if (animations == 1) modelAnimations = LoadModelAnimations(playerModelName, &animsCount);
                 luaReload = false;
             }
+            if (!showInventory) {
             luaEventLoop();
                 cameraLogic(camera, fov);
                 shadersLogic();
@@ -258,11 +259,19 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                 }
                 showHintLogic();
                 navigationDrawLogic(navFont);
-
+            }
                 /* battle block(not theather btw) */
                 battleLogic();
                 if (inBattle) {
                     drawBattleMenu();
+                }
+
+                // Inventory Handling
+                if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
+                    showInventory = true;
+                }
+                if (showInventory) {
+                    drawInventory();
                 }
 
                 // Debug Toggle
@@ -280,13 +289,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
                     }
                 }
 
-                // Inventory Handling
-                if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog) {
-                    showInventory = true;
-                }
-                if (showInventory) {
-                    drawInventory();
-                }
                 EndDrawing();
                 }
                 break;
