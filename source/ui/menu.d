@@ -17,8 +17,9 @@ enum
     MENU_ITEM_LANGUAGE = 1,
     MENU_ITEM_SHADERS = 2,
     MENU_ITEM_SOUND = 3,
-    MENU_ITEM_FPS = 4,
-    MENU_ITEM_EXIT = 5,
+    MENU_ITEM_SFX = 4,
+    MENU_ITEM_FPS = 5,
+    MENU_ITEM_EXIT = 6,
 
     FADE_SPEED_IN = 0.02f,
     FADE_SPEED_OUT = 0.04f,
@@ -42,8 +43,13 @@ MenuState initMenuState()
     MenuState state;
     state.fromSave = std.file.exists(getcwd() ~ "/save.txt");
     state.options = [
-        "Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60",
-        "Exit Game"
+        "Start Game", 
+        "Language: English", 
+        "Shaders: On", 
+        "Sound: On",
+        "SFX: On",
+        "FPS: 60",
+        "Exit Game",
     ];
 
     if (state.fromSave)
@@ -175,7 +181,7 @@ void handleMenuNavigation(ref MenuState state)
         moved = true;
     }
 
-    if (moved && audioEnabled)
+    if (moved && sfxEnabled)
     {
         PlaySound(audio.menuMoveSound);
     }
@@ -193,10 +199,7 @@ void handleMenuSettings(ref MenuState state)
 
     state.inactivityTimer = 0;
 
-    if (audioEnabled)
-    {
-        PlaySound(audio.menuChangeSound);
-    }
+    if (sfxEnabled) PlaySound(audio.menuChangeSound);
 
     switch (state.selectedIndex)
     {
@@ -230,6 +233,10 @@ void handleMenuSettings(ref MenuState state)
         {
             StopMusicStream(state.menuMusic);
         }
+        break;
+    case MENU_ITEM_SFX:
+        sfxEnabled = rightPressed ? false : true;
+        state.options[MENU_ITEM_SFX] = sfxEnabled ? "SFX: On" : "SFX: Off";
         break;
 
     case MENU_ITEM_FPS:
@@ -280,7 +287,7 @@ void showMainMenu(ref GameState currentGameState)
             IsKeyPressed(KeyboardKey.KEY_SPACE) ||
             IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
         {
-            PlaySound(audio.acceptSound);
+            if (sfxEnabled) PlaySound(audio.acceptSound);
             switch (state.selectedIndex)
             {
             case MENU_ITEM_START:

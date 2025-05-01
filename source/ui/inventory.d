@@ -13,10 +13,6 @@ import std.string;
 import graphics.battle;
 import ui.common;
 
-void initAudioInventory() {
-    
-}
-
 void handleMenuInput(int numberOfButtons, int numberOfTabs) {
     if (inBattle) {
         return;
@@ -27,13 +23,13 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
             debug debug_writeln("Selected button index: ", selectedButtonIndex, " buttonTextsInventory length:", 
             buttonTextsInventory[selectedTabIndex].length);
             if (selectedButtonIndex == 0 && buttonTextsInventory[selectedTabIndex].length == 1) {
-                PlaySound(audio.nonSound);
+                if (sfxEnabled) PlaySound(audio.nonSound);
             } else {
-                PlaySound(audio.menuMoveSound);
+                if (sfxEnabled) PlaySound(audio.menuMoveSound);
                 selectedButtonIndex = (selectedButtonIndex + 1) % numberOfButtons;
             }
         } else {
-            PlaySound(audio.nonSound);
+            if (sfxEnabled) PlaySound(audio.nonSound);
         }
     }
     if ((IsKeyPressed(KeyboardKey.KEY_UP)) || 
@@ -42,35 +38,33 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
             debug debug_writeln("Selected button index: ", selectedButtonIndex, " buttonTextsInventory length:", 
             buttonTextsInventory[selectedTabIndex].length);
             if (selectedButtonIndex == 0 && buttonTextsInventory[selectedTabIndex].length == 1) {
-                PlaySound(audio.nonSound);
+                if (sfxEnabled) PlaySound(audio.nonSound);
             } else {
-                PlaySound(audio.menuMoveSound);
+                if (sfxEnabled) PlaySound(audio.menuMoveSound);
                 selectedButtonIndex = (selectedButtonIndex - 1 + numberOfButtons) % numberOfButtons;
             }
         } else {
-            PlaySound(audio.nonSound);
+            if (sfxEnabled) PlaySound(audio.nonSound);
         }
     }
     if ((IsKeyPressed(KeyboardKey.KEY_RIGHT)) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT) ) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_TRIGGER_1) )) {
-        PlaySound(audio.menuMoveSound);
+        if (sfxEnabled) PlaySound(audio.menuMoveSound);
         selectedTabIndex = (selectedTabIndex + 1) % numberOfTabs;
         selectedButtonIndex = 0;
     }
     if ((IsKeyPressed(KeyboardKey.KEY_LEFT)) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT) ) || 
         (IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_TRIGGER_1) )) {
-        PlaySound(audio.menuMoveSound);
+        if (sfxEnabled) PlaySound(audio.menuMoveSound);
         selectedTabIndex = (selectedTabIndex - 1 + numberOfTabs) % numberOfTabs;
         selectedButtonIndex = 0;
     }
     if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || 
     IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
-        PlaySound(audio.declineSound);
-        if (allowControl != false) {
-            allowControl = true;
-        }
+        if (sfxEnabled) PlaySound(audio.declineSound);
+        allowControl = true;
         showInventory = false;
         return;
     }

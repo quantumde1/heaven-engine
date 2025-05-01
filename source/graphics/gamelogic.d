@@ -41,10 +41,21 @@ immutable float FOG_DENSITY = 0.026f;
 
 void gameInit()
 {
-    debug_writeln("Game initializing.");
-    encounterThreshold = uniform(MIN_ENCOUNTER_THRESHOLD, MAX_ENCOUNTER_THRESHOLD);
-    randomNumber = rand() % 4;
-    controlConfig = loadControlConfig();
+    if (WindowShouldClose()) {
+        currentGameState = GameState.Exit;
+    } else {
+        debug_writeln("Game initializing.");
+        encounterThreshold = uniform(MIN_ENCOUNTER_THRESHOLD, MAX_ENCOUNTER_THRESHOLD);
+        randomNumber = rand() % 4;
+        controlConfig = loadControlConfig();
+        if (sfxEnabled == false) {
+            UnloadSound(audio.menuMoveSound);
+            UnloadSound(audio.acceptSound);
+            UnloadSound(audio.menuChangeSound);
+            UnloadSound(audio.declineSound);
+            UnloadSound(audio.nonSound);
+        }
+    }
 }
 
 void luaInit(string lua_exec)
@@ -82,7 +93,7 @@ void navigationDrawLogic(Font navFont)
     if (show_sec_dialog && showDialog)
     {
         allow_exit_dialog = allowControl = false;
-        display_dialog(name_global, emotion_global, message_global, pageChoice_glob);
+        displayDialog(name_global, emotion_global, message_global, pageChoice_glob);
     }
 
     if (!showDialog)
@@ -99,13 +110,13 @@ void navigationDrawLogic(Font navFont)
 
         if (!inBattle && !friendlyZone && !hideNavigation)
         {
-            draw_flickering_rhombus(colorChoice, colorIntensity);
+            drawFlickeringRhombus(colorChoice);
         }
     }
 
     if (!inBattle && !showInventory && !showDialog && !hideNavigation)
     {
-        draw_navigation(cameraAngle, navFont, fontdialog);
+        drawNavigation(cameraAngle, navFont, fontdialog);
     }
 }
 
@@ -294,9 +305,9 @@ void showHintLogic()
 void inventoryLogic()
 {
     if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton
-            .GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog)
+            .GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog && !isCameraRotating)
     {
-        PlaySound(audio.acceptSound);
+        if (sfxEnabled) PlaySound(audio.acceptSound);
         showInventory = true;
     }
     if (showInventory)

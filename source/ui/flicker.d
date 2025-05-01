@@ -5,7 +5,7 @@ import raylib;
 import std.math;
 import variables;
 
-void draw_flickering_rhombus(int colorChoice, float intensity)
+void drawFlickeringRhombus(int colorChoice)
 {
     int rectWidth = 100; // Ширина прямоугольника
     int rectHeight = 100; // Высота прямоугольника

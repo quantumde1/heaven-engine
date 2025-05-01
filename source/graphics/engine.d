@@ -99,10 +99,30 @@ debug
     }
 }
 
-void closeAudio()
+void unloadResourcesLogic()
 {
+    debug_writeln("Exiting. See ya'!");
+    StopMusicStream(music);
+    EndDrawing();
+    if (sfxEnabled) {
+        UnloadSound(audio.menuMoveSound);
+        UnloadSound(audio.acceptSound);
+        UnloadSound(audio.menuChangeSound);
+        UnloadSound(audio.declineSound);
+        UnloadSound(audio.nonSound);
+    }
+    UnloadFont(fontdialog);
+    for (int i = cast(int) tex2d.length; i < tex2d.length; i++)
+    {
+        UnloadTexture(tex2d[i].texture);
+    }
+    for (int i = cast(int) backgrounds.length; i < backgrounds.length; i++)
+    {
+        UnloadTexture(backgrounds[i]);
+    }
     UnloadMusicStream(music);
     CloseAudioDevice();
+    CloseWindow();
 }
 
 void fadeEffect(float alpha, bool fadeIn, void delegate(float alpha) renderer)
@@ -271,18 +291,18 @@ debug_lab:
                 }
                 if (!showInventory)
                 {
-                    luaEventLoop();
-                    cameraLogic(camera, fov);
-                    shadersLogic();
-                    playerLogic(cameraSpeed);
-                    animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
-                    deltaTime = GetFrameTime();
                     if (audioEnabled)
                     {
                         UpdateMusicStream(music);
                     }
+                    deltaTime = GetFrameTime();
+                    luaEventLoop();
+                    shadersLogic();
+                    playerLogic(cameraSpeed);
                     BeginDrawing();
                     ClearBackground(Colors.BLACK);
+                    cameraLogic(camera, fov);
+                    animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
                     //all drawing must be here
 
                     /* visual novel element block */
@@ -300,39 +320,16 @@ debug_lab:
 
                 // Debug Toggle
                 debugLogic();
-
                 EndDrawing();
             }
             break;
         case GameState.Exit:
-            debug_writeln("Exiting. See ya'!");
-            StopMusicStream(music);
             EndDrawing();
-            CloseWindow();
-            UnloadSound(audio.menuMoveSound);
-            UnloadSound(audio.acceptSound);
-            UnloadSound(audio.menuChangeSound);
-            UnloadFont(fontdialog);
-            for (int i = cast(int) tex2d.length; i < tex2d.length; i++)
-            {
-                UnloadTexture(tex2d[i].texture);
-            }
-            for (int i = cast(int) backgrounds.length; i < backgrounds.length; i++)
-            {
-                UnloadTexture(backgrounds[i]);
-            }
-            closeAudio();
+            unloadResourcesLogic();
             return;
 
         default:
             break;
         }
     }
-    // Cleanup
-    EndDrawing();
-    UnloadShader(shader);
-    scope (exit)
-        closeAudio();
-    scope (exit)
-        CloseWindow();
 }

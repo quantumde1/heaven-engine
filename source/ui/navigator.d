@@ -67,7 +67,7 @@ void drawCompass(const int compassSize, const int compassX, const int compassY, 
     }
 }
 
-void draw_navigation(float cameraAngle, Font navFont, Font fontdialog)
+void drawNavigation(float cameraAngle, Font navFont, Font fontdialog)
 {
     const int compassSize = 200;
     const int compassX = GetScreenWidth() - compassSize - 20;

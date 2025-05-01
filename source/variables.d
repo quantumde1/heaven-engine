@@ -110,6 +110,7 @@ bool showInventory = false;
 bool showMapPrompt = false;
 bool showDebug = false;
 bool audioEnabled;
+bool sfxEnabled = true;
 int gamepadInt;
 
 /* dialogs */
@@ -196,7 +197,7 @@ char button;
 enum GameState {
     MainMenu,
     InGame,
-    Exit,
+    Exit
 }
 
 GameState currentGameState;
