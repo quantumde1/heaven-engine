@@ -2,6 +2,7 @@
 import raylib;
 
 import std.stdio;
+
 //local imports
 import graphics.engine;
 import graphics.video;
@@ -11,11 +12,14 @@ import std.string;
 import scripts.config;
 import std.conv;
 
-
-void main(string[] args) {
-    if (isReleaseBuild()) {
+void main(string[] args)
+{
+    if (isReleaseBuild())
+    {
         SetTraceLogLevel(7);
-    } else {
+    }
+    else
+    {
         SetTraceLogLevel(0);
     }
     validateRaylibBinding();
@@ -24,10 +28,13 @@ void main(string[] args) {
     int screenHeight = GetScreenHeight();
     // Check if there are enough arguments
     lua_exec = "scripts/00_script.lua";
-    if (args.length > 2) {
-        lua_exec = getcwd().to!string~"/"~args[1];
-        engine_loader("made in heaven", screenWidth, screenHeight, args[2].to!bool);    
-    } else {
+    if (args.length > 2)
+    {
+        lua_exec = getcwd().to!string ~ "/" ~ args[1];
+        engine_loader("made in heaven", screenWidth, screenHeight, args[2].to!bool);
+    }
+    else
+    {
         engine_loader("made in heaven", screenWidth, screenHeight, false);
     }
 }

@@ -31,13 +31,16 @@ void getCorners(ref const OBB obb, out Vector3[8] corners)
 
     corners[0] = Vector3Add(Vector3Add(Vector3Add(obb.center, right), up), forward);
     corners[1] = Vector3Add(Vector3Add(Vector3Subtract(obb.center, right), up), forward);
-    corners[2] = Vector3Add(Vector3Add(Vector3Subtract(obb.center, right), up), Vector3Negate(forward));
+    corners[2] = Vector3Add(Vector3Add(Vector3Subtract(obb.center, right), up), Vector3Negate(
+            forward));
     corners[3] = Vector3Add(Vector3Add(Vector3Add(obb.center, right), up), Vector3Negate(forward));
 
     corners[4] = Vector3Add(Vector3Add(Vector3Add(obb.center, right), Vector3Negate(up)), forward);
     corners[5] = Vector3Add(Vector3Add(Vector3Subtract(obb.center, right), Vector3Negate(up)), forward);
-    corners[6] = Vector3Add(Vector3Add(Vector3Subtract(obb.center, right), Vector3Negate(up)), Vector3Negate(forward));
-    corners[7] = Vector3Add(Vector3Add(Vector3Add(obb.center, right), Vector3Negate(up)), Vector3Negate(forward));
+    corners[6] = Vector3Add(Vector3Add(Vector3Subtract(obb.center, right), Vector3Negate(up)), Vector3Negate(
+            forward));
+    corners[7] = Vector3Add(Vector3Add(Vector3Add(obb.center, right), Vector3Negate(up)), Vector3Negate(
+            forward));
 }
 
 void drawWireframe(ref const OBB obb, Color color)
@@ -69,8 +72,8 @@ bool containsPoint(ref const OBB obb, Vector3 point)
     local = Vector3RotateByQuaternion(local, inverseRot);
 
     return fabs(local.x) <= obb.halfExtents.x &&
-           fabs(local.y) <= obb.halfExtents.y &&
-           fabs(local.z) <= obb.halfExtents.z;
+        fabs(local.y) <= obb.halfExtents.y &&
+        fabs(local.z) <= obb.halfExtents.z;
 }
 
 void projectBoundingBoxOntoAxis(ref const BoundingBox box, Vector3 axis, out float outMin, out float outMax)
@@ -110,7 +113,8 @@ void projectOBBOntoAxis(ref const OBB obb, Vector3 axis, out float outMin, out f
     float r =
         fabs(Vector3DotProduct(right, axis)) * obb.halfExtents.x +
         fabs(Vector3DotProduct(up, axis)) * obb.halfExtents.y +
-        fabs(Vector3DotProduct(forward, axis)) * obb.halfExtents.z;
+        fabs(
+            Vector3DotProduct(forward, axis)) * obb.halfExtents.z;
 
     float centerProj = Vector3DotProduct(obb.center, axis);
     outMin = centerProj - r;
@@ -239,29 +243,29 @@ RayCollision getRayCollisionOBB(Ray ray, ref const OBB obb)
         float dir;
         float min;
         float max;
-        
+
         switch (i)
         {
-            case 0:
-                origin = localRayOrigin.x;
-                dir = localRayDir.x;
-                min = boxMin.x;
-                max = boxMax.x;
-                break;
-            case 1:
-                origin = localRayOrigin.y;
-                dir = localRayDir.y;
-                min = boxMin.y;
-                max = boxMax.y;
-                break;
-            case 2:
-                origin = localRayOrigin.z;
-                dir = localRayDir.z;
-                min = boxMin.z;
-                max = boxMax.z;
-                break;
-            default:
-                assert(false);
+        case 0:
+            origin = localRayOrigin.x;
+            dir = localRayDir.x;
+            min = boxMin.x;
+            max = boxMax.x;
+            break;
+        case 1:
+            origin = localRayOrigin.y;
+            dir = localRayDir.y;
+            min = boxMin.y;
+            max = boxMax.y;
+            break;
+        case 2:
+            origin = localRayOrigin.z;
+            dir = localRayDir.z;
+            min = boxMin.z;
+            max = boxMax.z;
+            break;
+        default:
+            assert(false);
         }
 
         if (fabs(dir) < 0.0001f)
@@ -290,17 +294,17 @@ RayCollision getRayCollisionOBB(Ray ray, ref const OBB obb)
                 normal = Vector3(0);
                 switch (abs(axis))
                 {
-                    case 0:
-                        normal.x = axis >= 0 ? -1.0f : 1.0f;
-                        break;
-                    case 1:
-                        normal.y = axis >= 0 ? -1.0f : 1.0f;
-                        break;
-                    case 2:
-                        normal.z = axis >= 0 ? -1.0f : 1.0f;
-                        break;
-                    default:
-                        break;
+                case 0:
+                    normal.x = axis >= 0 ? -1.0f : 1.0f;
+                    break;
+                case 1:
+                    normal.y = axis >= 0 ? -1.0f : 1.0f;
+                    break;
+                case 2:
+                    normal.z = axis >= 0 ? -1.0f : 1.0f;
+                    break;
+                default:
+                    break;
                 }
             }
 

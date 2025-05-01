@@ -68,7 +68,9 @@ void handleMenuInput(int numberOfButtons, int numberOfTabs) {
     if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE) || 
     IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ) {
         PlaySound(audio.declineSound);
-        allowControl = true;
+        if (allowControl != false) {
+            allowControl = true;
+        }
         showInventory = false;
         return;
     }

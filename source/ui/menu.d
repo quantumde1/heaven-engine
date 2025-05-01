@@ -11,20 +11,22 @@ import graphics.engine;
 import graphics.video;
 import std.file;
 
-enum {
+enum
+{
     MENU_ITEM_START = 0,
     MENU_ITEM_LANGUAGE = 1,
     MENU_ITEM_SHADERS = 2,
     MENU_ITEM_SOUND = 3,
     MENU_ITEM_FPS = 4,
     MENU_ITEM_EXIT = 5,
-    
+
     FADE_SPEED_IN = 0.02f,
     FADE_SPEED_OUT = 0.04f,
     INACTIVITY_TIMEOUT = 20.0f
 }
 
-struct MenuState {
+struct MenuState
+{
     string[] options;
     int selectedIndex;
     float fadeAlpha;
@@ -35,34 +37,39 @@ struct MenuState {
     int logoX, logoY;
 }
 
-MenuState initMenuState() {
+MenuState initMenuState()
+{
     MenuState state;
-    state.fromSave = std.file.exists(getcwd()~"/save.txt");
-    state.options = ["Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60", "Exit Game"];
-    
-    if (state.fromSave) 
+    state.fromSave = std.file.exists(getcwd() ~ "/save.txt");
+    state.options = [
+        "Start Game", "Language: English", "Shaders: On", "Sound: On", "FPS: 60",
+        "Exit Game"
+    ];
+
+    if (state.fromSave)
         state.options[MENU_ITEM_START] = "Continue";
-    if (!audioEnabled) 
+    if (!audioEnabled)
         state.options[MENU_ITEM_SOUND] = "Sound: Off";
-    
+
     state.fadeAlpha = 0.0f;
     state.inactivityTimer = 0.0f;
     state.selectedIndex = 0;
-    
+
     uint imageSize;
     char* imageData = get_file_data_from_archive("res/data.bin", "logo.png", &imageSize);
     state.logoTexture = LoadTextureFromImage(
-        LoadImageFromMemory(".PNG", cast(const(ubyte)*)imageData, imageSize)
+        LoadImageFromMemory(".PNG", cast(const(ubyte)*) imageData, imageSize)
     );
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*)imageData, imageSize));
-    
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) imageData, imageSize));
+
     state.logoX = (GetScreenWidth() - state.logoTexture.width) / 2;
     state.logoY = (GetScreenHeight() - state.logoTexture.height) / 2 - 50;
-    
+
     uint audioSize;
     char* audioData = get_file_data_from_archive("res/data.bin", "main_menu.mp3", &audioSize);
-    state.menuMusic = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*)audioData, audioSize);
-    if (audioEnabled) {
+    state.menuMusic = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*) audioData, audioSize);
+    if (audioEnabled)
+    {
         PlayMusicStream(state.menuMusic);
     }
     audio.declineSound = LoadSound("res/sfx/10002.wav");
@@ -73,198 +80,235 @@ MenuState initMenuState() {
     return state;
 }
 
-void cleanupMenu(ref MenuState state) {
+void cleanupMenu(ref MenuState state)
+{
     UnloadTexture(state.logoTexture);
     UnloadMusicStream(state.menuMusic);
 }
 
-void drawMenu(ref const MenuState state) {
+void drawMenu(ref const MenuState state)
+{
     BeginDrawing();
     ClearBackground(Colors.BLACK);
-    
+
     DrawTextureEx(
-        state.logoTexture, 
-        Vector2(state.logoX, state.logoY), 
-        0.0f, 1.0f, 
+        state.logoTexture,
+        Vector2(state.logoX, state.logoY),
+        0.0f, 1.0f,
         Fade(Colors.WHITE, state.fadeAlpha)
     );
-    
-    for (int i = 0; i < state.options.length; i++) {
+
+    for (int i = 0; i < state.options.length; i++)
+    {
         Color textColor = (i == state.selectedIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
         float textWidth = MeasureTextEx(fontdialog, toStringz(state.options[i]), 30, 0).x;
         float textX = (GetScreenWidth() - textWidth) / 2;
         int textY = state.logoY + state.logoTexture.height + 100 + (30 * i);
-        
+
         DrawTextEx(
-            fontdialog, 
-            toStringz(state.options[i]), 
-            Vector2(textX, textY), 
-            30, 0, 
+            fontdialog,
+            toStringz(state.options[i]),
+            Vector2(textX, textY),
+            30, 0,
             Fade(textColor, state.fadeAlpha)
         );
     }
-    
+
     EndDrawing();
 }
 
-void handleInactivity(ref MenuState state) {
+void handleInactivity(ref MenuState state)
+{
     state.inactivityTimer += GetFrameTime();
-    
-    if (state.inactivityTimer >= INACTIVITY_TIMEOUT) {
-        while (state.fadeAlpha > 0.0f) {
+
+    if (state.inactivityTimer >= INACTIVITY_TIMEOUT)
+    {
+        while (state.fadeAlpha > 0.0f)
+        {
             state.fadeAlpha -= FADE_SPEED_OUT;
-            if (state.fadeAlpha < 0.0f) state.fadeAlpha = 0.0f;
+            if (state.fadeAlpha < 0.0f)
+                state.fadeAlpha = 0.0f;
             drawMenu(state);
         }
-        
+
         StopMusicStream(state.menuMusic);
-        version (Posix) playVideo(cast(char*)(getcwd()~"/res/videos/opening_old.mp4"));
-        version (Windows) playVideo(cast(char*)("/"~getcwd()~"/res/videos/opening_old.mp4"));
-        
-        if (audioEnabled) {
+        version (Posix)
+            playVideo(cast(char*)(getcwd() ~ "/res/videos/opening_old.mp4"));
+        version (Windows)
+            playVideo(cast(char*)("/" ~ getcwd() ~ "/res/videos/opening_old.mp4"));
+
+        if (audioEnabled)
+        {
             PlayMusicStream(state.menuMusic);
         }
-        
+
         state.inactivityTimer = 0.0f;
-        
-        while (state.fadeAlpha < 1.0f) {
+
+        while (state.fadeAlpha < 1.0f)
+        {
             state.fadeAlpha += FADE_SPEED_IN;
-            if (state.fadeAlpha > 1.0f) state.fadeAlpha = 1.0f;
+            if (state.fadeAlpha > 1.0f)
+                state.fadeAlpha = 1.0f;
             drawMenu(state);
         }
     }
 }
 
-void handleMenuNavigation(ref MenuState state) {
+void handleMenuNavigation(ref MenuState state)
+{
     bool moved = false;
 
-    if (IsKeyPressed(KeyboardKey.KEY_DOWN) || 
-        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+    if (IsKeyPressed(KeyboardKey.KEY_DOWN) ||
+        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
+    {
         state.selectedIndex = cast(int)((state.selectedIndex + 1) % state.options.length);
         state.inactivityTimer = 0;
         moved = true;
     }
-    
-    if (IsKeyPressed(KeyboardKey.KEY_UP) || 
-        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
-        state.selectedIndex = cast(int)((state.selectedIndex - 1 + state.options.length) % state.options.length);
+
+    if (IsKeyPressed(KeyboardKey.KEY_UP) ||
+        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
+    {
+        state.selectedIndex = cast(int)(
+            (state.selectedIndex - 1 + state.options.length) % state.options.length);
         state.inactivityTimer = 0;
         moved = true;
     }
 
-    if (moved && audioEnabled) {
+    if (moved && audioEnabled)
+    {
         PlaySound(audio.menuMoveSound);
     }
 }
 
-void handleMenuSettings(ref MenuState state) {
-    bool leftPressed = IsKeyPressed(KeyboardKey.KEY_LEFT) || 
-                      IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-    bool rightPressed = IsKeyPressed(KeyboardKey.KEY_RIGHT) || 
-                       IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-    
-    if (!leftPressed && !rightPressed) return;
-    
+void handleMenuSettings(ref MenuState state)
+{
+    bool leftPressed = IsKeyPressed(KeyboardKey.KEY_LEFT) ||
+        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+    bool rightPressed = IsKeyPressed(KeyboardKey.KEY_RIGHT) ||
+        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+
+    if (!leftPressed && !rightPressed)
+        return;
+
     state.inactivityTimer = 0;
 
-    if (audioEnabled) {
+    if (audioEnabled)
+    {
         PlaySound(audio.menuChangeSound);
     }
 
-    switch (state.selectedIndex) {
-        case MENU_ITEM_LANGUAGE:
-            if (rightPressed) {
-                usedLang = "russian";
-                state.options[MENU_ITEM_LANGUAGE] = "Language: Russian";
-            } else if (leftPressed) {
-                usedLang = "english";
-                state.options[MENU_ITEM_LANGUAGE] = "Language: English";
-            }
-            break;
-            
-        case MENU_ITEM_SHADERS:
-            shaderEnabled = rightPressed ? false : true;
-            state.options[MENU_ITEM_SHADERS] = shaderEnabled ? "Shaders: On" : "Shaders: Off";
-            break;
-            
-        case MENU_ITEM_SOUND:
-            audioEnabled = rightPressed ? false : true;
-            state.options[MENU_ITEM_SOUND] = audioEnabled ? "Sound: On" : "Sound: Off";
-            
-            if (audioEnabled) {
-                PlayMusicStream(state.menuMusic);
-            } else {
-                StopMusicStream(state.menuMusic);
-            }
-            break;
-            
-        case MENU_ITEM_FPS:
-            FPS = rightPressed ? 30 : 60;
-            SetTargetFPS(FPS);
-            state.options[MENU_ITEM_FPS] = format("FPS: %d", FPS);
-            break;
-            
-        default:
-            break;
+    switch (state.selectedIndex)
+    {
+    case MENU_ITEM_LANGUAGE:
+        if (rightPressed)
+        {
+            usedLang = "russian";
+            state.options[MENU_ITEM_LANGUAGE] = "Language: Russian";
+        }
+        else if (leftPressed)
+        {
+            usedLang = "english";
+            state.options[MENU_ITEM_LANGUAGE] = "Language: English";
+        }
+        break;
+
+    case MENU_ITEM_SHADERS:
+        shaderEnabled = rightPressed ? false : true;
+        state.options[MENU_ITEM_SHADERS] = shaderEnabled ? "Shaders: On" : "Shaders: Off";
+        break;
+
+    case MENU_ITEM_SOUND:
+        audioEnabled = rightPressed ? false : true;
+        state.options[MENU_ITEM_SOUND] = audioEnabled ? "Sound: On" : "Sound: Off";
+
+        if (audioEnabled)
+        {
+            PlayMusicStream(state.menuMusic);
+        }
+        else
+        {
+            StopMusicStream(state.menuMusic);
+        }
+        break;
+
+    case MENU_ITEM_FPS:
+        FPS = rightPressed ? 30 : 60;
+        SetTargetFPS(FPS);
+        state.options[MENU_ITEM_FPS] = format("FPS: %d", FPS);
+        break;
+
+    default:
+        break;
     }
 }
 
-void showMainMenu(ref GameState currentGameState) {
+void showMainMenu(ref GameState currentGameState)
+{
     MenuState state = initMenuState();
-    
-    while (state.fadeAlpha < 1.0f) {
+
+    while (state.fadeAlpha < 1.0f)
+    {
         state.fadeAlpha += FADE_SPEED_IN;
-        if (state.fadeAlpha > 1.0f) state.fadeAlpha = 1.0f;
+        if (state.fadeAlpha > 1.0f)
+            state.fadeAlpha = 1.0f;
         drawMenu(state);
     }
-    
-    while (!WindowShouldClose()) {
+
+    while (!WindowShouldClose())
+    {
         UpdateMusicStream(state.menuMusic);
-        
-        if (IsKeyPressed(KeyboardKey.KEY_F3)) {
+
+        if (IsKeyPressed(KeyboardKey.KEY_F3))
+        {
             showDebug = true;
         }
-        
-        if (showDebug) {
-            debug drawDebugInfo(cubePosition, currentGameState, 
-                              partyMembers[0].currentHealth, 
-                              cameraAngle, playerStepCounter, 
-                              encounterThreshold, inBattle);
+
+        if (showDebug)
+        {
+            debug drawDebugInfo(cubePosition, currentGameState,
+                partyMembers[0].currentHealth,
+                cameraAngle, playerStepCounter,
+                encounterThreshold, inBattle);
         }
-        
+
         handleInactivity(state);
         handleMenuNavigation(state);
         handleMenuSettings(state);
-        
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || 
-            IsKeyPressed(KeyboardKey.KEY_SPACE) || 
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) ||
+            IsKeyPressed(KeyboardKey.KEY_SPACE) ||
+            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+        {
             PlaySound(audio.acceptSound);
-            switch (state.selectedIndex) {
-                case MENU_ITEM_START:
-                    while (state.fadeAlpha > 0.0f) {
-                        state.fadeAlpha -= FADE_SPEED_OUT;
-                        if (state.fadeAlpha < 0.0f) state.fadeAlpha = 0.0f;
-                        drawMenu(state);
-                    }
-                    
-                    cleanupMenu(state);
-                    currentGameState = GameState.InGame;
-                    debug_writeln("getting into game...");
-                    return;
-                    
-                case MENU_ITEM_EXIT:
-                    cleanupMenu(state);
-                    currentGameState = GameState.Exit;
-                    return;
-                    
-                default:
-                    break;
+            switch (state.selectedIndex)
+            {
+            case MENU_ITEM_START:
+                while (state.fadeAlpha > 0.0f)
+                {
+                    state.fadeAlpha -= FADE_SPEED_OUT;
+                    if (state.fadeAlpha < 0.0f)
+                        state.fadeAlpha = 0.0f;
+                    drawMenu(state);
+                }
+
+                cleanupMenu(state);
+                currentGameState = GameState.InGame;
+                debug_writeln("getting into game...");
+                return;
+
+            case MENU_ITEM_EXIT:
+                cleanupMenu(state);
+                currentGameState = GameState.Exit;
+                return;
+
+            default:
+                break;
             }
         }
-        
+
         drawMenu(state);
     }
-    
+
     cleanupMenu(state);
 }
