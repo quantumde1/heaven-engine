@@ -19,6 +19,7 @@ import graphics.scene;
 import ui.flicker;
 import ui.navigator;
 import dialogs.dialog_system;
+import ui.inventory;
 
 /** 
  * this module contains game logic, which was removed from engine.d for better readability.
