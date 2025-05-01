@@ -36,17 +36,18 @@ Texture2D[] loadAnimationFrames(const string archivePath, const string animation
         string frameFileName = format("processed_%s_frame_%04d.png", animationName, frameIndex);
         uint image_size;
         debug debug_writeln(frameFileName);
-        char* image_data = get_file_data_from_archive(cast(const(char)*) archivePath.ptr, cast(
-                const(char)*) frameFileName.ptr, &image_size);
+        char* image_data = get_file_data_from_archive(toStringz(archivePath),
+                toStringz(frameFileName), &image_size);
         if (image_data == null)
         {
             debug debug_writeln("exiting from load anim");
-            break; // Если файл не найден, завершаем цикл
+            break;
         }
         Image image = LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size);
         Texture2D texture = LoadTextureFromImage(image);
         UnloadImage(image);
         frames ~= texture;
+        debug debug_writeln("Loaded frame ", frameIndex, " - ", frameFileName);
         frameIndex++;
     }
     return frames;
@@ -56,6 +57,9 @@ void drawAttackAnimation()
 {
     if (isPlayingAnimation && currentFrame < attackAnimationFrames.length)
     {
+        debug debug_writeln("Animation called!");
+        debug debug_writeln("Current animation frame time: ", frameTime, " frame duration: ", frameDuration, 
+        " current frame: ", currentFrame, " overall available frames: ", attackAnimationFrames.length);
         Texture2D currentTexture = attackAnimationFrames[currentFrame];
         Vector2 position = Vector2(
             (GetScreenWidth() - currentTexture.width * 6) / 2,
@@ -65,15 +69,12 @@ void drawAttackAnimation()
 
         // Обновляем время кадра
         frameTime += GetFrameTime();
-        if (frameTime >= frameDuration)
+        frameTime = 0.0f;
+        currentFrame++;
+        if (currentFrame >= attackAnimationFrames.length)
         {
-            frameTime = 0.0f;
-            currentFrame++;
-            if (currentFrame >= attackAnimationFrames.length)
-            {
-                isPlayingAnimation = false;
-                currentFrame = 0;
-            }
+            isPlayingAnimation = false;
+            currentFrame = 0;
         }
     }
 }

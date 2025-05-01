@@ -232,11 +232,10 @@ void vnLogic()
     }
 }
 
-void animationsLogic(ref int currentFrame, ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected)
+void animationsLogic(ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected)
 {
     if (animations != 1 || modelAnimations is null)
         return;
-    currentFrame = 0;
     ModelAnimation anim;
 
     bool isMoving = collisionDetected == false && allowControl == true && (
@@ -307,6 +306,7 @@ void inventoryLogic()
     if ((IsKeyPressed(controlConfig.opmenu_button) || IsGamepadButtonPressed(gamepadInt, GamepadButton
             .GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !showDialog && !isCameraRotating)
     {
+        debug debug_writeln("opening inventory...");
         if (sfxEnabled) PlaySound(audio.acceptSound);
         showInventory = true;
     }

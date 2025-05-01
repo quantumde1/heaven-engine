@@ -302,7 +302,7 @@ debug_lab:
                     BeginDrawing();
                     ClearBackground(Colors.BLACK);
                     cameraLogic(camera, fov);
-                    animationsLogic(currentFrame, animCurrentFrame, modelAnimations, collisionDetected);
+                    animationsLogic(animCurrentFrame, modelAnimations, collisionDetected);
                     //all drawing must be here
 
                     /* visual novel element block */
