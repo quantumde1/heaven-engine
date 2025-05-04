@@ -10,6 +10,7 @@ import std.string;
 import graphics.engine;
 import graphics.video;
 import std.file;
+import ui.common;
 
 enum
 {
@@ -36,6 +37,74 @@ struct MenuState
     Music menuMusic;
     bool fromSave;
     int logoX, logoY;
+}
+
+void renderText(float alpha, immutable(char)* text)
+{
+    DrawTextEx(fontdialog, text,
+        Vector2(GetScreenWidth() / 2 - MeasureText(text, 40) / 2,
+            GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
+    );
+}
+
+void renderLogo(float alpha, immutable(char)* name, bool fullscreen)
+{
+    uint image_size;
+    char* image_data_logo = get_file_data_from_archive("res/data.bin", name, &image_size);
+    Texture2D atlus = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data_logo, image_size));
+    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data_logo, image_size));
+
+    if (fullscreen)
+    {
+        DrawTexturePro(atlus,
+            Rectangle(0, 0, cast(float) atlus.width, cast(float) atlus.height),
+            Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()),
+            Vector2(0, 0), 0.0, Fade(Colors.WHITE, alpha));
+    }
+    else
+    {
+        DrawTexture(atlus, GetScreenWidth() / 2, GetScreenHeight() / 2, Colors.WHITE);
+    }
+}
+
+void helloScreen()
+{
+    fadeEffect(0.0f, true, (float alpha) {
+        renderText(alpha, "powered by\n\nHeaven Engine");
+    });
+
+    fadeEffect(2.0f, false, (float alpha) {
+        renderText(alpha, "powered by\n\nHeaven Engine");
+    });
+    /*
+    fadeEffect(0.0f, true, (float alpha) {
+        renderLogo(alpha, "atlus_logo.png".toStringz, true);
+    });
+    
+    fadeEffect(fadeAlpha, false, (float alpha) {
+        renderLogo(alpha, "atlus_logo.png".toStringz, true);
+    });
+    */
+    // Play Opening Video
+    BeginDrawing();
+    debug debug_writeln("searching for video");
+    if (std.file.exists(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"))
+    {
+        debug debug_writeln("video found, playing");
+        version (Windows)
+        {
+            playVideo(cast(char*)("/" ~ getcwd() ~ "/res/videos/soul_OP.moflex.mp4"));
+        }
+        version (Posix)
+        {
+            playVideo(cast(char*)(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"));
+        }
+    }
+    else
+    {
+        debug debug_writeln("video not found, skipping");
+        videoFinished = true;
+    }
 }
 
 MenuState initMenuState()

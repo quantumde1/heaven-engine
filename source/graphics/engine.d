@@ -12,6 +12,7 @@ import std.conv;
 import ui.flicker;
 import graphics.battle;
 import ui.menu;
+import ui.common;
 import graphics.scene;
 import variables;
 import std.random;
@@ -42,7 +43,6 @@ ControlConfig loadControlConfig()
 
 // Constants
 enum FontSize = 20;
-enum FadeIncrement = 0.02f;
 enum ScreenPadding = 10;
 enum TextSpacing = 30;
 const float cameraSpeed = 5.0f;
@@ -123,88 +123,6 @@ void unloadResourcesLogic()
     UnloadMusicStream(music);
     CloseAudioDevice();
     CloseWindow();
-}
-
-void fadeEffect(float alpha, bool fadeIn, void delegate(float alpha) renderer)
-{
-    while (fadeIn ? alpha < 2.0f : alpha > 0.0f)
-    {
-        alpha += fadeIn ? FadeIncrement : -FadeIncrement;
-        BeginDrawing();
-        ClearBackground(Colors.BLACK);
-        renderer(alpha);
-        EndDrawing();
-    }
-}
-
-void renderText(float alpha, immutable(char)* text)
-{
-    DrawTextEx(fontdialog, text,
-        Vector2(GetScreenWidth() / 2 - MeasureText(text, 40) / 2,
-            GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
-    );
-}
-
-void renderLogo(float alpha, immutable(char)* name, bool fullscreen)
-{
-    uint image_size;
-    char* image_data_logo = get_file_data_from_archive("res/data.bin", name, &image_size);
-    Texture2D atlus = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data_logo, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data_logo, image_size));
-
-    if (fullscreen)
-    {
-        DrawTexturePro(atlus,
-            Rectangle(0, 0, cast(float) atlus.width, cast(float) atlus.height),
-            Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()),
-            Vector2(0, 0), 0.0, Fade(Colors.WHITE, alpha));
-    }
-    else
-    {
-        DrawTexture(atlus, GetScreenWidth() / 2, GetScreenHeight() / 2, Colors.WHITE);
-    }
-}
-
-void helloScreen()
-{
-    float fadeAlpha = 2.0f;
-
-    fadeEffect(0.0f, true, (float alpha) {
-        renderText(alpha, "powered by\n\nHeaven Engine");
-    });
-
-    fadeEffect(fadeAlpha, false, (float alpha) {
-        renderText(alpha, "powered by\n\nHeaven Engine");
-    });
-    /*
-    fadeEffect(0.0f, true, (float alpha) {
-        renderLogo(alpha, "atlus_logo.png".toStringz, true);
-    });
-    
-    fadeEffect(fadeAlpha, false, (float alpha) {
-        renderLogo(alpha, "atlus_logo.png".toStringz, true);
-    });
-    */
-    // Play Opening Video
-    BeginDrawing();
-    debug debug_writeln("searching for video");
-    if (std.file.exists(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"))
-    {
-        debug debug_writeln("video found, playing");
-        version (Windows)
-        {
-            playVideo(cast(char*)("/" ~ getcwd() ~ "/res/videos/soul_OP.moflex.mp4"));
-        }
-        version (Posix)
-        {
-            playVideo(cast(char*)(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"));
-        }
-    }
-    else
-    {
-        debug debug_writeln("video not found, skipping");
-        videoFinished = true;
-    }
 }
 
 void engine_loader(string window_name, int screenWidth, int screenHeight, bool play)
@@ -317,7 +235,6 @@ debug_lab:
 
                 // Inventory Handling
                 inventoryLogic();
-
                 // Debug Toggle
                 debugLogic();
                 EndDrawing();
