@@ -19,8 +19,9 @@ enum
     MENU_ITEM_SHADERS = 2,
     MENU_ITEM_SOUND = 3,
     MENU_ITEM_SFX = 4,
-    MENU_ITEM_FPS = 5,
-    MENU_ITEM_EXIT = 6,
+    MENU_ITEM_FULLSCREEN = 5,
+    MENU_ITEM_FPS = 6,
+    MENU_ITEM_EXIT = 7,
 
     FADE_SPEED_IN = 0.02f,
     FADE_SPEED_OUT = 0.04f,
@@ -117,6 +118,7 @@ MenuState initMenuState()
         "Shaders: On", 
         "Sound: On",
         "SFX: On",
+        "Fullscreen: On",
         "FPS: 60",
         "Exit Game",
     ];
@@ -306,6 +308,23 @@ void handleMenuSettings(ref MenuState state)
     case MENU_ITEM_SFX:
         sfxEnabled = rightPressed ? false : true;
         state.options[MENU_ITEM_SFX] = sfxEnabled ? "SFX: On" : "SFX: Off";
+        break;
+
+    case MENU_ITEM_FULLSCREEN:
+        fullscreenEnabled = rightPressed ? false : true;
+        state.options[MENU_ITEM_FULLSCREEN] = fullscreenEnabled ? "Fullscreen: On" : "Fullscreen: Off";
+        if (fullscreenEnabled) {
+            if (!IsWindowFullscreen()) {
+                ToggleFullscreen();
+                HideCursor();
+                
+            }
+        } else if (fullscreenEnabled == false) {
+            if (IsWindowFullscreen()) {
+                ToggleFullscreen();
+                ShowCursor();
+            }
+        }
         break;
 
     case MENU_ITEM_FPS:

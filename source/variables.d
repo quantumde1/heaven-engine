@@ -68,9 +68,12 @@ struct BattleState {
 }
 
 bool playAnimation;
+
+int currentFrame = 0;
+
 Texture2D[] framesUI;
 
-const float frameDuration = 0.016f;
+float frameDuration = 0.016f;
 
 // struct
 struct Enemy {
@@ -116,6 +119,7 @@ bool showMapPrompt = false;
 bool showDebug = false;
 bool audioEnabled;
 bool sfxEnabled = true;
+bool fullscreenEnabled = true;
 int gamepadInt;
 
 /* dialogs */

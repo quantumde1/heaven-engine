@@ -123,12 +123,6 @@ void navigationDrawLogic(Font navFont)
 
 void playerLogic(float cameraSpeed)
 {
-    if (!neededDraw2D && !inBattle) {
-        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float) texture_skybox.width, cast(float) texture_skybox
-                .height), Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()), Vector2(0, 0), 0.0, Colors
-                .WHITE);
-        drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
-    }
     updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
     controlFunction(camera, cubePosition,
         controlConfig.forward_button,
@@ -230,6 +224,12 @@ void vnLogic()
                     .WHITE);
         }
     }
+    if (!neededDraw2D && !inBattle) {
+        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float) texture_skybox.width, cast(float) texture_skybox
+                .height), Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()), Vector2(0, 0), 0.0, Colors
+                .WHITE);
+        drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
+    }
     playUIAnimation(framesUI);
 }
 
@@ -281,7 +281,7 @@ void animationsLogic(ref int animCurrentFrame, ModelAnimation* modelAnimations, 
 
 void showHintLogic()
 {
-    if (!hintNeeded || showInventory || inBattle || showDialog)
+    if (!hintNeeded || showInventory || inBattle)
         return;
 
     Color semiTransparentBlack = Color(0, 0, 0, 200);

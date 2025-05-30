@@ -12,7 +12,7 @@ Texture2D[] loadAnimationFramesUI(const string archivePath, const string animati
     uint frameIndex = 1;
     while (true)
     {
-        string frameFileName = format("%s_frame_%04d.png", animationName, frameIndex);
+        string frameFileName = format("%s-%03d.png", animationName, frameIndex);
         uint image_size;
         debug debug_writeln(frameFileName);
         char* image_data = get_file_data_from_archive(toStringz(archivePath),
@@ -36,13 +36,12 @@ Texture2D[] loadAnimationFramesUI(const string archivePath, const string animati
 void playUIAnimation(Texture2D[] frames)
 {
     static float frameTime = 0.0f;
-    static int currentFrame = 0;
     
     if (playAnimation) {
         frameTime += GetFrameTime();
         
-        if (frameTime >= frameDuration) {
-            frameTime = 0.0f;
+        while (frameTime >= frameDuration && frameDuration > 0) {
+            frameTime -= frameDuration;
             currentFrame = cast(int)((currentFrame + 1) % frames.length);
         }
         

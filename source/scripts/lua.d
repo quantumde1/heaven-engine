@@ -599,6 +599,10 @@ extern (C) nothrow int lua_draw2Dobject(lua_State* L)
 extern (C) nothrow int lua_loadUIAnimation(lua_State *L) {
     try {
     framesUI = loadAnimationFramesUI("res/uifx/"~to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2)));
+    if (lua_gettop(L) == 3) {
+        frameDuration = luaL_checknumber(L, 3);
+        debug debug_writeln("frameDuration: ", frameDuration);
+    }
     } catch (Exception e) {
     }
     return 0;
@@ -617,6 +621,8 @@ extern (C) nothrow int lua_playUIAnimation(lua_State *L) {
 extern (C) nothrow int lua_stopUIAnimation(lua_State *L) {
     playAnimation = false;
     debug debug_writeln("Animation UI stop");
+    frameDuration = 0.016f;
+    currentFrame = 0;
     return 0;
 }
 
