@@ -584,8 +584,12 @@ extern (C) nothrow int lua_draw2Dobject(lua_State* L)
 
         uint image_size;
         char* image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
-        tex2d[count].texture = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size));
-        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size));
+        Image img = LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size);
+        tex2d[count].texture = LoadTextureFromImage(img);
+        // Store the texture dimensions
+        tex2d[count].width = img.width;
+        tex2d[count].height = img.height;
+        UnloadImage(img);
         tex2d[count].x = cast(int) luaL_checkinteger(L, 2);
         tex2d[count].y = cast(int) luaL_checkinteger(L, 3);
         tex2d[count].scale = luaL_checknumber(L, 4);

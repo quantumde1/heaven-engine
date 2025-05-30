@@ -180,6 +180,8 @@ char* musicpath;
 Music musicBattle;
 
 struct TextureShow {
+    float width;
+    float height;
     float x;
     float y;
     Texture2D texture;

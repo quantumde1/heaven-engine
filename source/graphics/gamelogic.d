@@ -220,8 +220,14 @@ void vnLogic()
         allowControl = false;
         for (int i = 0; i < tex2d.length; i++)
         {
-            DrawTextureEx(tex2d[i].texture, Vector2(tex2d[i].x, tex2d[i].y), 0.0, tex2d[i].scale, Colors
-                    .WHITE);
+            float centeredX = tex2d[i].x - (tex2d[i].width * tex2d[i].scale / 2);
+            float centeredY = tex2d[i].y - (tex2d[i].height * tex2d[i].scale / 2);
+            
+            DrawTextureEx(tex2d[i].texture, 
+                        Vector2(centeredX, centeredY), 
+                        0.0, 
+                        tex2d[i].scale, 
+                        Colors.WHITE);
         }
     }
     if (!neededDraw2D && !inBattle) {
