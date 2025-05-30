@@ -129,19 +129,6 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
 {
     // Initialization
     gamepadInt = 0;
-    version (linux)
-    {
-        gamepadInt = 1;
-        debug debug_writeln("Linux version detected");
-    }
-    version (Windows)
-    {
-        debug debug_writeln("Windows version detected");
-    }
-    version (osx)
-    {
-        debug debug_writeln("macOS version detected");
-    }
     debug debug_writeln("Engine version: ", ver);
     SetExitKey(0);
     // Window and Audio Initialization

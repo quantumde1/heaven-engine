@@ -80,7 +80,7 @@ void luaInit(string lua_exec)
         if (luaL_dofile(L, "scripts/00_script.bin") != LUA_OK)
         {
             writeln("Script execution error: ", to!string(lua_tostring(L, -1)));
-            writeln("Non-typical situation occured. Contact developers.");
+            writeln("Non-typical situation occured. Tell developers about it!");
             return;
         }
     }
@@ -146,7 +146,7 @@ void shadersLogic()
         shader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
 
         int ambientLoc = GetShaderLocation(shader, "ambient");
-        float[4] values = [0.00005f, 0.00005f, 0.00005f, 1.0f];
+        float[4] values = [0.05f, 0.05f, 0.05f, 1.0f];
         SetShaderValue(shader, ambientLoc, &values[0], ShaderUniformDataType.SHADER_UNIFORM_VEC4);
 
         assignShaderToModel(playerModel);

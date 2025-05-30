@@ -69,20 +69,20 @@ void displayDialog(string character, char* emotion, string[] pages, int choicePa
     }
     int shadowOffsetX = 4; // Смещение по оси X
     int shadowOffsetY = 4; // Смещение по оси Y
-
-    if (nameu[1] == '#') {
-        // Draw the character name
-        namewidth = MeasureText(toStringz(to!string(nameu.filter!(x => x != '#'))), FONT_SIZE+10); // Measure the width of the nameu text
-        DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), Vector2(position.x + shadowOffsetX, position.y + shadowOffsetY), FONT_SIZE, 1.0f, Colors.BLACK); // Цвет тени
-        DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), position, FONT_SIZE, 1.0f, Colors.GREEN);
+    if (character.length != 0) {
+        if (nameu[1] == '#') {
+            // Draw the character name
+            namewidth = MeasureText(toStringz(to!string(nameu.filter!(x => x != '#'))), FONT_SIZE+10); // Measure the width of the nameu text
+            DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), Vector2(position.x + shadowOffsetX, position.y + shadowOffsetY), FONT_SIZE, 1.0f, Colors.BLACK); // Цвет тени
+            DrawTextEx(fontdialog, toStringz(to!string(nameu.filter!(x => x != '#'))), position, FONT_SIZE, 1.0f, Colors.GREEN);
+        }
+        else {
+            // Draw the character name
+            namewidth = MeasureText(toStringz(nameu), FONT_SIZE+10); // Measure the width of the nameu text
+            DrawTextEx(fontdialog, toStringz(nameu), Vector2(position.x + shadowOffsetX, position.y + shadowOffsetY), FONT_SIZE, 1.0f, Colors.BLACK); // Цвет тени
+            DrawTextEx(fontdialog, toStringz(nameu), position, FONT_SIZE, 1.0f, Colors.BLUE);
+        }
     }
-    else {
-        // Draw the character name
-        namewidth = MeasureText(toStringz(nameu), FONT_SIZE+10); // Measure the width of the nameu text
-        DrawTextEx(fontdialog, toStringz(nameu), Vector2(position.x + shadowOffsetX, position.y + shadowOffsetY), FONT_SIZE, 1.0f, Colors.BLACK); // Цвет тени
-        DrawTextEx(fontdialog, toStringz(nameu), position, FONT_SIZE, 1.0f, Colors.BLUE);
-    }
-
     // Draw the current page text with wrapping
     if (isI) {
         Rectangle textBox = Rectangle(rectX + charPaddingX + 10 + namewidth + 30, lineY, rectWidth - namewidth - charPaddingX - 10, rectHeight - charPaddingY);
