@@ -67,6 +67,11 @@ struct BattleState {
     bool playerTurn; // true if it's the player's turn, false for enemies
 }
 
+bool playAnimation;
+Texture2D[] framesUI;
+
+const float frameDuration = 0.016f;
+
 // struct
 struct Enemy {
     string name;

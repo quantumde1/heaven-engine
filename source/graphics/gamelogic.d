@@ -10,6 +10,7 @@ import graphics.engine;
 import scripts.lua;
 import std.stdio;
 import std.conv;
+import graphics.effects;
 import raylib_lights;
 import std.string;
 import graphics.battle;
@@ -122,6 +123,12 @@ void navigationDrawLogic(Font navFont)
 
 void playerLogic(float cameraSpeed)
 {
+    if (!neededDraw2D && !inBattle) {
+        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float) texture_skybox.width, cast(float) texture_skybox
+                .height), Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()), Vector2(0, 0), 0.0, Colors
+                .WHITE);
+        drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
+    }
     updatePlayerOBB(playerOBB, cubePosition, modelCharacterSize, playerModelRotation);
     controlFunction(camera, cubePosition,
         controlConfig.forward_button,
@@ -223,13 +230,7 @@ void vnLogic()
                     .WHITE);
         }
     }
-    if (!neededDraw2D && !inBattle)
-    {
-        DrawTexturePro(texture_skybox, Rectangle(0, 0, cast(float) texture_skybox.width, cast(float) texture_skybox
-                .height), Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()), Vector2(0, 0), 0.0, Colors
-                .WHITE);
-        drawScene(camera, cubePosition, cameraAngle, cubeModels, playerModel);
-    }
+    playUIAnimation(framesUI);
 }
 
 void animationsLogic(ref int animCurrentFrame, ModelAnimation* modelAnimations, bool collisionDetected)

@@ -5,6 +5,7 @@ import bindbc.lua;
 import raylib;
 import variables;
 import std.stdio;
+import graphics.effects;
 import std.conv;
 import scripts.config;
 import graphics.cubes;
@@ -595,6 +596,50 @@ extern (C) nothrow int lua_draw2Dobject(lua_State* L)
     return 0;
 }
 
+extern (C) nothrow int lua_loadUIAnimation(lua_State *L) {
+    try {
+    framesUI = loadAnimationFramesUI("res/uifx/"~to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2)));
+    } catch (Exception e) {
+    }
+    return 0;
+}
+
+extern (C) nothrow int lua_playUIAnimation(lua_State *L) {
+    debug debug_writeln("Animation UI start");
+    try {
+        playAnimation = true;
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
+extern (C) nothrow int lua_stopUIAnimation(lua_State *L) {
+    playAnimation = false;
+    debug debug_writeln("Animation UI stop");
+    return 0;
+}
+
+extern (C) nothrow int lua_unloadUIAnimation(lua_State *L) {
+    try {
+        for (int i = 0; i < framesUI.length; i++) {
+            UnloadTexture(framesUI[i]);
+        }
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
+extern (C) nothrow int lua_playSfx(lua_State *L) {
+    try {
+    playSfx(to!string(luaL_checkstring(L, 1)));
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
 extern (C) nothrow int lua_stopDraw2Dobject(lua_State* L)
 {
     for (int i = 0; i < tex2d.length; i++)
@@ -749,11 +794,16 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L)
     lua_register(L, "animationsState", &lua_disableAnimations);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
     lua_register(L, "getScreenHeight", &lua_getScreenHeight);
+    lua_register(L, "playSfx", &lua_playSfx);
+    lua_register(L, "loadAnimationUI", &lua_loadUIAnimation);
+    lua_register(L, "playAnimationUI", &lua_playUIAnimation);
+    lua_register(L, "unloadAnimationUI", &lua_unloadUIAnimation);
     lua_register(L, "loadScript", &lua_loadScript);
     lua_register(L, "saveCameraState", &lua_saveCameraState);
     lua_register(L, "resetCameraState", &lua_resetCameraState);
     lua_register(L, "getButtonName", &luaL_getButtonDialog);
     lua_register(L, "reloadShaderVertex", &lua_reloadShaderVertex);
+    lua_register(L, "stopAnimationUI", &lua_stopUIAnimation);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
     lua_register(L, "reloadShaderFragment", &lua_reloadShaderFragment);
     lua_register(L, "Begin2D", &lua_2dModeEnable);

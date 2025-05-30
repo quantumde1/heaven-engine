@@ -20,7 +20,6 @@ import ui.common;
 Texture2D[] attackAnimationFrames;
 int currentFrame = 0;
 float frameTime = 0.0f;
-const float frameDuration = 0.016f;
 bool isPlayingAnimation = false;
 bool isEnemyShaking = false;
 float shakeDuration = 0.26f;
