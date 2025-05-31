@@ -5,9 +5,15 @@ import std.stdio;
 import variables;
 import std.string;
 import scripts.config;
+import std.algorithm;
+
+int screenWidth;// = GetScreenWidth();
+int screenHeight;// = GetScreenHeight();
 
 Texture2D[] loadAnimationFramesUI(const string archivePath, const string animationName)
 {
+    screenWidth = GetScreenWidth();
+    screenHeight = GetScreenHeight();
     Texture2D[] frames;
     uint frameIndex = 1;
     while (true)
@@ -44,16 +50,28 @@ void playUIAnimation(Texture2D[] frames)
             frameTime -= frameDuration;
             currentFrame = cast(int)((currentFrame + 1) % frames.length);
         }
+
+        int frameWidth = frames[currentFrame].width;
+        int frameHeight = frames[currentFrame].height;
         
-        DrawTextureEx(frames[currentFrame], Vector2(0, 0), 0, 1.0f, Colors.WHITE);
+        DrawTexturePro(
+            frames[currentFrame],
+            Rectangle(0, 0, frameWidth, frameHeight),
+            Rectangle(0, 0, screenWidth, screenHeight),
+            Vector2(0, 0),
+            0,
+            Color(255, 255, 255, 127)
+        );
     } else {
         frameTime = 0.0f;
         currentFrame = 0;
     }
 }
 
+Sound sfx;
+
 void playSfx(string filename) {
     debug debug_writeln("Loading & playing SFX");
-    Sound sfx = LoadSound(filename.toStringz());
+    sfx = LoadSound(filename.toStringz());
     PlaySound(sfx);
 }

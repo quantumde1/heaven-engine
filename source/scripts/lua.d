@@ -519,7 +519,7 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
     }
     else
     {
-        typingSpeed = 0.03f;
+        typingSpeed = 0.018f;
     }
     showDialog = true;
     allowControl = false;
@@ -689,6 +689,11 @@ extern (C) nothrow int lua_getLocationName(lua_State* L)
     return 1;
 }
 
+extern (C) nothrow int lua_stopSfx(lua_State *L) {
+    StopSound(sfx);
+    return 0;
+}
+
 extern (C) nothrow int lua_stop2Dbackground(lua_State* L)
 {
     UnloadTexture(texture_background);
@@ -814,6 +819,7 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L)
     lua_register(L, "getButtonName", &luaL_getButtonDialog);
     lua_register(L, "reloadShaderVertex", &lua_reloadShaderVertex);
     lua_register(L, "stopAnimationUI", &lua_stopUIAnimation);
+    lua_register(L, "stopSfx", &lua_stopSfx);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
     lua_register(L, "reloadShaderFragment", &lua_reloadShaderFragment);
     lua_register(L, "Begin2D", &lua_2dModeEnable);

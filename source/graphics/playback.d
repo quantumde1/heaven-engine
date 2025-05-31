@@ -19,7 +19,9 @@ extern (C)
     struct libvlc_media_player_t;
     struct libvlc_event_manager_t;
     struct libvlc_event_t;
-
+    long libvlc_media_player_get_length(libvlc_media_player_t* player);
+    long libvlc_media_player_get_time(libvlc_media_player_t* player);
+    void libvlc_media_player_set_time(libvlc_media_player_t* player, long time);
     libvlc_instance_t* libvlc_new(int argc, const(char)** argv);
     void libvlc_release(libvlc_instance_t* instance);
 
@@ -120,10 +122,8 @@ extern (C) void end_vlc_rendering(void* data, void* id, void* p_pixels)
 
 extern (C) void videoEndCallback(void* data)
 {
-    auto video = cast(Video*) data;
     videoFinished = true;
     debug debug_writeln("Video ended");
-    cleanup_video(video);
 }
 
 Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* protocol)
@@ -234,10 +234,22 @@ extern (C) int playVideo(char* argv)
     debug debug_writeln("Video started playing");
     while (!WindowShouldClose())
     {
+        auto player = new_video.player;
+
+        long videoLength = libvlc_media_player_get_length(player); // длина в мс
+        long currentTime = libvlc_media_player_get_time(player);  // текущее время в мс
+        debug debug_writeln("Current time: ", currentTime, " videoLength: ", videoLength);
+        if (videoLength > 0 && currentTime >= videoLength-210)
+        {
+            debug debug_writeln("video reached end");
+            videoFinished = true;
+        }
+
         if (videoFinished)
         {
             break;
         }
+
 
         BeginDrawing();
         ClearBackground(Colors.BLACK);
