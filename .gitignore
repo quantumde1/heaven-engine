@@ -23,7 +23,7 @@ a.out
 sky
 *.dylib*
 res/
-scripts/
+/scripts/
 docs/
 ./save.txt
 ./heaven-silent-hill/
@@ -31,4 +31,3 @@ heaven-silent-hill/
 heaven-soul-hackers/
 ./heaven-soul-hackers/
 res
-scripts
