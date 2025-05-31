@@ -5,7 +5,7 @@ import std.stdio;
 
 //local imports
 import graphics.engine;
-import graphics.video;
+import graphics.playback;
 import variables;
 import std.file;
 import std.string;

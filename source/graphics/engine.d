@@ -2,7 +2,7 @@
 module graphics.engine;
 
 import raylib;
-import graphics.video;
+import graphics.playback;
 import std.stdio;
 import std.math;
 import std.file;

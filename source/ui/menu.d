@@ -8,7 +8,7 @@ import core.time;
 import core.thread;
 import std.string;
 import graphics.engine;
-import graphics.video;
+import graphics.playback;
 import std.file;
 import ui.common;
 

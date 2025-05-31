@@ -68,8 +68,10 @@ void playUIAnimation(Texture2D[] frames)
     }
 }
 
+Sound sfx;
+
 void playSfx(string filename) {
     debug debug_writeln("Loading & playing SFX");
-    Sound sfx = LoadSound(filename.toStringz());
+    sfx = LoadSound(filename.toStringz());
     PlaySound(sfx);
 }

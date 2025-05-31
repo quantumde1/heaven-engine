@@ -81,7 +81,7 @@ void displayDialog(string character, char* emotion, string[] pages, int choicePa
     // Draw text with wrapping
     int textX = screenWidth/6 - (nameX + (isI ? namewidth + 30 : namewidth));
     int textY = nameY;
-    int textWidth = rectWidth - textX - padding;
+    int textWidth = rectWidth - textX - padding - screenWidth/6;
     int textHeight = rectHeight - padding * 2;
     
     Rectangle textBox = Rectangle(textX, textY, textWidth, textHeight);
@@ -97,7 +97,6 @@ void displayDialog(string character, char* emotion, string[] pages, int choicePa
         int imageY = cast(int)(rectY - dialogImage.height * 3.5f - 20);
         DrawTextureEx(dialogImage, Vector2(imageX, imageY), 0.0f, 3.5f, Colors.WHITE);
     }
-    drawSnakeAnimation(rectX, rectY, rectWidth, rectHeight);
 
     answer_num = -1; // Default value if incorrect
 
@@ -128,8 +127,9 @@ void displayDialog(string character, char* emotion, string[] pages, int choicePa
 
     // Handle advancing the dialog
     if (isTextFullyDisplayed) {
+        drawSnakeAnimation(rectX, rectY, rectWidth, rectHeight);
         // If the text is fully displayed, check for Enter key to go to the next page
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
+        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) || IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             currentPage++;
             if (sfxEnabled) PlaySound(audio.acceptSound);
             currentCharIndex = 0; // Reset character index for the next page
@@ -147,7 +147,7 @@ void displayDialog(string character, char* emotion, string[] pages, int choicePa
         }
     } else {
         // If the text is not fully displayed, pressing Enter will show the full text
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) || (isGamepadConnected && IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))) {
             isTextFullyDisplayed = true; // Set the flag to indicate the text is fully displayed
         }
     }
