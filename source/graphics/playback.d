@@ -364,7 +364,7 @@ extern (C) int playVideoInternal(char* argv)
 
 void playVideo(string filename) {
     version (Posix)
-        playVideoInternal(cast(char*)(getcwd() ~ filename));
+        playVideoInternal(cast(char*)(getcwd() ~ "/" ~ filename));
     version (Windows)
-        playVideoInternal(cast(char*)("/" ~ getcwd() ~ filename));
+        playVideoInternal(cast(char*)("/" ~ getcwd() ~ "/" ~ filename));
 }
