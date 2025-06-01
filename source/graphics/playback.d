@@ -11,6 +11,7 @@ import variables;
 import core.sync.mutex;
 import std.array;
 import scripts.config;
+import std.file;
 
 extern (C)
 {
@@ -196,7 +197,7 @@ void cleanup_video(Video* video)
     free(video);
 }
 
-extern (C) int playVideo(char* argv)
+extern (C) int playVideoInternal(char* argv)
 {
     const(char)*[] vlcArgs;
     debug
@@ -359,4 +360,11 @@ extern (C) int playVideo(char* argv)
     video_list.length = 0;
     libvlc_release(libvlc);
     return 0;
+}
+
+void playVideo(string filename) {
+    version (Posix)
+        playVideoInternal(cast(char*)(getcwd() ~ filename));
+    version (Windows)
+        playVideoInternal(cast(char*)("/" ~ getcwd() ~ filename));
 }

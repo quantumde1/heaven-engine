@@ -103,14 +103,7 @@ void helloScreen()
     if (std.file.exists(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"))
     {
         debug debug_writeln("video found, playing");
-        version (Windows)
-        {
-            playVideo(cast(char*)("/" ~ getcwd() ~ "/res/videos/soul_OP.moflex.mp4"));
-        }
-        version (Posix)
-        {
-            playVideo(cast(char*)(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"));
-        }
+        playVideo("/res/videos/soul_OP.moflex.mp4");
     }
     else
     {
@@ -140,19 +133,11 @@ MenuState initMenuState()
     state.inactivityTimer = 0.0f;
     state.selectedIndex = 0;
 
-    uint imageSize;
-    char* imageData = get_file_data_from_archive("res/data.bin", "logo.png", &imageSize);
-    state.logoTexture = LoadTextureFromImage(
-        LoadImageFromMemory(".PNG", cast(const(ubyte)*) imageData, imageSize)
-    );
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) imageData, imageSize));
-
+    state.logoTexture = LoadTexture("res/data/menu_logo.png");
     state.logoX = (GetScreenWidth() - state.logoTexture.width) / 2;
     state.logoY = (GetScreenHeight() - state.logoTexture.height) / 2 - 50;
 
-    uint audioSize;
-    char* audioData = get_file_data_from_archive("res/data.bin", "main_menu.mp3", &audioSize);
-    state.menuMusic = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*) audioData, audioSize);
+    state.menuMusic = LoadMusicStream("res/data/menu_music.mp3");
     if (audioEnabled)
     {
         PlayMusicStream(state.menuMusic);
@@ -217,11 +202,7 @@ void handleInactivity(ref MenuState state)
         }
 
         StopMusicStream(state.menuMusic);
-        version (Posix)
-            playVideo(cast(char*)(getcwd() ~ "/res/videos/opening_old.mp4"));
-        version (Windows)
-            playVideo(cast(char*)("/" ~ getcwd() ~ "/res/videos/opening_old.mp4"));
-
+        playVideo("/res/videos/opening_old.mp4");
         if (audioEnabled)
         {
             PlayMusicStream(state.menuMusic);

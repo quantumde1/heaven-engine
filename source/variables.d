@@ -68,7 +68,7 @@ struct ControlConfig {
     char opmenu_button;
 }
 
-char button;
+int button;
 
 /* main menu */
 

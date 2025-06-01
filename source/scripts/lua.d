@@ -53,15 +53,7 @@ extern (C) nothrow int lua_playVideo(lua_State* L)
     try
     {
         videoFinished = false;
-        version (Windows)
-        {
-            playVideo(cast(char*) toStringz("/" ~ getcwd() ~ "/" ~ luaL_checkstring(L, 1)
-                    .to!string));
-        }
-        version (Posix)
-        {
-            playVideo(cast(char*) toStringz(getcwd() ~ "/" ~ luaL_checkstring(L, 1).to!string));
-        }
+        playVideo(luaL_checkstring(L, 1).to!string);
     }
     catch (Exception e)
     {
@@ -72,80 +64,6 @@ extern (C) nothrow int lua_playVideo(lua_State* L)
 extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L)
 {
     lua_pushinteger(L, answer_num); // Push the integer value onto the Lua stack
-    return 1;
-}
-
-extern (C) nothrow int luaL_getButtonDialog(lua_State* L)
-{
-    try
-    {
-        if (!IsGamepadAvailable(gamepadInt))
-        {
-            switch (to!string(luaL_checkstring(L, 1)))
-            {
-            case "dialog":
-                button = controlConfig.dialog_button;
-                break;
-            case "forward":
-                button = controlConfig.forward_button;
-                break;
-            case "backward":
-                button = controlConfig.back_button;
-                break;
-            case "left":
-                button = controlConfig.left_button;
-                break;
-            case "right":
-                button = controlConfig.right_button;
-                break;
-            case "opmenu":
-                button = controlConfig.opmenu_button;
-                break;
-            case "buttonmap":
-                button = 'P';
-                break;
-            default:
-                break;
-            }
-            lua_pushstring(L, toStringz(button.to!string));
-        }
-        else
-        {
-            switch (to!string(luaL_checkstring(L, 1)))
-            {
-            case "dialog":
-                button = GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
-                lua_pushstring(L, toStringz("Circle/B"));
-                break;
-            case "forward":
-                button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP;
-                lua_pushstring(L, toStringz("Up"));
-                break;
-            case "backward":
-                button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN;
-                lua_pushstring(L, toStringz("Down"));
-                break;
-            case "left":
-                button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP;
-                lua_pushstring(L, toStringz("Left"));
-                break;
-            case "right":
-                button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
-                lua_pushstring(L, toStringz("Right"));
-                break;
-            case "opmenu":
-                button = GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT;
-                lua_pushstring(L, toStringz("Triangle/X"));
-                break;
-            default:
-                break;
-            }
-        }
-    }
-    catch (Exception e)
-    {
-
-    }
     return 1;
 }
 
@@ -164,18 +82,7 @@ extern (C) nothrow int luaL_isKeyPressed(lua_State* L)
     {
         if (!IsGamepadAvailable(gamepadInt))
         {
-            if (IsKeyPressed((button)))
-            {
-                lua_pushboolean(L, true);
-            }
-            else
-            {
-                lua_pushboolean(L, false);
-            }
-        }
-        else
-        {
-            if (IsGamepadButtonPressed(gamepadInt, button.to!int))
+            if (IsKeyPressed(cast(int)(luaL_checkinteger(L, 1))))
             {
                 lua_pushboolean(L, true);
             }
@@ -195,7 +102,6 @@ extern (C) nothrow int luaL_isKeyPressed(lua_State* L)
 extern (C) nothrow int luaL_dialogBox(lua_State* L)
 {
     showDialog = true;
-    debug debug_writeln("lua called dialogbox");
     luaL_checktype(L, 2, LUA_TTABLE);
 
     int textTableLength = cast(int) lua_objlen(L, 2);
@@ -483,7 +389,6 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L)
     lua_register(L, "playAnimationUI", &lua_playUIAnimation);
     lua_register(L, "unloadAnimationUI", &lua_unloadUIAnimation);
     lua_register(L, "loadScript", &lua_loadScript);
-    lua_register(L, "getButtonName", &luaL_getButtonDialog);
     lua_register(L, "stopAnimationUI", &lua_stopUIAnimation);
     lua_register(L, "stopSfx", &lua_stopSfx);
     lua_register(L, "getScreenWidth", &lua_getScreenWidth);
