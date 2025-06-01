@@ -124,7 +124,6 @@ nothrow char parse_conf(string filename, string type)
         }
         catch (Exception e)
         {
-            // Handle any exceptions that may occur during logging
         }
     }
     return 'E';

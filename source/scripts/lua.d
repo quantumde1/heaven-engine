@@ -4,7 +4,6 @@ module scripts.lua;
 import bindbc.lua;
 import raylib;
 import variables;
-import std.stdio;
 import graphics.effects;
 import std.conv;
 import scripts.config;
@@ -14,7 +13,6 @@ import graphics.playback;
 import std.file;
 import std.array;
 import std.algorithm;
-import core.thread;
 
 /* 
  * This module provides Lua bindings for various engine functionalities.
@@ -50,13 +48,6 @@ extern (C) nothrow int lua_loadScript(lua_State* L)
     return 0;
 }
 
-// Lua State Functions
-extern (C) nothrow int lua_isDialogExecuted(lua_State* L)
-{
-    lua_pushboolean(L, event_initialized);
-    return 1; // Number of return values
-}
-
 extern (C) nothrow int lua_playVideo(lua_State* L)
 {
     try
@@ -76,24 +67,6 @@ extern (C) nothrow int lua_playVideo(lua_State* L)
     {
     }
     return 0;
-}
-
-extern (C) nothrow int lua_allowControl(lua_State* L)
-{
-    allowControl = true;
-    return 0;
-}
-
-extern (C) nothrow int lua_disallowControl(lua_State* L)
-{
-    allowControl = false;
-    return 0;
-}
-
-extern (C) nothrow int lua_getDialogName(lua_State* L)
-{
-    lua_pushstring(L, name_global.toStringz());
-    return 1; // Number of return values
 }
 
 extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L)
@@ -221,8 +194,8 @@ extern (C) nothrow int luaL_isKeyPressed(lua_State* L)
 
 extern (C) nothrow int luaL_dialogBox(lua_State* L)
 {
-    name_global = luaL_checkstring(L, 1).to!string; // Update dialog name
-    event_initialized = true;
+    showDialog = true;
+    debug debug_writeln("lua called dialogbox");
     luaL_checktype(L, 2, LUA_TTABLE);
 
     int textTableLength = cast(int) lua_objlen(L, 2);
@@ -236,17 +209,6 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
     }
 
     pageChoice_glob = cast(int) luaL_checkinteger(L, 4);
-    emotion_global = cast(char*) luaL_checkstring(L, 3);
-    try
-    {
-        uint image_size;
-        char* image_data = get_file_data_from_archive("res/faces.bin", emotion_global, &image_size);
-        dialogImage = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size));
-        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size));
-    }
-    catch (Exception e)
-    {
-    }
     // Get the choices array from the Lua stack
     luaL_checktype(L, 5, LUA_TTABLE);
     int choicesLength = cast(int) lua_objlen(L, 5);
@@ -257,28 +219,21 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
         choices[i] = luaL_checkstring(L, -1).to!string;
         lua_pop(L, 1);
     }
-    int x_pos = cast(int) luaL_checkinteger(L, 6);
-    if (x_pos == 0)
-    {
-        pos = false;
-    }
-    if (x_pos == 1)
-    {
-        pos = true;
-    }
     if (lua_gettop(L) == 7)
     {
         typingSpeed = cast(float) luaL_checknumber(L, 7);
     }
     else
     {
-        typingSpeed = 0.018f;
+        typingSpeed = 0.6f;
     }
-    showDialog = true;
-    allowControl = false;
-    show_sec_dialog = true;
 
     return 0;
+}
+
+extern (C) nothrow int lua_isDialogExecuted(lua_State *L) {
+    lua_pushboolean(L, showDialog);
+    return 1;
 }
 
 extern (C) nothrow int lua_load2Dbackground(lua_State* L)
@@ -298,11 +253,7 @@ extern (C) nothrow int lua_load2Dbackground(lua_State* L)
         {
             UnloadTexture(backgrounds[index]);
         }
-
-        uint image_size;
-        char* image_data = get_file_data_from_archive("res/bg.bin", luaL_checkstring(L, 1), &image_size);
-        backgrounds[index] = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size));
-        UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size));
+        backgrounds[index] = LoadTexture(luaL_checkstring(L, 1));
     }
     catch (Exception e)
     {
@@ -334,15 +285,7 @@ extern (C) nothrow int lua_draw2Dobject(lua_State* L)
         {
             tex2d.length = count + 1;
         }
-
-        uint image_size;
-        char* image_data = get_file_data_from_archive("res/tex.bin", luaL_checkstring(L, 1), &image_size);
-        Image img = LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size);
-        tex2d[count].texture = LoadTextureFromImage(img);
-        // Store the texture dimensions
-        tex2d[count].width = img.width;
-        tex2d[count].height = img.height;
-        UnloadImage(img);
+        tex2d[count].texture = LoadTexture(luaL_checkstring(L, 1));
         tex2d[count].x = cast(int) luaL_checkinteger(L, 2);
         tex2d[count].y = cast(int) luaL_checkinteger(L, 3);
         tex2d[count].scale = luaL_checknumber(L, 4);
@@ -488,29 +431,7 @@ extern (C) nothrow int lua_getTime(lua_State* L)
     return 1;
 }
 
-
-// Music functions
 extern (C) nothrow int lua_LoadMusic(lua_State* L)
-{
-    try
-    {
-        musicpath = cast(char*) luaL_checkstring(L, 1);
-        uint audio_size;
-        char* audio_data = get_file_data_from_archive("res/data.bin", musicpath, &audio_size);
-
-        if (audioEnabled)
-        {
-            UnloadMusicStream(music);
-            music = LoadMusicStreamFromMemory(".mp3", cast(const(ubyte)*) audio_data, audio_size);
-        }
-    }
-    catch (Exception e)
-    {
-    }
-    return 0;
-}
-
-extern (C) nothrow int lua_LoadMusicExternal(lua_State* L)
 {
     try
     {
@@ -551,10 +472,8 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L)
 {
     lua_register(L, "dialogBox", &luaL_dialogBox);
     lua_register(L, "dialogAnswerValue", &luaL_dialogAnswerValue);
-    //lua_register(L, "loadLocation", &luaL_loadlocation);
-    lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
-    lua_register(L, "getDialogName", &lua_getDialogName);
     lua_register(L, "loadScript", &luaL_loadScript);
+    lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
     lua_register(L, "setFont", &lua_setGameFont);
     lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
     lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
@@ -579,9 +498,6 @@ extern (C) nothrow void luaL_opendialoglib(lua_State* L)
     lua_register(L, "loadMusic", &lua_LoadMusic);
     lua_register(L, "playMusic", &lua_PlayMusic);
     lua_register(L, "stopMusic", &lua_StopMusic);
-    lua_register(L, "loadMusicExternal", &lua_LoadMusicExternal);
-    lua_register(L, "allowControl", &lua_allowControl);
-    lua_register(L, "disallowControl", &lua_disallowControl);
     lua_register(L, "stopDraw2Dcharacter", &lua_stopDraw2Dobject);
     lua_register(L, "getAnswerValue", &lua_getAnswerValue);
     lua_register(L, "getTime", &lua_getTime);

@@ -74,7 +74,7 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
     DisableCursor();
     ToggleFullscreen();
     Font navFont = LoadFont("res/font_16x16_en.png");
-    SetTargetFPS(FPS);
+    SetTargetFPS(60);
     fontdialog = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     InitAudioDevice();
@@ -121,21 +121,13 @@ debug_lab:
                     luaInit(lua_exec);
                     luaReload = false;
                 }
-                if (!showInventory)
-                {
-                    if (audioEnabled)
-                    {
-                        UpdateMusicStream(music);
-                    }
-                    luaEventLoop();
-                    BeginDrawing();
-                    ClearBackground(Colors.BLACK);
-                    //all drawing must be here
+                luaEventLoop();
+                BeginDrawing();
+                ClearBackground(Colors.BLACK);
+                //all drawing must be here
+                /* visual novel element block */
+                vnLogic();
 
-                    /* visual novel element block */
-                    vnLogic();
-
-                }
                 EndDrawing();
             }
             break;

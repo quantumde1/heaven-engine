@@ -89,16 +89,15 @@ void luaEventLoop()
 
 void vnLogic()
 {
+    UpdateMusicStream(music);
     if (neededDraw2D)
     {
-        allowControl = false;
         DrawTexturePro(texture_background, Rectangle(0, 0, cast(float) texture_background.width, cast(
                 float) texture_background.height), Rectangle(0, 0, cast(float) GetScreenWidth(), cast(
                 float) GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
     }
     if (neededCharacterDrawing)
     {
-        allowControl = false;
         for (int i = 0; i < tex2d.length; i++)
         {
             float centeredX = tex2d[i].x - (tex2d[i].width * tex2d[i].scale / 2);
@@ -112,4 +111,7 @@ void vnLogic()
         }
     }
     playUIAnimation(framesUI);
+    if (showDialog) {
+        displayDialog(message_global, pageChoice_glob, fontdialog, &showDialog, typingSpeed);
+    }
 }

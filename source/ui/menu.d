@@ -9,23 +9,34 @@ import core.thread;
 import std.string;
 import graphics.engine;
 import graphics.playback;
-import ui.common;
 import std.file;
 
 enum
 {
     MENU_ITEM_START = 0,
-    MENU_ITEM_LANGUAGE = 1,
-    MENU_ITEM_SHADERS = 2,
-    MENU_ITEM_SOUND = 3,
-    MENU_ITEM_SFX = 4,
-    MENU_ITEM_FULLSCREEN = 5,
-    MENU_ITEM_FPS = 6,
-    MENU_ITEM_EXIT = 7,
+    MENU_ITEM_SOUND = 1,
+    MENU_ITEM_SFX = 2,
+    MENU_ITEM_FULLSCREEN = 3,
+    MENU_ITEM_EXIT = 4,
 
     FADE_SPEED_IN = 0.02f,
     FADE_SPEED_OUT = 0.04f,
     INACTIVITY_TIMEOUT = 20.0f
+}
+
+
+void fadeEffect(float alpha, bool fadeIn, void delegate(float alpha) renderer)
+{
+    const float FadeIncrement = 0.02f;
+
+    while (fadeIn ? alpha < 2.0f : alpha > 0.0f)
+    {
+        alpha += fadeIn ? FadeIncrement : -FadeIncrement;
+        BeginDrawing();
+        ClearBackground(Colors.BLACK);
+        renderer(alpha);
+        EndDrawing();
+    }
 }
 
 struct MenuState
@@ -114,12 +125,9 @@ MenuState initMenuState()
     state.fromSave = std.file.exists(getcwd() ~ "/save.txt");
     state.options = [
         "Start Game", 
-        "Language: English", 
-        "Shaders: On", 
         "Sound: On",
         "SFX: On",
         "Fullscreen: On",
-        "FPS: 60",
         "Exit Game",
     ];
 
@@ -274,19 +282,6 @@ void handleMenuSettings(ref MenuState state)
 
     switch (state.selectedIndex)
     {
-    case MENU_ITEM_LANGUAGE:
-        if (rightPressed)
-        {
-            usedLang = "russian";
-            state.options[MENU_ITEM_LANGUAGE] = "Language: Russian";
-        }
-        else if (leftPressed)
-        {
-            usedLang = "english";
-            state.options[MENU_ITEM_LANGUAGE] = "Language: English";
-        }
-        break;
-
     case MENU_ITEM_SOUND:
         audioEnabled = rightPressed ? false : true;
         state.options[MENU_ITEM_SOUND] = audioEnabled ? "Sound: On" : "Sound: Off";
@@ -321,13 +316,6 @@ void handleMenuSettings(ref MenuState state)
             }
         }
         break;
-
-    case MENU_ITEM_FPS:
-        FPS = rightPressed ? 30 : 60;
-        SetTargetFPS(FPS);
-        state.options[MENU_ITEM_FPS] = format("FPS: %d", FPS);
-        break;
-
     default:
         break;
     }
