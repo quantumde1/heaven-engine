@@ -9,8 +9,8 @@ import core.thread;
 import std.string;
 import graphics.engine;
 import graphics.playback;
-import std.file;
 import ui.common;
+import std.file;
 
 enum
 {
@@ -287,11 +287,6 @@ void handleMenuSettings(ref MenuState state)
         }
         break;
 
-    case MENU_ITEM_SHADERS:
-        shaderEnabled = rightPressed ? false : true;
-        state.options[MENU_ITEM_SHADERS] = shaderEnabled ? "Shaders: On" : "Shaders: Off";
-        break;
-
     case MENU_ITEM_SOUND:
         audioEnabled = rightPressed ? false : true;
         state.options[MENU_ITEM_SOUND] = audioEnabled ? "Sound: On" : "Sound: Off";
@@ -354,18 +349,6 @@ void showMainMenu(ref GameState currentGameState)
     {
         UpdateMusicStream(state.menuMusic);
 
-        if (IsKeyPressed(KeyboardKey.KEY_F3))
-        {
-            showDebug = true;
-        }
-
-        if (showDebug)
-        {
-            debug drawDebugInfo(cubePosition, currentGameState,
-                partyMembers[0].currentHealth,
-                cameraAngle, playerStepCounter,
-                encounterThreshold, inBattle);
-        }
 
         handleInactivity(state);
         handleMenuNavigation(state);

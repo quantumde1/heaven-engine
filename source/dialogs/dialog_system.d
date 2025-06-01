@@ -10,7 +10,6 @@ import variables;
 import std.math;
 import std.string;
 import std.typecons;
-import graphics.cubes;
 import std.array;
 import std.algorithm;
 
@@ -138,9 +137,6 @@ void displayDialog(string character, char* emotion, string[] pages, int choicePa
                 showDialog = false;
                 allowControl = true;
                 allow_exit_dialog = true;
-                if (selectingEnemy == true) {
-                    selectingEnemy = false;
-                }
                 UnloadTexture(dialogImage);
                 currentPage = 0; // Reset to the first page if needed
             }
@@ -210,51 +206,6 @@ void drawSnakeAnimation(int rectX, int rectY, int rectWidth, int rectHeight) {
             cubeSize, cubeSize, cubeColor
         );
     }
-}
-
-void displayDialogs(Nullable!Cube collidedCube, char dlg, ref bool allowControl, ref bool showDialog, ref bool allow_exit_dialog, ref string name) {
-    bool isCubeNotNull = !collidedCube.isNull;
-    int posY = GetScreenHeight() - 20 - 40;
-    // Check if cube collision is not null
-    if (isCubeNotNull) {
-        if (!showDialog && allow_exit_dialog && !inBattle) {
-            if (IsGamepadAvailable(gamepadInt)) {
-                int buttonSize = 30;
-                int circleCenterX = 40 + buttonSize / 2;
-                int circleCenterY = posY + buttonSize / 2;
-                int textYOffset = 7; // Adjust this offset based on your font and text size
-                DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.RED);
-                DrawText(("B"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors.BLACK);
-                DrawText((" to dialog"), 40 + buttonSize + 5, posY, 20, Colors.BLACK);
-                hintNeeded = false;
-            } else {
-                int fontSize = 20;
-                DrawText(toStringz("Press "~dlg~" for dialog"), 40, posY, fontSize, Colors.BLACK);
-                hintNeeded = false;
-            }
-        }
-
-        // If all correct, show dialog from script with all needed text, name, emotion etc
-        if (IsKeyPressed(dlg) || IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
-            if (allow_exit_dialog) {
-                allow_exit_dialog = false;
-                allowControl = false;
-                name = collidedCube.get.name;
-                showDialog = true;
-                // Set the global variables to the current cube's dialog
-                name_global = collidedCube.get.name;
-                message_global = collidedCube.get.text;
-                emotion_global = collidedCube.get.emotion;
-                pageChoice_glob = collidedCube.get.choicePage;
-            }
-        }
-    }
-
-    // If dialog is not ended (not all text pages showed), show up "Press enter for continue" for showing next page of text
-    if (showDialog && isCubeNotNull) {
-        displayDialog(name_global, emotion_global, message_global, pageChoice_glob);
-    }
-    selectedChoice = 0;
 }
 
 // Draw text using font inside rectangle limits
