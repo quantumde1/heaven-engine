@@ -7,58 +7,16 @@ import bindbc.lua;
 
 extern (C) char* get_file_data_from_archive(const char *input_file, const char *file_name, uint *file_size_out);
 
-ControlConfig controlConfig;
-
-/* character & npc */
-bool hintNeeded;
-
-bool playAnimation;
-
-int currentFrame = 0;
-
-Texture2D[] framesUI;
-
-float frameDuration = 0.016f;
-
-/* lua things */
-lua_State* L;
-
-/* interface things */
-string ver = "1.1.0";
-bool audioEnabled;
-bool sfxEnabled = true;
-bool fullscreenEnabled = true;
-int gamepadInt;
-
-/* dialogs */
-bool showDialog = false;
-int selectedChoice = 0;
-int pageChoice_glob;
-int answer_num;
-bool isTextFullyDisplayed;
-string[] message_global;
-immutable int currentChoiceCharIndex = 0;
-string[] choices; // To hold choices from Lua
-Font fontdialog;
-float typingSpeed;
-
-/* audio things */
-Music music;
-char* musicpath;
-
-struct TextureShow {
-    float width;
-    float height;
-    float x;
-    float y;
-    Texture2D texture;
-    float scale;
+void resetAllScriptValues() {
+    import scripts.config : debug_writeln;
+    debug_writeln("Resetting all values!");
+    answerIndex = 0;
+    tex2d = [];
+    backgrounds = [];
 }
 
-TextureShow[] tex2d;
-Texture2D[] backgrounds;
+/* system */
 
-/* controls */
 struct ControlConfig {
     char right_button;
     char left_button;
@@ -68,28 +26,14 @@ struct ControlConfig {
     char opmenu_button;
 }
 
-int button;
-
-/* main menu */
-
-enum GameState {
-    MainMenu,
-    InGame,
-    Exit
+struct CharacterTexture {
+    float width;
+    float height;
+    float x;
+    float y;
+    Texture2D texture;
+    float scale;
 }
-
-GameState currentGameState;
-bool videoFinished;
-
-/* models and locations */
-Texture2D texture_background;
-Texture2D texture_character;
-bool neededDraw2D;
-bool neededCharacterDrawing;
-
-string lua_exec;
-bool luaReload = true;
-string usedLang = "english";
 
 struct InterfaceAudio {
     Sound menuMoveSound;
@@ -99,12 +43,97 @@ struct InterfaceAudio {
     Sound nonSound;
 }
 
+enum GameState {
+    MainMenu,
+    InGame,
+    Exit
+}
+
+CharacterTexture[] tex2d;
+
+ControlConfig controlConfig;
+
 InterfaceAudio audio;
 
-void resetAllScriptValues() {
-    import scripts.config : debug_writeln;
-    debug_writeln("Resetting all values!");
-    answer_num = 0;
-    tex2d = [];
-    backgrounds = [];
-}
+GameState currentGameState;
+
+Font textFont;
+
+Music music;
+
+
+/* booleans */
+
+bool hintNeeded;
+
+bool playAnimation;
+
+bool audioEnabled;
+
+bool sfxEnabled = true;
+
+bool fullscreenEnabled = true;
+
+bool luaReload = true;
+
+bool videoFinished;
+
+bool neededDraw2D;
+
+bool neededCharacterDrawing;
+
+bool showDialog = false;
+
+bool isTextFullyDisplayed;
+
+
+/* strings */
+
+string ver = "1.1.8";
+
+string[] messageGlobal;
+
+string[] choices;
+
+string luaExec;
+
+string usedLang = "english";
+
+char* musicPath;
+
+
+/* floats */
+
+float frameDuration = 0.016f;
+
+float typingSpeed = 0.6f;
+
+
+/* textures */
+
+Texture2D[] backgrounds;
+
+Texture2D[] framesUI;
+
+Texture2D backgroundTexture;
+
+/* integer values */
+
+int button;
+
+int selectedChoice = 0;
+
+int pageChoice_glob;
+
+int answerIndex;
+
+int currentFrame = 0;
+
+int currentChoiceCharIndex = 0;
+
+int gamepadInt;
+
+
+/* lua */
+
+lua_State* L;

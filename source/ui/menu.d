@@ -24,7 +24,6 @@ enum
     INACTIVITY_TIMEOUT = 20.0f
 }
 
-
 void fadeEffect(float alpha, bool fadeIn, void delegate(float alpha) renderer)
 {
     const float FadeIncrement = 0.02f;
@@ -53,7 +52,7 @@ struct MenuState
 
 void renderText(float alpha, immutable(char)* text)
 {
-    DrawTextEx(fontdialog, text,
+    DrawTextEx(textFont, text,
         Vector2(GetScreenWidth() / 2 - MeasureText(text, 40) / 2,
             GetScreenHeight() / 2), 40, 0, Fade(Colors.WHITE, alpha)
     );
@@ -61,21 +60,17 @@ void renderText(float alpha, immutable(char)* text)
 
 void renderLogo(float alpha, immutable(char)* name, bool fullscreen)
 {
-    uint image_size;
-    char* image_data_logo = get_file_data_from_archive("res/data.bin", name, &image_size);
-    Texture2D atlus = LoadTextureFromImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data_logo, image_size));
-    UnloadImage(LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data_logo, image_size));
-
+    Texture2D companyLogo = LoadTexture(name);
     if (fullscreen)
     {
-        DrawTexturePro(atlus,
-            Rectangle(0, 0, cast(float) atlus.width, cast(float) atlus.height),
+        DrawTexturePro(companyLogo,
+            Rectangle(0, 0, cast(float) companyLogo.width, cast(float) companyLogo.height),
             Rectangle(0, 0, cast(float) GetScreenWidth(), cast(float) GetScreenHeight()),
             Vector2(0, 0), 0.0, Fade(Colors.WHITE, alpha));
     }
     else
     {
-        DrawTexture(atlus, GetScreenWidth() / 2, GetScreenHeight() / 2, Colors.WHITE);
+        DrawTexture(companyLogo, GetScreenWidth() / 2, GetScreenHeight() / 2, Colors.WHITE);
     }
 }
 
@@ -171,12 +166,12 @@ void drawMenu(ref const MenuState state)
     for (int i = 0; i < state.options.length; i++)
     {
         Color textColor = (i == state.selectedIndex) ? Colors.LIGHTGRAY : Colors.GRAY;
-        float textWidth = MeasureTextEx(fontdialog, toStringz(state.options[i]), 30, 0).x;
+        float textWidth = MeasureTextEx(textFont, toStringz(state.options[i]), 30, 0).x;
         float textX = (GetScreenWidth() - textWidth) / 2;
         int textY = state.logoY + state.logoTexture.height + 100 + (30 * i);
 
         DrawTextEx(
-            fontdialog,
+            textFont,
             toStringz(state.options[i]),
             Vector2(textX, textY),
             30, 0,
@@ -341,7 +336,7 @@ void showMainMenu(ref GameState currentGameState)
 
                 cleanupMenu(state);
                 currentGameState = GameState.InGame;
-                debug_writeln("getting into game...");
+                debug debug_writeln("getting into game...");
                 return;
 
             case MENU_ITEM_EXIT:

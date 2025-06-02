@@ -23,14 +23,13 @@ void main(string[] args)
         SetTraceLogLevel(0);
     }
     validateRaylibBinding();
-    SetExitKey(0);
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     // Check if there are enough arguments
-    lua_exec = "scripts/00_script.lua";
+    luaExec = "scripts/00_script.lua";
     if (args.length > 2)
     {
-        lua_exec = getcwd().to!string ~ "/" ~ args[1];
+        luaExec = getcwd().to!string ~ "/" ~ args[1];
         engine_loader("made in heaven", screenWidth, screenHeight, args[2].to!bool);
     }
     else

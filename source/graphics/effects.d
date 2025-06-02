@@ -7,8 +7,8 @@ import std.string;
 import scripts.config;
 import std.algorithm;
 
-int screenWidth;// = GetScreenWidth();
-int screenHeight;// = GetScreenHeight();
+int screenWidth;
+int screenHeight;
 
 Texture2D[] loadAnimationFramesUI(const string archivePath, const string animationName)
 {

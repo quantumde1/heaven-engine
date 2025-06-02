@@ -49,7 +49,7 @@ void unloadResourcesLogic()
         UnloadSound(audio.declineSound);
         UnloadSound(audio.nonSound);
     }
-    UnloadFont(fontdialog);
+    UnloadFont(textFont);
     for (int i = cast(int) tex2d.length; i < tex2d.length; i++)
     {
         UnloadTexture(tex2d[i].texture);
@@ -73,9 +73,8 @@ void engine_loader(string window_name, int screenWidth, int screenHeight, bool p
     InitWindow(screenWidth, screenHeight, cast(char*) window_name);
     DisableCursor();
     ToggleFullscreen();
-    Font navFont = LoadFont("res/font_16x16_en.png");
     SetTargetFPS(60);
-    fontdialog = LoadFont("res/font_en.png");
+    textFont = LoadFont("res/font_en.png");
     // Fade In and Out Effects
     InitAudioDevice();
     audioEnabled = isAudioEnabled();
@@ -111,14 +110,13 @@ debug_lab:
             import core.stdc.stdlib;
             import core.stdc.time;
 
-            srand(cast(uint) time(null));
             gameInit();
             while (!WindowShouldClose())
             {
                 SetExitKey(0);
                 if (luaReload)
                 {
-                    luaInit(lua_exec);
+                    luaInit(luaExec);
                     luaReload = false;
                 }
                 luaEventLoop();

@@ -20,13 +20,13 @@ import std.algorithm;
  * Not all engine functions usable for scripting are yet implemented.
 */
 
-extern (C) nothrow int lua_getAnswerValue(lua_State* L)
+extern (C) nothrow int luaL_getAnswerValue(lua_State* L)
 {
-    lua_pushinteger(L, answer_num);
+    lua_pushinteger(L, answerIndex);
     return 1;
 }
 
-extern (C) nothrow int lua_loadScript(lua_State* L)
+extern (C) nothrow int luaL_loadScript(lua_State* L)
 {
     for (int i = cast(int) tex2d.length; i < tex2d.length; i++)
     {
@@ -38,7 +38,7 @@ extern (C) nothrow int lua_loadScript(lua_State* L)
     }
     try
     {
-        lua_exec = to!string(luaL_checkstring(L, 1));
+        luaExec = to!string(luaL_checkstring(L, 1));
         resetAllScriptValues();
     }
     catch (Exception e)
@@ -48,7 +48,7 @@ extern (C) nothrow int lua_loadScript(lua_State* L)
     return 0;
 }
 
-extern (C) nothrow int lua_playVideo(lua_State* L)
+extern (C) nothrow int luaL_playVideo(lua_State* L)
 {
     try
     {
@@ -63,7 +63,7 @@ extern (C) nothrow int lua_playVideo(lua_State* L)
 
 extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L)
 {
-    lua_pushinteger(L, answer_num); // Push the integer value onto the Lua stack
+    lua_pushinteger(L, answerIndex); // Push the integer value onto the Lua stack
     return 1;
 }
 
@@ -105,12 +105,12 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
     luaL_checktype(L, 2, LUA_TTABLE);
 
     int textTableLength = cast(int) lua_objlen(L, 2);
-    message_global = new string[](textTableLength); // Allocate exact size needed
+    messageGlobal = new string[](textTableLength); // Allocate exact size needed
 
     for (int i = 0; i < textTableLength; i++)
     { // Start index from 0
         lua_rawgeti(L, 2, i + 1); // Lua indices start from 1
-        message_global[i] = luaL_checkstring(L, -1).to!string;
+        messageGlobal[i] = luaL_checkstring(L, -1).to!string;
         lua_pop(L, 1);
     }
 
@@ -129,32 +129,27 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
     {
         typingSpeed = cast(float) luaL_checknumber(L, 7);
     }
-    else
-    {
-        typingSpeed = 0.6f;
-    }
 
     return 0;
 }
 
-extern (C) nothrow int lua_isDialogExecuted(lua_State *L) {
+extern (C) nothrow int luaL_isDialogExecuted(lua_State *L) {
     lua_pushboolean(L, showDialog);
     return 1;
 }
 
-extern (C) nothrow int lua_load2Dbackground(lua_State* L)
+extern (C) nothrow int luaL_load2Dbackground(lua_State* L)
 {
     try
     {
         int index = cast(int) luaL_checkinteger(L, 2);
-
-        // Если индекс выходит за границы, расширяем массив
+        //if index too big, extending array
         if (index >= backgrounds.length)
         {
             backgrounds.length = index + 1;
         }
 
-        // Если текстура по этому индексу уже загружена, выгружаем её
+        // if texture with same Index already loaded, unloading it
         if (index < backgrounds.length && backgrounds[index].id != 0)
         {
             UnloadTexture(backgrounds[index]);
@@ -167,11 +162,11 @@ extern (C) nothrow int lua_load2Dbackground(lua_State* L)
     return 0;
 }
 
-extern (C) nothrow int lua_draw2Dbackground(lua_State* L)
+extern (C) nothrow int luaL_draw2Dbackground(lua_State* L)
 {
     try
     {
-        texture_background = backgrounds[luaL_checkinteger(L, 1)];
+        backgroundTexture = backgrounds[luaL_checkinteger(L, 1)];
         neededDraw2D = true;
     }
     catch (Exception e)
@@ -180,11 +175,10 @@ extern (C) nothrow int lua_draw2Dbackground(lua_State* L)
     return 0;
 }
 
-extern (C) nothrow int lua_draw2Dobject(lua_State* L)
+extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
 {
     try
     {
-        neededCharacterDrawing = true;
         int count = cast(int) luaL_checkinteger(L, 5);
 
         if (count >= tex2d.length)
@@ -195,6 +189,8 @@ extern (C) nothrow int lua_draw2Dobject(lua_State* L)
         tex2d[count].x = cast(int) luaL_checkinteger(L, 2);
         tex2d[count].y = cast(int) luaL_checkinteger(L, 3);
         tex2d[count].scale = luaL_checknumber(L, 4);
+        
+        neededCharacterDrawing = true;
     }
     catch (Exception e)
     {
@@ -202,7 +198,7 @@ extern (C) nothrow int lua_draw2Dobject(lua_State* L)
     return 0;
 }
 
-extern (C) nothrow int lua_loadUIAnimation(lua_State *L) {
+extern (C) nothrow int luaL_loadUIAnimation(lua_State *L) {
     try {
     framesUI = loadAnimationFramesUI("res/uifx/"~to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2)));
     if (lua_gettop(L) == 3) {
@@ -214,7 +210,7 @@ extern (C) nothrow int lua_loadUIAnimation(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_playUIAnimation(lua_State *L) {
+extern (C) nothrow int luaL_playUIAnimation(lua_State *L) {
     debug debug_writeln("Animation UI start");
     try {
         playAnimation = true;
@@ -224,7 +220,7 @@ extern (C) nothrow int lua_playUIAnimation(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_stopUIAnimation(lua_State *L) {
+extern (C) nothrow int luaL_stopUIAnimation(lua_State *L) {
     playAnimation = false;
     debug debug_writeln("Animation UI stop");
     frameDuration = 0.016f;
@@ -232,7 +228,7 @@ extern (C) nothrow int lua_stopUIAnimation(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_unloadUIAnimation(lua_State *L) {
+extern (C) nothrow int luaL_unloadUIAnimation(lua_State *L) {
     try {
         for (int i = 0; i < framesUI.length; i++) {
             UnloadTexture(framesUI[i]);
@@ -243,7 +239,7 @@ extern (C) nothrow int lua_unloadUIAnimation(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_playSfx(lua_State *L) {
+extern (C) nothrow int luaL_playSfx(lua_State *L) {
     try {
     playSfx(to!string(luaL_checkstring(L, 1)));
     } catch (Exception e) {
@@ -252,7 +248,7 @@ extern (C) nothrow int lua_playSfx(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int lua_stopDraw2Dobject(lua_State* L)
+extern (C) nothrow int luaL_stopDraw2Dcharacter(lua_State* L)
 {
     for (int i = 0; i < tex2d.length; i++)
     {
@@ -267,54 +263,48 @@ extern (C) nothrow int lua_stopDraw2Dobject(lua_State* L)
     return 0;
 }
 
-extern (C) nothrow int lua_getScreenWidth(lua_State* L)
+extern (C) nothrow int luaL_getScreenWidth(lua_State* L)
 {
     lua_pushinteger(L, GetScreenWidth());
     return 1;
 }
 
-extern (C) nothrow int lua_getScreenHeight(lua_State* L)
+extern (C) nothrow int luaL_getScreenHeight(lua_State* L)
 {
     lua_pushinteger(L, GetScreenHeight());
     return 1;
 }
 
-extern (C) nothrow int lua_getUsedLanguage(lua_State* L)
+extern (C) nothrow int luaL_getUsedLanguage(lua_State* L)
 {
     lua_pushstring(L, usedLang.toStringz());
     return 1;
 }
 
-extern (C) nothrow int lua_stopSfx(lua_State *L) {
+extern (C) nothrow int luaL_stopSfx(lua_State *L) {
     StopSound(sfx);
     return 0;
 }
 
-extern (C) nothrow int lua_stop2Dbackground(lua_State* L)
-{
-    UnloadTexture(texture_background);
-    return 0;
-}
-
-extern (C) nothrow int lua_unload2Dbackground(lua_State* L)
+extern (C) nothrow int luaL_unload2Dbackground(lua_State* L)
 {
     UnloadTexture(backgrounds[cast(int) luaL_checkinteger(L, 1)]);
     return 0;
 }
 
-extern (C) nothrow int lua_2dModeEnable(lua_State* L)
+extern (C) nothrow int luaL_2dModeEnable(lua_State* L)
 {
     neededDraw2D = true;
     return 0;
 }
 
-extern (C) nothrow int lua_2dModeDisable(lua_State* L)
+extern (C) nothrow int luaL_2dModeDisable(lua_State* L)
 {
     neededDraw2D = false;
     return 0;
 }
 
-extern (C) nothrow int lua_setGameFont(lua_State* L)
+extern (C) nothrow int luaL_setGameFont(lua_State* L)
 {
     const char* x = luaL_checkstring(L, 1);
     debug_writeln("Setting custom font: ", x.to!string);
@@ -327,22 +317,22 @@ extern (C) nothrow int lua_setGameFont(lua_State* L)
     {
         codepoints[96 + i] = 0x400 + i;
     }
-    fontdialog = LoadFontEx(x, 40, codepoints.ptr, codepoints.length);
+    textFont = LoadFontEx(x, 40, codepoints.ptr, codepoints.length);
     return 0;
 }
 
-extern (C) nothrow int lua_getTime(lua_State* L)
+extern (C) nothrow int luaL_getTime(lua_State* L)
 {
     lua_pushnumber(L, GetTime());
     return 1;
 }
 
-extern (C) nothrow int lua_LoadMusic(lua_State* L)
+extern (C) nothrow int luaL_LoadMusic(lua_State* L)
 {
     try
     {
-        musicpath = cast(char*) luaL_checkstring(L, 1);
-        music = LoadMusicStream(musicpath);
+        musicPath = cast(char*) luaL_checkstring(L, 1);
+        music = LoadMusicStream(musicPath);
     }
     catch (Exception e)
     {
@@ -351,59 +341,47 @@ extern (C) nothrow int lua_LoadMusic(lua_State* L)
 }
 
 // Music control functions
-extern (C) nothrow int lua_PlayMusic(lua_State* L)
+extern (C) nothrow int luaL_PlayMusic(lua_State* L)
 {
     PlayMusicStream(music);
     return 0;
 }
 
-extern (C) nothrow int lua_StopMusic(lua_State* L)
+extern (C) nothrow int luaL_StopMusic(lua_State* L)
 {
     StopMusicStream(music);
     return 0;
 }
 
-// Load and execute a Lua script
-extern (C) nothrow int luaL_loadScript(lua_State* L)
-{
-    if (luaL_dofile(L, luaL_checkstring(L, 1)) != 0)
-    {
-        lua_pop(L, 1); // Remove error message from stack
-    }
-    return 0;
-}
-
 // Register the dialog functions
-extern (C) nothrow void luaL_opendialoglib(lua_State* L)
+extern (C) nothrow void luaL_loader(lua_State* L)
 {
     lua_register(L, "dialogBox", &luaL_dialogBox);
     lua_register(L, "dialogAnswerValue", &luaL_dialogAnswerValue);
+    lua_register(L, "isDialogExecuted", &luaL_isDialogExecuted);
+    lua_register(L, "getAnswerValue", &luaL_getAnswerValue);
+    lua_register(L, "loadAnimationUI", &luaL_loadUIAnimation);
+    lua_register(L, "playAnimationUI", &luaL_playUIAnimation);
+    lua_register(L, "stopAnimationUI", &luaL_stopUIAnimation);
+    lua_register(L, "unloadAnimationUI", &luaL_unloadUIAnimation);
+    lua_register(L, "playVideo", &luaL_playVideo);
+    lua_register(L, "loadMusic", &luaL_LoadMusic);
+    lua_register(L, "playMusic", &luaL_PlayMusic);
+    lua_register(L, "stopMusic", &luaL_StopMusic);
+    lua_register(L, "playSfx", &luaL_playSfx);
+    lua_register(L, "stopSfx", &luaL_stopSfx);
+    lua_register(L, "Begin2D", &luaL_2dModeEnable);
+    lua_register(L, "End2D", &luaL_2dModeDisable);
+    lua_register(L, "draw2Dcharacter", &luaL_draw2Dcharacter);
+    lua_register(L, "stopDraw2Dcharacter", &luaL_stopDraw2Dcharacter);
+    lua_register(L, "load2Dtexture", &luaL_load2Dbackground);
+    lua_register(L, "draw2Dtexture", &luaL_draw2Dbackground);
+    lua_register(L, "unload2Dtexture", &luaL_unload2Dbackground);
+    lua_register(L, "getTime", &luaL_getTime);
     lua_register(L, "loadScript", &luaL_loadScript);
-    lua_register(L, "isDialogExecuted", &lua_isDialogExecuted);
-    lua_register(L, "setFont", &lua_setGameFont);
-    lua_register(L, "draw2Dtexture", &lua_draw2Dbackground);
-    lua_register(L, "draw2Dcharacter", &lua_draw2Dobject);
-    lua_register(L, "getScreenHeight", &lua_getScreenHeight);
-    lua_register(L, "playSfx", &lua_playSfx);
-    lua_register(L, "loadAnimationUI", &lua_loadUIAnimation);
-    lua_register(L, "playAnimationUI", &lua_playUIAnimation);
-    lua_register(L, "unloadAnimationUI", &lua_unloadUIAnimation);
-    lua_register(L, "loadScript", &lua_loadScript);
-    lua_register(L, "stopAnimationUI", &lua_stopUIAnimation);
-    lua_register(L, "stopSfx", &lua_stopSfx);
-    lua_register(L, "getScreenWidth", &lua_getScreenWidth);
-    lua_register(L, "Begin2D", &lua_2dModeEnable);
-    lua_register(L, "End2D", &lua_2dModeDisable);
+    lua_register(L, "setFont", &luaL_setGameFont);
+    lua_register(L, "getScreenHeight", &luaL_getScreenHeight);
+    lua_register(L, "getScreenWidth", &luaL_getScreenWidth);
     lua_register(L, "isKeyPressed", &luaL_isKeyPressed);
-    lua_register(L, "getLanguage", &lua_getUsedLanguage);
-    lua_register(L, "stopDraw2Dtexture", &lua_stop2Dbackground);
-    lua_register(L, "unload2Dtexture", &lua_unload2Dbackground);
-    lua_register(L, "load2Dtexture", &lua_load2Dbackground);
-    lua_register(L, "playVideo", &lua_playVideo);
-    lua_register(L, "loadMusic", &lua_LoadMusic);
-    lua_register(L, "playMusic", &lua_PlayMusic);
-    lua_register(L, "stopMusic", &lua_StopMusic);
-    lua_register(L, "stopDraw2Dcharacter", &lua_stopDraw2Dobject);
-    lua_register(L, "getAnswerValue", &lua_getAnswerValue);
-    lua_register(L, "getTime", &lua_getTime);
+    lua_register(L, "getLanguage", &luaL_getUsedLanguage);
 }
