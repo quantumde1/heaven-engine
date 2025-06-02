@@ -50,9 +50,9 @@ void unloadResourcesLogic()
         UnloadSound(audio.nonSound);
     }
     UnloadFont(textFont);
-    for (int i = cast(int) tex2d.length; i < tex2d.length; i++)
+    for (int i = cast(int) characterTextures.length; i < characterTextures.length; i++)
     {
-        UnloadTexture(tex2d[i].texture);
+        UnloadTexture(characterTextures[i].texture);
     }
     for (int i = cast(int) backgrounds.length; i < backgrounds.length; i++)
     {

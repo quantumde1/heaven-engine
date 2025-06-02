@@ -28,9 +28,9 @@ extern (C) nothrow int luaL_getAnswerValue(lua_State* L)
 
 extern (C) nothrow int luaL_loadScript(lua_State* L)
 {
-    for (int i = cast(int) tex2d.length; i < tex2d.length; i++)
+    for (int i = cast(int) characterTextures.length; i < characterTextures.length; i++)
     {
-        UnloadTexture(tex2d[i].texture);
+        UnloadTexture(characterTextures[i].texture);
     }
     for (int i = cast(int) backgrounds.length; i < backgrounds.length; i++)
     {
@@ -181,14 +181,16 @@ extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
     {
         int count = cast(int) luaL_checkinteger(L, 5);
 
-        if (count >= tex2d.length)
+        if (count >= characterTextures.length)
         {
-            tex2d.length = count + 1;
+            characterTextures.length = count + 1;
         }
-        tex2d[count].texture = LoadTexture(luaL_checkstring(L, 1));
-        tex2d[count].x = cast(int) luaL_checkinteger(L, 2);
-        tex2d[count].y = cast(int) luaL_checkinteger(L, 3);
-        tex2d[count].scale = luaL_checknumber(L, 4);
+        characterTextures[count].texture = LoadTexture(luaL_checkstring(L, 1));
+        characterTextures[count].x = cast(int) luaL_checkinteger(L, 2);
+        characterTextures[count].y = cast(int) luaL_checkinteger(L, 3);
+        characterTextures[count].scale = luaL_checknumber(L, 4);
+        characterTextures[count].width = characterTextures[count].texture.width;
+        characterTextures[count].height = characterTextures[count].texture.height;
         
         neededCharacterDrawing = true;
     }
@@ -250,15 +252,15 @@ extern (C) nothrow int luaL_playSfx(lua_State *L) {
 
 extern (C) nothrow int luaL_stopDraw2Dcharacter(lua_State* L)
 {
-    for (int i = 0; i < tex2d.length; i++)
+    for (int i = 0; i < characterTextures.length; i++)
     {
-        tex2d[i].texture = LoadTexture("empty");
-        tex2d[i].scale = 0.0f;
-        tex2d[i].x = 0;
-        tex2d[i].y = 0;
+        characterTextures[i].texture = LoadTexture("empty");
+        characterTextures[i].scale = 0.0f;
+        characterTextures[i].x = 0;
+        characterTextures[i].y = 0;
     }
     int count = cast(int) luaL_checkinteger(L, 1);
-    UnloadTexture(tex2d[count].texture);
+    UnloadTexture(characterTextures[count].texture);
     neededCharacterDrawing = false;
     return 0;
 }

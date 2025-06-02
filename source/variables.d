@@ -11,7 +11,7 @@ void resetAllScriptValues() {
     import scripts.config : debug_writeln;
     debug_writeln("Resetting all values!");
     answerIndex = 0;
-    tex2d = [];
+    characterTextures = [];
     backgrounds = [];
 }
 
@@ -49,7 +49,7 @@ enum GameState {
     Exit
 }
 
-CharacterTexture[] tex2d;
+CharacterTexture[] characterTextures;
 
 ControlConfig controlConfig;
 

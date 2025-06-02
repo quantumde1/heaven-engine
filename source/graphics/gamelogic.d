@@ -72,15 +72,15 @@ void vnLogic()
     }
     if (neededCharacterDrawing)
     {
-        for (int i = 0; i < tex2d.length; i++)
+        for (int i = 0; i < characterTextures.length; i++)
         {
-            float centeredX = tex2d[i].x - (tex2d[i].width * tex2d[i].scale / 2);
-            float centeredY = tex2d[i].y - (tex2d[i].height * tex2d[i].scale / 2);
+            float centeredX = characterTextures[i].x - (characterTextures[i].width * characterTextures[i].scale / 2);
+            float centeredY = characterTextures[i].y - (characterTextures[i].height * characterTextures[i].scale / 2);
             
-            DrawTextureEx(tex2d[i].texture, 
+            DrawTextureEx(characterTextures[i].texture,
                         Vector2(centeredX, centeredY), 
                         0.0, 
-                        tex2d[i].scale, 
+                        characterTextures[i].scale, 
                         Colors.WHITE);
         }
     }
