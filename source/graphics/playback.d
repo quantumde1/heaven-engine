@@ -237,9 +237,6 @@ extern (C) int playVideoInternal(char* argv)
     {
         auto player = new_video.player;
 
-        long videoLength = libvlc_media_player_get_length(player); // длина в мс
-        long currentTime = libvlc_media_player_get_time(player);  // текущее время в мс
-        debug debug_writeln("Current time: ", currentTime, " videoLength: ", videoLength);
         if (libvlc_media_player_get_state(player) == libvlc_state_t.libvlc_Ended)
         {
             debug debug_writeln("Video reached end.");
