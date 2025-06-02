@@ -20,53 +20,6 @@ import std.algorithm;
  * Not all engine functions usable for scripting are yet implemented.
 */
 
-extern (C) nothrow int luaL_getAnswerValue(lua_State* L)
-{
-    lua_pushinteger(L, answerIndex);
-    return 1;
-}
-
-extern (C) nothrow int luaL_loadScript(lua_State* L)
-{
-    for (int i = cast(int) characterTextures.length; i < characterTextures.length; i++)
-    {
-        UnloadTexture(characterTextures[i].texture);
-    }
-    for (int i = cast(int) backgrounds.length; i < backgrounds.length; i++)
-    {
-        UnloadTexture(backgrounds[i]);
-    }
-    try
-    {
-        luaExec = to!string(luaL_checkstring(L, 1));
-        resetAllScriptValues();
-    }
-    catch (Exception e)
-    {
-    }
-    luaReload = true;
-    return 0;
-}
-
-extern (C) nothrow int luaL_playVideo(lua_State* L)
-{
-    try
-    {
-        videoFinished = false;
-        playVideo(luaL_checkstring(L, 1).to!string);
-    }
-    catch (Exception e)
-    {
-    }
-    return 0;
-}
-
-extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L)
-{
-    lua_pushinteger(L, answerIndex); // Push the integer value onto the Lua stack
-    return 1;
-}
-
 string hint;
 
 extern (C) nothrow int luaL_showHint(lua_State* L)
@@ -76,28 +29,7 @@ extern (C) nothrow int luaL_showHint(lua_State* L)
     return 0;
 }
 
-extern (C) nothrow int luaL_isKeyPressed(lua_State* L)
-{
-    try
-    {
-        if (!IsGamepadAvailable(gamepadInt))
-        {
-            if (IsKeyPressed(cast(int)(luaL_checkinteger(L, 1))))
-            {
-                lua_pushboolean(L, true);
-            }
-            else
-            {
-                lua_pushboolean(L, false);
-            }
-        }
-    }
-    catch (Exception e)
-    {
-
-    }
-    return 1;
-}
+/* text window */
 
 extern (C) nothrow int luaL_dialogBox(lua_State* L)
 {
@@ -105,23 +37,21 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
     luaL_checktype(L, 2, LUA_TTABLE);
 
     int textTableLength = cast(int) lua_objlen(L, 2);
-    messageGlobal = new string[](textTableLength); // Allocate exact size needed
+    messageGlobal = new string[](textTableLength); 
 
-    for (int i = 0; i < textTableLength; i++)
-    { // Start index from 0
-        lua_rawgeti(L, 2, i + 1); // Lua indices start from 1
+    for (int i = 0; i < textTableLength; i++) {
+        lua_rawgeti(L, 2, i + 1);
         messageGlobal[i] = luaL_checkstring(L, -1).to!string;
         lua_pop(L, 1);
     }
 
     pageChoice_glob = cast(int) luaL_checkinteger(L, 4);
-    // Get the choices array from the Lua stack
     luaL_checktype(L, 5, LUA_TTABLE);
     int choicesLength = cast(int) lua_objlen(L, 5);
     choices = new string[choicesLength];
     for (int i = 0; i < choicesLength; i++)
     {
-        lua_rawgeti(L, 5, i + 1); // Lua indices start from 1
+        lua_rawgeti(L, 5, i + 1);
         choices[i] = luaL_checkstring(L, -1).to!string;
         lua_pop(L, 1);
     }
@@ -133,10 +63,24 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
     return 0;
 }
 
+extern (C) nothrow int luaL_getAnswerValue(lua_State* L)
+{
+    lua_pushinteger(L, answerIndex);
+    return 1;
+}
+
 extern (C) nothrow int luaL_isDialogExecuted(lua_State *L) {
     lua_pushboolean(L, showDialog);
     return 1;
 }
+
+extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L)
+{
+    lua_pushinteger(L, answerIndex);
+    return 1;
+}
+
+/* background drawing and loading */
 
 extern (C) nothrow int luaL_load2Dbackground(lua_State* L)
 {
@@ -175,6 +119,14 @@ extern (C) nothrow int luaL_draw2Dbackground(lua_State* L)
     return 0;
 }
 
+extern (C) nothrow int luaL_unload2Dbackground(lua_State* L)
+{
+    UnloadTexture(backgrounds[cast(int) luaL_checkinteger(L, 1)]);
+    return 0;
+}
+
+/* character textures */
+
 extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
 {
     try
@@ -191,7 +143,7 @@ extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
         characterTextures[count].scale = luaL_checknumber(L, 4);
         characterTextures[count].width = characterTextures[count].texture.width;
         characterTextures[count].height = characterTextures[count].texture.height;
-        
+
         neededCharacterDrawing = true;
     }
     catch (Exception e)
@@ -199,6 +151,78 @@ extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
     }
     return 0;
 }
+
+extern (C) nothrow int luaL_stopDraw2Dcharacter(lua_State* L)
+{
+    for (int i = 0; i < characterTextures.length; i++)
+    {
+        characterTextures[i].texture = LoadTexture("empty");
+        characterTextures[i].scale = 0.0f;
+        characterTextures[i].x = 0;
+        characterTextures[i].y = 0;
+    }
+    int count = cast(int) luaL_checkinteger(L, 1);
+    UnloadTexture(characterTextures[count].texture);
+    neededCharacterDrawing = false;
+    return 0;
+}
+
+/* music and video */
+
+extern (C) nothrow int luaL_LoadMusic(lua_State* L)
+{
+    try
+    {
+        musicPath = cast(char*) luaL_checkstring(L, 1);
+        music = LoadMusicStream(musicPath);
+    }
+    catch (Exception e)
+    {
+    }
+    return 0;
+}
+
+extern (C) nothrow int luaL_PlayMusic(lua_State* L)
+{
+    PlayMusicStream(music);
+    return 0;
+}
+
+extern (C) nothrow int luaL_StopMusic(lua_State* L)
+{
+    StopMusicStream(music);
+    return 0;
+}
+
+extern (C) nothrow int luaL_playSfx(lua_State *L) {
+    try {
+    playSfx(to!string(luaL_checkstring(L, 1)));
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
+extern (C) nothrow int luaL_stopSfx(lua_State *L) {
+    StopSound(sfx);
+    return 0;
+}
+
+
+extern (C) nothrow int luaL_playVideo(lua_State* L)
+{
+    try
+    {
+        videoFinished = false;
+        playVideo(luaL_checkstring(L, 1).to!string);
+    }
+    catch (Exception e)
+    {
+    }
+    return 0;
+}
+
+/* ui animations */
 
 extern (C) nothrow int luaL_loadUIAnimation(lua_State *L) {
     try {
@@ -241,29 +265,7 @@ extern (C) nothrow int luaL_unloadUIAnimation(lua_State *L) {
     return 0;
 }
 
-extern (C) nothrow int luaL_playSfx(lua_State *L) {
-    try {
-    playSfx(to!string(luaL_checkstring(L, 1)));
-    } catch (Exception e) {
-
-    }
-    return 0;
-}
-
-extern (C) nothrow int luaL_stopDraw2Dcharacter(lua_State* L)
-{
-    for (int i = 0; i < characterTextures.length; i++)
-    {
-        characterTextures[i].texture = LoadTexture("empty");
-        characterTextures[i].scale = 0.0f;
-        characterTextures[i].x = 0;
-        characterTextures[i].y = 0;
-    }
-    int count = cast(int) luaL_checkinteger(L, 1);
-    UnloadTexture(characterTextures[count].texture);
-    neededCharacterDrawing = false;
-    return 0;
-}
+/* system */
 
 extern (C) nothrow int luaL_getScreenWidth(lua_State* L)
 {
@@ -281,17 +283,6 @@ extern (C) nothrow int luaL_getUsedLanguage(lua_State* L)
 {
     lua_pushstring(L, usedLang.toStringz());
     return 1;
-}
-
-extern (C) nothrow int luaL_stopSfx(lua_State *L) {
-    StopSound(sfx);
-    return 0;
-}
-
-extern (C) nothrow int luaL_unload2Dbackground(lua_State* L)
-{
-    UnloadTexture(backgrounds[cast(int) luaL_checkinteger(L, 1)]);
-    return 0;
 }
 
 extern (C) nothrow int luaL_2dModeEnable(lua_State* L)
@@ -329,33 +320,50 @@ extern (C) nothrow int luaL_getTime(lua_State* L)
     return 1;
 }
 
-extern (C) nothrow int luaL_LoadMusic(lua_State* L)
+extern (C) nothrow int luaL_isKeyPressed(lua_State* L)
 {
     try
     {
-        musicPath = cast(char*) luaL_checkstring(L, 1);
-        music = LoadMusicStream(musicPath);
+        if (IsKeyPressed(cast(int)(luaL_checkinteger(L, 1))))
+        {
+            lua_pushboolean(L, true);
+        }
+        else
+        {
+            lua_pushboolean(L, false);
+        }
+    }
+    catch (Exception e)
+    {
+
+    }
+    return 1;
+}
+
+extern (C) nothrow int luaL_loadScript(lua_State* L)
+{
+    for (int i = cast(int) characterTextures.length; i < characterTextures.length; i++)
+    {
+        UnloadTexture(characterTextures[i].texture);
+    }
+    for (int i = cast(int) backgrounds.length; i < backgrounds.length; i++)
+    {
+        UnloadTexture(backgrounds[i]);
+    }
+    try
+    {
+        luaExec = to!string(luaL_checkstring(L, 1));
+        resetAllScriptValues();
     }
     catch (Exception e)
     {
     }
+    luaReload = true;
     return 0;
 }
 
-// Music control functions
-extern (C) nothrow int luaL_PlayMusic(lua_State* L)
-{
-    PlayMusicStream(music);
-    return 0;
-}
+/* Register functions */
 
-extern (C) nothrow int luaL_StopMusic(lua_State* L)
-{
-    StopMusicStream(music);
-    return 0;
-}
-
-// Register the dialog functions
 extern (C) nothrow void luaL_loader(lua_State* L)
 {
     lua_register(L, "dialogBox", &luaL_dialogBox);

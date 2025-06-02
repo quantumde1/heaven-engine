@@ -1,4 +1,4 @@
-module dialogs.dialog_system;
+module dialogs.dialogbox;
 
 import raylib;
 import std.string;
@@ -17,7 +17,6 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     
-    // Draw dialog background
     DrawRectangle(
         0,
         screenHeight - screenHeight / 3,
@@ -26,7 +25,6 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
         Color(20, 20, 20, 220)
     );
     
-    // Define text area margins
     float marginLeft = screenWidth/6.5f;
     float marginRight = screenWidth/6.5f;
     float marginTop = screenHeight - screenHeight/3.3f;
@@ -34,22 +32,18 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
     float fontSize = 40.0f;
     float spacing = 1.0f;
     
-    // Handle text display progress
     string currentText = pages[currentPage];
     int textLength = cast(int)currentText.length;
     
-    // If Enter is pressed and text isn't fully displayed, show all text immediately
     if (IsKeyPressed(KeyboardKey.KEY_ENTER) && !textFullyDisplayed) {
         textDisplayProgress = textLength;
         textFullyDisplayed = true;
     }
-    // If text is fully displayed and Enter is pressed, go to next page
     else if (IsKeyPressed(KeyboardKey.KEY_ENTER) && textFullyDisplayed) {
         currentPage += 1;
         textDisplayProgress = 0.0f;
         textFullyDisplayed = false;
     }
-    // Otherwise, increment text display progress
     else if (!textFullyDisplayed) {
         textDisplayProgress += textSpeed;
         if (textDisplayProgress >= textLength) {
@@ -58,16 +52,13 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
         }
     }
     
-    // Get the portion of text to display
     int charsToShow = cast(int)textDisplayProgress;
     string displayedText = currentText[0 .. min(charsToShow, textLength)];
     
-    // Split text into lines that fit within the available width
     string[] lines;
     string remainingText = displayedText;
     
     while (remainingText.length > 0) {
-        // Measure how much text fits in one line
         int fitChars = 0;
         float width = 0.0f;
         
@@ -81,20 +72,21 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
             float wordWidth = MeasureTextEx(dialogFont, word.toStringz(), fontSize, spacing).x;
             
             if (width + wordWidth > textWidth && width > 0) {
-                break; // Doesn't fit, break to new line
+                break;
             }
             
             width += wordWidth;
             fitChars = nextChar;
             
-            // Skip whitespace
             while (fitChars < remainingText.length && isWhite(remainingText[fitChars])) {
                 width += MeasureTextEx(dialogFont, " ".toStringz(), fontSize, spacing).x;
                 fitChars++;
             }
         }
         
-        if (fitChars == 0) fitChars = 1; // Ensure progress
+        if (fitChars == 0) {
+            fitChars = 1;
+        }
         
         lines ~= remainingText[0..fitChars];
         remainingText = remainingText[fitChars..$];
@@ -113,7 +105,6 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
         );
     }
     
-    // Draw the snake animation (only when text is fully displayed)
     if (textFullyDisplayed) {
         drawSnakeAnimation(
             0,
@@ -123,7 +114,6 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
         );
     }
     
-    // Handle page transitions
     if (currentPage >= pagesLength) {
         currentPage = 0;
         textDisplayProgress = 0.0f;

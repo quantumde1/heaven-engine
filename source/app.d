@@ -14,18 +14,14 @@ import std.conv;
 
 void main(string[] args)
 {
-    if (isReleaseBuild())
-    {
+    validateRaylibBinding();
+    debug {
+        SetTraceLogLevel(0);
+    } else {
         SetTraceLogLevel(7);
     }
-    else
-    {
-        SetTraceLogLevel(0);
-    }
-    validateRaylibBinding();
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
-    // Check if there are enough arguments
     luaExec = "scripts/00_script.lua";
     if (args.length > 2)
     {

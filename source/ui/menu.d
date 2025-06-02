@@ -219,16 +219,14 @@ void handleMenuNavigation(ref MenuState state)
 {
     bool moved = false;
 
-    if (IsKeyPressed(KeyboardKey.KEY_DOWN) ||
-        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
+    if (IsKeyPressed(KeyboardKey.KEY_DOWN))
     {
         state.selectedIndex = cast(int)((state.selectedIndex + 1) % state.options.length);
         state.inactivityTimer = 0;
         moved = true;
     }
 
-    if (IsKeyPressed(KeyboardKey.KEY_UP) ||
-        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
+    if (IsKeyPressed(KeyboardKey.KEY_UP))
     {
         state.selectedIndex = cast(int)(
             (state.selectedIndex - 1 + state.options.length) % state.options.length);
@@ -244,10 +242,8 @@ void handleMenuNavigation(ref MenuState state)
 
 void handleMenuSettings(ref MenuState state)
 {
-    bool leftPressed = IsKeyPressed(KeyboardKey.KEY_LEFT) ||
-        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-    bool rightPressed = IsKeyPressed(KeyboardKey.KEY_RIGHT) ||
-        IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+    bool leftPressed = IsKeyPressed(KeyboardKey.KEY_LEFT);
+    bool rightPressed = IsKeyPressed(KeyboardKey.KEY_RIGHT);
 
     if (!leftPressed && !rightPressed)
         return;
@@ -319,8 +315,7 @@ void showMainMenu(ref GameState currentGameState)
         handleMenuSettings(state);
 
         if (IsKeyPressed(KeyboardKey.KEY_ENTER) ||
-            IsKeyPressed(KeyboardKey.KEY_SPACE) ||
-            IsGamepadButtonPressed(gamepadInt, GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+            IsKeyPressed(KeyboardKey.KEY_SPACE))
         {
             if (sfxEnabled) PlaySound(audio.acceptSound);
             switch (state.selectedIndex)

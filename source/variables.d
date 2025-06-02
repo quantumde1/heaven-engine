@@ -131,8 +131,6 @@ int currentFrame = 0;
 
 int currentChoiceCharIndex = 0;
 
-int gamepadInt;
-
 
 /* lua */
 

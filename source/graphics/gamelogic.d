@@ -13,7 +13,7 @@ import std.conv;
 import graphics.effects;
 import std.string;
 import std.math;
-import dialogs.dialog_system;
+import dialogs.dialogbox;
 
 /** 
  * this module contains game logic, which was removed from engine.d for better readability.

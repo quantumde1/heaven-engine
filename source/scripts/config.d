@@ -8,8 +8,7 @@ import std.range;
 import variables;
 import std.conv;
 
-string check_build_settings(string filename, string checked_what) nothrow
-{
+nothrow string check_build_settings(string filename, string checked_what) {
     try
     {
         auto file = File(filename);
@@ -37,22 +36,6 @@ string check_build_settings(string filename, string checked_what) nothrow
     return "ERROR";
 }
 
-nothrow bool isReleaseBuild()
-{
-    try
-    {
-        debug
-        {
-            return false;
-        }
-        return true;
-    }
-    catch (Exception e)
-    {
-        debug_writeln("Error checking release build: " ~ e.msg);
-    }
-}
-
 nothrow bool isAudioEnabled()
 {
     try
@@ -65,8 +48,6 @@ nothrow bool isAudioEnabled()
         debug_writeln("Error getting audio state: " ~ e.msg);
     }
 }
-
-import std.format;
 
 nothrow void debug_writeln(A...)(A args)
 {

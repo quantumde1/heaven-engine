@@ -313,26 +313,8 @@ extern (C) int playVideoInternal(char* argv)
             }
         }
 
-        // Add Skip text/button
-        int posY = GetScreenHeight() - 20 - 40;
-        if (IsGamepadAvailable(gamepadInt))
-        {
-            int buttonSize = 30;
-            int circleCenterX = 40 + buttonSize / 2;
-            int circleCenterY = posY + buttonSize / 2;
-            int textYOffset = 7; // Adjust this offset based on your font and text size
-            DrawCircle(circleCenterX, circleCenterY, buttonSize / 2, Colors.GREEN);
-            DrawText(cast(char*)("A"), circleCenterX - 5, circleCenterY - textYOffset, 20, Colors
-                    .BLACK);
-            DrawText(cast(char*)(" to skip video"), 40 + buttonSize + 5, posY, 20, Colors.WHITE);
-        }
-        else
-        {
-            DrawText(cast(char*)("Press Enter to Skip"), 40, posY, 20, Colors.WHITE);
-        }
-
-        if (IsKeyPressed(KeyboardKey.KEY_ENTER) || IsGamepadButtonPressed(gamepadInt, GamepadButton
-                .GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+        
+        if (IsKeyPressed(KeyboardKey.KEY_ENTER))
         {
             foreach (video; video_list)
             {
