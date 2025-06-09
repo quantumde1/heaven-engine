@@ -5,3 +5,4 @@
 *.gdi
 *.img
 *.o
+*.ccls-cache*
