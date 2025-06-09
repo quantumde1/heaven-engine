@@ -1,0 +1,7 @@
+/res
+/scripts
+*.elf
+*.cdi
+*.gdi
+*.img
+*.o

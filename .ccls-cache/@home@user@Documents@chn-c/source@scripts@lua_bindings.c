@@ -1,0 +1,127 @@
+#ifdef _arch_dreamcast
+#include <lua/lua.h>
+#include <lua/lualib.h>
+#include <lua/lauxlib.h>
+#else
+#include <lua5.3/lua.h>
+#include <lua5.3/lualib.h>
+#include <lua5.3/lauxlib.h>
+#endif
+
+#include "../../include/variables.h"
+#include "../../include/render_character.h"
+#include "../../include/render_background.h"
+
+#include <string.h>
+
+int luaL_loadBackground(lua_State *L) {
+    load2Dbackground((char*)luaL_checkstring(L, 1), luaL_checkinteger(L, 2));
+    return 0;
+}
+
+int luaL_getTime(lua_State *L) {
+    lua_pushnumber(L, GetTime());
+    return 1;
+}
+int luaL_loadCharacter(lua_State *L) {
+    load2Dcharacter((char*)luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), (Vector2){luaL_checknumber(L, 4), luaL_checknumber(L, 5)});
+}
+
+int luaL_drawBackground(lua_State *L) {
+    drawBackground = true;
+    drawnBackgroundIndex = luaL_checkinteger(L, 1);
+}
+
+int luaL_unloadBackground(lua_State *L) {
+    UnloadTexture(backgrounds.data[luaL_checkinteger(L, 1)]);
+    return 0;
+}
+
+int luaL_unloadCharacter(lua_State *L) {
+    UnloadTexture(characterTexture.data[luaL_checkinteger(L, 1)].texture);
+    return 0;
+}
+
+int luaL_drawCharacter(lua_State *L) {
+    drawCharacter = true;
+}
+
+int luaL_getScreenWidth(lua_State *L) {
+    lua_pushinteger(L, GetScreenWidth());
+    return 1;
+}
+
+int luaL_getScreenHeight(lua_State *L) {
+    lua_pushinteger(L, GetScreenHeight());
+    return 1;
+}
+
+int luaL_isDialogExecuted(lua_State *L) {
+    lua_pushboolean(L, showDialog);
+    return 1;
+}
+
+int luaL_dialogBox(lua_State* L)
+{
+    showDialog = 1;
+    luaL_checktype(L, 2, LUA_TTABLE);
+
+    size_t textTableLength = (size_t)luaL_len(L, 2);
+    pages = (char**)malloc(textTableLength * sizeof(char*));
+    pagesLength = textTableLength;
+
+    for (int i = 0; i < textTableLength; i++) {
+        lua_rawgeti(L, 2, i + 1);
+        const char* str = luaL_checkstring(L, -1);
+        pages[i] = strdup(str);
+        lua_pop(L, 1);
+    }
+
+    luaL_checktype(L, 5, LUA_TTABLE);
+    
+    if (lua_gettop(L) == 7)
+    {
+        typingSpeed = (float)luaL_checknumber(L, 7);
+    }
+
+    return 0;
+}
+
+int luaL_registration(lua_State *L) {
+    lua_register(L, "load2Dtexture", &luaL_loadBackground);
+    lua_register(L, "dialogBox", &luaL_dialogBox);
+    lua_register(L, "getScreenWidth", &luaL_getScreenWidth);
+    lua_register(L, "unload2Dtexture", &luaL_unloadBackground);
+    lua_register(L, "unload2Dcharacter", &luaL_unloadCharacter);
+    lua_register(L, "getScreenHeight", &luaL_getScreenHeight);
+    lua_register(L, "getTime", &luaL_getTime);
+    lua_register(L, "load2Dcharacter", &luaL_loadCharacter);
+    lua_register(L, "isDialogExecuted", &luaL_isDialogExecuted);
+    lua_register(L, "draw2Dtexture", &luaL_drawBackground);
+    lua_register(L, "draw2Dcharacter", &luaL_drawCharacter);
+}
+
+void luaInit(char* luaExec)
+{
+    printf("loading lua");
+    L = luaL_newstate();
+    luaL_openlibs(L);
+    luaL_registration(L);
+    printf("Executing next Lua file: %s\n", luaExec);
+    if (luaL_dofile(L, luaExec) != LUA_OK)
+    {
+        printf("lua error\n");
+        printf("%s\n", lua_tostring(L, -1));
+        return;
+    }
+}
+
+void luaEventLoop()
+{
+    lua_getglobal(L, "EventLoop");
+    if (lua_pcall(L, 0, 0, 0) != LUA_OK)
+    {
+        printf("error in EventLoop");
+    }
+    lua_pop(L, 0);
+}

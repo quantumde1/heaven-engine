@@ -1,0 +1,12 @@
+SRCS := $(shell find source -name '*.c')
+
+OBJS := $(SRCS:.c=.o)
+
+%.o: %.c
+	gcc -c $< -o $@ -lraylib -g -L/usr/lib -llua-5.3
+
+heaven: $(OBJS)
+	gcc $^ -o $@ -lraylib -g -L/usr/lib -llua-5.3
+
+clean:
+	rm -f $(OBJS) heaven
