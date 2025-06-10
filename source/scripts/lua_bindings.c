@@ -8,6 +8,7 @@
 #include <lua5.3/lauxlib.h>
 #endif
 
+#include "../../include/abstraction.h"
 #include "../../include/audio.h"
 #include "../../include/variables.h"
 #include "../../include/render_character.h"
@@ -24,8 +25,16 @@ int luaL_getTime(lua_State *L) {
     lua_pushnumber(L, GetTime());
     return 1;
 }
-int luaL_loadCharacter(lua_State *L) {
-    load2Dcharacter((char*)luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), (Vector2){luaL_checknumber(L, 4), luaL_checknumber(L, 5)});
+
+int luaL_unloadCharacter(lua_State *L) {
+    drawCharacter = false;
+    UnloadTexture(characterTexture.data[luaL_checkinteger(L, 1)].texture);
+    return 0;
+}
+
+int luaL_drawCharacter(lua_State *L) {
+    load2Dcharacter((char*)luaL_checkstring(L, 1), luaL_checknumber(L, 5), luaL_checknumber(L, 4), (Vector2){luaL_checknumber(L, 2), luaL_checknumber(L, 3)});
+    drawCharacter = true;
     return 0;
 }
 
@@ -36,17 +45,17 @@ int luaL_drawBackground(lua_State *L) {
 }
 
 int luaL_unloadBackground(lua_State *L) {
-    UnloadTexture(backgrounds.data[luaL_checkinteger(L, 1)]);
+    int index = luaL_checkinteger(L, 1);
+    if (index < 0 || index >= backgrounds.length || !backgrounds.data[index].id) {
+        luaL_error(L, "Invalid background texture index: %d", index);
+        return 0;
+    }
+    UnloadTexture(backgrounds.data[index]);
+    backgrounds.data[index].id = 0; // Mark as unloaded
     return 0;
 }
 
-int luaL_unloadCharacter(lua_State *L) {
-    UnloadTexture(characterTexture.data[luaL_checkinteger(L, 1)].texture);
-    return 0;
-}
-
-int luaL_drawCharacter(lua_State *L) {
-    drawCharacter = true;
+int luaL_playVideo(lua_State *L) {
     return 0;
 }
 
@@ -104,14 +113,8 @@ int luaL_dialogBox(lua_State* L)
 
 int luaL_loadScript(lua_State *L) {
     resetAllValues();
-    char* luaExec = (char*)luaL_checkstring(L, 1);
-    printf("Executing next Lua file: %s\n", luaExec);
-    if (luaL_dofile(L, luaExec) != LUA_OK)
-    {
-        printf("lua error\n");
-        printf("%s\n", lua_tostring(L, -1));
-        return 1;
-    }
+    luaExec = (char*)luaL_checkstring(L, 1);
+    luaReload = true;
     return 0;
 }
 
@@ -137,6 +140,7 @@ int luaL_unloadMusic(lua_State *L) {
 
 int luaL_registration(lua_State *L) {
     lua_register(L, "loadMusic", &luaL_loadMusic);
+    lua_register(L, "playVideo", &luaL_playVideo);
     lua_register(L, "playMusic", &luaL_playMusic);
     lua_register(L, "playSfx", &luaL_playSfx);
     lua_register(L, "stopSfx", &luaL_stopSfx);
@@ -147,29 +151,32 @@ int luaL_registration(lua_State *L) {
     lua_register(L, "getScreenWidth", &luaL_getScreenWidth);
     lua_register(L, "unload2Dtexture", &luaL_unloadBackground);
     lua_register(L, "unload2Dcharacter", &luaL_unloadCharacter);
+    /* heaven compatibility */
+    lua_register(L, "stopDraw2Dcharacter", &luaL_unloadCharacter);
+
     lua_register(L, "getScreenHeight", &luaL_getScreenHeight);
     lua_register(L, "getTime", &luaL_getTime);
     lua_register(L, "loadScript", &luaL_loadScript);
-    lua_register(L, "load2Dcharacter", &luaL_loadCharacter);
     lua_register(L, "isDialogExecuted", &luaL_isDialogExecuted);
     lua_register(L, "draw2Dtexture", &luaL_drawBackground);
     lua_register(L, "draw2Dcharacter", &luaL_drawCharacter);
     return 0;
 }
 
-void luaInit(char* luaExec)
+void luaInit()
 {
-    printf("loading lua");
+    printf("(re)loading lua");
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_registration(L);
     printf("Executing next Lua file: %s\n", luaExec);
-    if (luaL_dofile(L, luaExec) != LUA_OK)
+    if (luaL_dofile(L, concat_strings(PREFIX, luaExec)) != LUA_OK)
     {
         printf("lua error\n");
         printf("%s\n", lua_tostring(L, -1));
         return;
     }
+    luaReload = false;
 }
 
 void luaEventLoop()

@@ -16,8 +16,11 @@
 #include <adx/adx.h> /* ADX Decoder Library */
 #include <adx/snddrv.h> /* Direct Access to Sound Driver */
 
-int playbackNeeded = 0;
-int sfxNeeded = 0;
+#include <stdatomic.h>  // Для атомарных операций (если доступно)
+
+// Заменяем int на atomic_int для thread-safety
+atomic_int playbackNeeded = 0;
+atomic_int sfxNeeded = 0;
 
 // SFX variables
 #define LEFT 255
@@ -28,21 +31,26 @@ static uint8_t sfx_volume = 255;
 static int sfx_pan = CENTER;
 
 static void* audio_thread(void *filename) {
-    while(playbackNeeded == 1) {
-        play_again:
-        if( adx_dec( concat_strings(PREFIX, (char*)filename), 1 ) < 1 ) {
+    while (atomic_load(&playbackNeeded)) {  // Проверяем флаг атомарно
+        if (adx_dec(concat_strings(PREFIX, (char*)filename), 1) < 1) {
             printf("Error: invalid ADX");
             return NULL;
         }
-        while( snddrv.drv_status == SNDDRV_STATUS_NULL ) {
+
+        // Ждём инициализации драйвера
+        while (snddrv.drv_status == SNDDRV_STATUS_NULL) {
             thd_pass();
+            if (!atomic_load(&playbackNeeded)) return NULL;  // Выход, если остановлено
         }
-        while (snddrv.drv_status != SNDDRV_STATUS_NULL ) {
+
+        // Ждём завершения воспроизведения (с проверкой флага)
+        while (snddrv.drv_status != SNDDRV_STATUS_NULL) {
             thd_sleep(50);
-        }
-        if (snddrv.drv_status == SNDDRV_STATUS_NULL) {
-            printf("audio loop");
-            goto play_again;
+            if (!atomic_load(&playbackNeeded)) {
+                adx_stop();
+                printf("stopping playback");
+                return NULL;
+            }
         }
     }
     return NULL;
@@ -54,11 +62,11 @@ void loadMusic(char* filename) {
 }
 
 void playMusic() {
-    playbackNeeded = 1;
+    atomic_store(&playbackNeeded, 1);  // Атомарная установка флага
 }
 
 void stopMusic() {
-    playbackNeeded = 0;
+    atomic_store(&playbackNeeded, 0);  // Атомарная установка флага
 }
 
 void unloadMusic() {
@@ -67,9 +75,6 @@ void unloadMusic() {
 
 void playSfx(char* filename) {
     printf("%s\n", "sfx called in audio.c");
-    if(current_sfx) {
-        snd_sfx_unload(current_sfx);
-    }
     FILE *file = fopen(concat_strings(PREFIX, filename), "r");
     if (file != NULL) {
         printf("%s\n", "loading sfx");

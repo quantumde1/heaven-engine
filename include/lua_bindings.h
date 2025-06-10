@@ -1,2 +1,2 @@
 void luaEventLoop();
-void luaInit(char* luaExec);
+void luaInit();

@@ -22,8 +22,6 @@ int main() {
     #endif
     SetTargetFPS(60);
     Font fontDialogBox = LoadFont(concat_strings(PREFIX, "res/font_en.png"));
-    load2Dbackground("res/backgrounds/out.png", 0);
-    luaInit(concat_strings(PREFIX, "scripts/00_script.lua"));
     #ifdef _arch_dreamcast
     while (true) {
         initAudioSystem();
@@ -31,6 +29,9 @@ int main() {
     while (!WindowShouldClose()) {
         UpdateMusicStream(BGM);
     #endif
+        if (luaReload == true) {
+            luaInit();
+        }
         BeginDrawing();
         ClearBackground(WHITE);
         luaEventLoop();

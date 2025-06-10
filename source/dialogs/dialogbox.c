@@ -27,12 +27,7 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
     float marginTop = screenHeight - screenHeight/3.3f;
     float textWidth = screenWidth - marginLeft - marginRight;
     
-    // Начальный размер шрифта
-    #ifdef _arch_dreamcast
     float initialFontSize = 23.0f;
-    #else
-    float initialFontSize = 40.0f;
-    #endif
     float fontSize = initialFontSize;
     float spacing = 1.0f;
     
@@ -70,7 +65,7 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
     int maxLines = 4; // Максимальное количество строк, которое мы хотим
     
     // Пытаемся найти подходящий размер шрифта
-    while (!textFits && testFontSize > 15.0f) { // Минимальный размер шрифта 10
+    while (!textFits && testFontSize > 14.0f) { // Минимальный размер шрифта 15
         const char* testText = displayedText;
         int testLineCount = 0;
         bool fits = true;

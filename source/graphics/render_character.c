@@ -4,7 +4,7 @@
 #include "../../include/variables.h"
 #include "../../include/abstraction.h"
 
-void load2Dcharacter(char* filename, int index, int scale, Vector2 coordinates) {
+void load2Dcharacter(char* filename, int index, float scale, Vector2 coordinates) {
     while (index >= characterTexture.length) {
         CharacterTexture empty = {0};
         da_push(characterTexture, empty);
@@ -18,15 +18,24 @@ void load2Dcharacter(char* filename, int index, int scale, Vector2 coordinates) 
 
 void draw2Dcharacter() {
     for (size_t i = 0; i < characterTexture.length; i++) {
-        if (characterTexture.data[i].texture.id != 0) {
-            float centeredX = characterTexture.data[i].x - (characterTexture.data[i].texture.width * characterTexture.data[i].scale / 2);
-            float centeredY = characterTexture.data[i].y - (characterTexture.data[i].texture.height * characterTexture.data[i].scale / 2);
-            
-            DrawTextureEx(characterTexture.data[i].texture,
-                        (Vector2){centeredX, centeredY}, 
-                        0.0, 
-                        characterTexture.data[i].scale, 
-                        WHITE);
+        Texture2D tex  = characterTexture.data[i].texture;
+        float scale    = characterTexture.data[i].scale;
+        float x        = characterTexture.data[i].x;
+        float y        = characterTexture.data[i].y;
+
+        if (tex.id != 0) {
+            Rectangle srcRect  = { 0, 0, (float)tex.width, (float)tex.height };
+            Rectangle dstRect  = { x, y, tex.width * scale, tex.height * scale };
+            Vector2 origin     = { (tex.width * scale) * 0.5f, (tex.height * scale) * 0.5f };
+
+            DrawTexturePro(
+                tex,
+                srcRect,
+                dstRect,
+                origin,
+                0.0f,
+                WHITE
+            );
         }
     }
 }

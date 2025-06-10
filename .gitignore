@@ -6,3 +6,8 @@
 *.img
 *.o
 *.ccls-cache*
+heaven-engine
+*.iso
+IP.BIN
+/sfx/
+/voices/

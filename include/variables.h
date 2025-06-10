@@ -69,4 +69,8 @@ extern Music BGM;
 
 extern Sound SFX;
 
+extern bool luaReload;
+
+extern char* luaExec;
+
 void resetAllValues();
