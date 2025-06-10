@@ -8,7 +8,7 @@ case "$1" in
         source /opt/toolchains/dc/kos/environ.sh
         ## if working, go next, otherwise idk
         make -f makefiles/dreamcastMakefile
-	mkdcdisc -e heaven.elf -o heaven.cdi -d res -d scripts
+	    mkdcdisc -e heaven.elf -o heaven.cdi -d res -d scripts
         ;;
     "desktop")
         ## going without anything, lmao

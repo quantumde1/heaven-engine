@@ -64,3 +64,9 @@ extern int drawnBackgroundIndex;
 extern float typingSpeed;
 
 extern int pagesLength;
+
+extern Music BGM;
+
+extern Sound SFX;
+
+void resetAllValues();

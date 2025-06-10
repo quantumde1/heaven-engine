@@ -4,241 +4,293 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
-#define FNAME_LEN 255
+#define MAX_FILENAME_LEN 255
+#define PATH_SEPARATOR '/'
 
-void Y(const char *Z, char **A, int B) {
-    FILE *C = fopen(Z, "wb");
-    if (!C) {
-        perror("Error opening output file");
-        return;
+#pragma pack(push, 1)
+typedef struct {
+    uint8_t name_length;
+    uint32_t data_offset;
+    uint32_t data_size;
+    char name[MAX_FILENAME_LEN];
+} FileTableEntry;
+#pragma pack(pop)
+
+#include "../../include/abstraction.h"
+
+void free_file_entry(FileEntry* entry) {
+    if (entry) {
+        free(entry->name);
+        free(entry->data);
+        free(entry);
     }
-
-    if (fwrite(&B, sizeof(uint32_t), 1, C) != 1) {
-        perror("Error writing file count");
-        fclose(C);
-        return;
-    }
-
-    for (int D = 0; D < B; D++) {
-        const char *E = A[D];
-        char F[FNAME_LEN];
-        struct stat G;
-
-        if (strncpy(F, E, FNAME_LEN - 1) == NULL) {
-            perror("Error copying file name");
-            continue;
-        }
-        F[FNAME_LEN - 1] = '\0';
-
-        char *H = strrchr(F, '/');
-        if (H) {
-            H++;
-        } else {
-            H = F;
-        }
-
-        if (stat(E, &G) != 0) {
-            perror("Error getting file stats");
-            continue;
-        }
-
-        uint8_t I = strlen(H);
-        if (fwrite(&I, sizeof(uint8_t), 1, C) != 1 || fwrite(H, sizeof(char), I, C) != I) {
-            perror("Error writing file name");
-            continue;
-        }
-
-        uint32_t J = G.st_size;
-        if (fwrite(&J, sizeof(uint32_t), 1, C) != 1) {
-            perror("Error writing file size");
-            continue;
-        }
-
-        FILE *K = fopen(E, "rb");
-        if (!K) {
-            perror("Error opening input file");
-            continue;
-        }
-
-        char *L = malloc(J);
-        if (!L) {
-            perror("Error allocating memory");
-            fclose(K);
-            continue;
-        }
-
-        if (fread(L, sizeof(char), J, K) != J) {
-            perror("Error reading file data");
-            free(L);
-            fclose(K);
-            continue;
-        }
-
-        if (fwrite(L, sizeof(char), J, C) != J) {
-            perror("Error writing file data");
-        }
-
-        free(L);
-        fclose(K);
-    }
-
-    fclose(C);
-    printf("Packed %d files into %s\n", B, Z);
 }
 
-void M(const char *N, const char *O) {
-    FILE *P = fopen(N, "rb");
-    if (!P) {
-        perror("Error opening input file");
-        return;
+// Pack files into an archive with file table at the beginning
+int create_archive(const char* archive_path, char** file_paths, int file_count) {
+    FILE* archive_file = fopen(archive_path, "wb");
+    if (!archive_file) {
+        perror("Failed to open archive file");
+        return -1;
     }
 
-    uint32_t Q;
-    if (fread(&Q, sizeof(uint32_t), 1, P) != 1) {
-        perror("Error reading file count");
-        fclose(P);
-        return;
+    // 1. Write placeholder for file count and table size
+    uint32_t file_count_header = file_count;
+    uint32_t table_size = 0; // Will be filled later
+    if (fwrite(&file_count_header, sizeof(uint32_t), 1, archive_file) != 1 ||
+        fwrite(&table_size, sizeof(uint32_t), 1, archive_file) != 1) {
+        perror("Failed to write header");
+        fclose(archive_file);
+        return -1;
     }
 
-    for (uint32_t R = 0; R < Q; R++) {
-        uint8_t S;
-        if (fread(&S, sizeof(uint8_t), 1, P) != 1) {
-            perror("Error reading file name length");
-            break;
+    // 2. First pass - collect file info and write file table
+    FileTableEntry* table = calloc(file_count, sizeof(FileTableEntry));
+    if (!table) {
+        perror("Failed to allocate file table");
+        fclose(archive_file);
+        return -1;
+    }
+
+    uint32_t current_offset = sizeof(uint32_t) * 2; // After header
+
+    // Calculate table size and offsets
+    for (int i = 0; i < file_count; i++) {
+        const char* input_path = file_paths[i];
+        struct stat file_stat;
+
+        // Get base filename
+        const char* last_sep = strrchr(input_path, PATH_SEPARATOR);
+        const char* base_name = last_sep ? last_sep + 1 : input_path;
+        uint8_t name_length = strlen(base_name);
+
+        if (name_length >= MAX_FILENAME_LEN) {
+            fprintf(stderr, "Filename too long: %s\n", input_path);
+            free(table);
+            fclose(archive_file);
+            return -1;
         }
 
-        char *T = malloc(S + 1);
-        if (!T) {
-            perror("Error allocating memory");
-            break;
+        // Get file stats
+        if (stat(input_path, &file_stat) != 0) {
+            perror("Failed to get file stats");
+            free(table);
+            fclose(archive_file);
+            return -1;
         }
 
-        if (fread(T, sizeof(char), S, P) != S) {
-            perror("Error reading file name");
-            free(T);
-            break;
+        // Fill table entry
+        table[i].name_length = name_length;
+        table[i].data_size = file_stat.st_size;
+        strncpy(table[i].name, base_name, name_length);
+        
+        // First entry starts right after the table
+        if (i == 0) {
+            table[i].data_offset = sizeof(uint32_t) * 2 + sizeof(FileTableEntry) * file_count;
+        } else {
+            table[i].data_offset = table[i-1].data_offset + table[i-1].data_size;
         }
-        T[S] = '\0';
+    }
 
-        uint32_t U;
-        if (fread(&U, sizeof(uint32_t), 1, P) != 1) {
-            perror("Error reading file size");
-            free(T);
-            break;
-        }
+    // Write file table
+    table_size = sizeof(FileTableEntry) * file_count;
+    if (fwrite(table, sizeof(FileTableEntry), file_count, archive_file) != file_count) {
+        perror("Failed to write file table");
+        free(table);
+        fclose(archive_file);
+        return -1;
+    }
 
-        char *V = malloc(U);
-        if (!V) {
-            perror("Error allocating memory");
-            free(T);
-            break;
-        }
-
-        if (fread(V, sizeof(char), U, P) != U) {
-            perror("Error reading file data");
-            free(T);
-            free(V);
-            break;
-        }
-
-        char W[FNAME_LEN];
-        if (snprintf(W, sizeof(W), "%s/%s", O, T) >= sizeof(W)) {
-            fprintf(stderr, "Error: file path too long\n");
-            free(T);
-            free(V);
-            break;
+    // 3. Second pass - write actual file data
+    for (int i = 0; i < file_count; i++) {
+        const char* input_path = file_paths[i];
+        FILE* input_file = fopen(input_path, "rb");
+        if (!input_file) {
+            perror("Failed to open input file");
+            continue;
         }
 
-        FILE *X = fopen(W, "wb");
-        if (X) {
-            if (fwrite(V, sizeof(char), U, X) != U) {
-                perror("Error writing file data");
+        char* buffer = malloc(table[i].data_size);
+        if (!buffer) {
+            perror("Failed to allocate memory");
+            fclose(input_file);
+            continue;
+        }
+
+        if (fread(buffer, 1, table[i].data_size, input_file) != table[i].data_size) {
+            perror("Failed to read file data");
+            free(buffer);
+            fclose(input_file);
+            continue;
+        }
+
+        if (fwrite(buffer, 1, table[i].data_size, archive_file) != table[i].data_size) {
+            perror("Failed to write file data");
+        }
+
+        free(buffer);
+        fclose(input_file);
+    }
+
+    // 4. Update header with actual table size
+    fseek(archive_file, sizeof(uint32_t), SEEK_SET);
+    if (fwrite(&table_size, sizeof(uint32_t), 1, archive_file) != 1) {
+        perror("Failed to update table size");
+    }
+
+    free(table);
+    fclose(archive_file);
+    printf("Successfully packed %d files into %s\n", file_count, archive_path);
+    return 0;
+}
+
+// Extract all files from archive
+int extract_archive(const char* archive_path, const char* output_dir) {
+    FILE* archive_file = fopen(archive_path, "rb");
+    if (!archive_file) {
+        perror("Failed to open archive file");
+        return -1;
+    }
+
+    // Read header
+    uint32_t file_count, table_size;
+    if (fread(&file_count, sizeof(uint32_t), 1, archive_file) != 1 ||
+        fread(&table_size, sizeof(uint32_t), 1, archive_file) != 1) {
+        perror("Failed to read header");
+        fclose(archive_file);
+        return -1;
+    }
+
+    // Read file table
+    FileTableEntry* table = malloc(table_size);
+    if (!table) {
+        perror("Failed to allocate file table");
+        fclose(archive_file);
+        return -1;
+    }
+
+    if (fread(table, 1, table_size, archive_file) != table_size) {
+        perror("Failed to read file table");
+        free(table);
+        fclose(archive_file);
+        return -1;
+    }
+
+    // Extract files
+    for (uint32_t i = 0; i < file_count; i++) {
+        // Create output path
+        char output_path[MAX_FILENAME_LEN * 2];
+        snprintf(output_path, sizeof(output_path), "%s/%s", output_dir, table[i].name);
+
+        // Seek to file data
+        if (fseek(archive_file, table[i].data_offset, SEEK_SET) != 0) {
+            perror("Failed to seek to file data");
+            continue;
+        }
+
+        // Read file data
+        char* file_data = malloc(table[i].data_size);
+        if (!file_data) {
+            perror("Failed to allocate memory");
+            continue;
+        }
+
+        if (fread(file_data, 1, table[i].data_size, archive_file) != table[i].data_size) {
+            perror("Failed to read file data");
+            free(file_data);
+            continue;
+        }
+
+        // Write output file
+        FILE* output_file = fopen(output_path, "wb");
+        if (output_file) {
+            if (fwrite(file_data, 1, table[i].data_size, output_file) != table[i].data_size) {
+                perror("Failed to write output file");
             }
-            fclose(X);
+            fclose(output_file);
         } else {
-            perror("Error opening output file");
+            perror("Failed to create output file");
         }
 
-        free(T);
-        free(V);
+        free(file_data);
     }
 
-    fclose(P);
-    printf("Unpacked %d files to %s\n", Q, O);
+    free(table);
+    fclose(archive_file);
+    printf("Successfully unpacked %d files to %s\n", file_count, output_dir);
+    return 0;
 }
 
-char* get_file_data_from_archive(const char *input_file, const char *file_name, uint32_t *file_size_out) {
-    FILE *f = fopen(input_file, "rb");
-    if (!f) {
-        perror("Failed to open input file");
+// Get specific file from archive by name
+FileEntry* get_file_from_archive(const char* archive_path, const char* filename) {
+    FILE* archive_file = fopen(archive_path, "rb");
+    if (!archive_file) {
+        perror("Failed to open archive file");
         return NULL;
     }
 
-    uint32_t num_files;
-    if (fread(&num_files, sizeof(uint32_t), 1, f) != 1) {
-        perror("Error reading file count");
-        fclose(f);
+    // Read header
+    uint32_t file_count, table_size;
+    if (fread(&file_count, sizeof(uint32_t), 1, archive_file) != 1 ||
+        fread(&table_size, sizeof(uint32_t), 1, archive_file) != 1) {
+        perror("Failed to read header");
+        fclose(archive_file);
         return NULL;
     }
 
-    for (uint32_t i = 0; i < num_files; i++) {
-        uint8_t name_length;
-        if (fread(&name_length, sizeof(uint8_t), 1, f) != 1) {
-            perror("Error reading file name length");
-            break;
-        }
-
-        char *current_file_name = malloc(name_length + 1);
-        if (!current_file_name) {
-            perror("Error allocating memory");
-            break;
-        }
-
-        if (fread(current_file_name, sizeof(char), name_length, f) != name_length) {
-            perror("Error reading file name");
-            free(current_file_name);
-            break;
-        }
-        current_file_name[name_length] = '\0';
-
-        uint32_t file_size;
-        if (fread(&file_size, sizeof(uint32_t), 1, f) != 1) {
-            perror("Error reading file size");
-            free(current_file_name);
-            break;
-        }
-
-        if (strcmp(current_file_name, file_name) == 0) {
-            char *buffer = malloc(file_size);
-            if (!buffer) {
-                perror("Error allocating memory");
-                free(current_file_name);
-                break;
-            }
-
-            if (fread(buffer, sizeof(char), file_size, f) != file_size) {
-                perror("Error reading file data");
-                free(buffer);
-                free(current_file_name);
-                break;
-            }
-
-            fclose(f);
-            free(current_file_name);
-            *file_size_out = file_size;
-            return buffer;
-        }
-
-        if (fseek(f, file_size, SEEK_CUR) != 0) {
-            perror("Error seeking file data");
-            free(current_file_name);
-            break;
-        }
-
-        free(current_file_name);
+    // Read file table
+    FileTableEntry* table = malloc(table_size);
+    if (!table) {
+        perror("Failed to allocate file table");
+        fclose(archive_file);
+        return NULL;
     }
 
-    printf("File '%s' not found in the archive.\n", file_name);
-    fclose(f);
-    return NULL;
+    if (fread(table, 1, table_size, archive_file) != table_size) {
+        perror("Failed to read file table");
+        free(table);
+        fclose(archive_file);
+        return NULL;
+    }
+
+    // Find requested file
+    FileEntry* entry = NULL;
+    for (uint32_t i = 0; i < file_count; i++) {
+        if (strcmp(table[i].name, filename) == 0) {
+            // Found the file - read its data
+            if (fseek(archive_file, table[i].data_offset, SEEK_SET) != 0) {
+                perror("Failed to seek to file data");
+                break;
+            }
+
+            entry = malloc(sizeof(FileEntry));
+            if (!entry) {
+                perror("Failed to allocate memory");
+                break;
+            }
+
+            entry->name = strdup(table[i].name);
+            entry->size = table[i].data_size;
+            entry->data = malloc(table[i].data_size);
+            
+            if (!entry->data || !entry->name) {
+                perror("Failed to allocate memory");
+                free_file_entry(entry);
+                entry = NULL;
+                break;
+            }
+
+            if (fread(entry->data, 1, table[i].data_size, archive_file) != table[i].data_size) {
+                perror("Failed to read file data");
+                free_file_entry(entry);
+                entry = NULL;
+            }
+
+            break;
+        }
+    }
+
+    free(table);
+    fclose(archive_file);
+    return entry;
 }

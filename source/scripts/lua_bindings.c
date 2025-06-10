@@ -8,6 +8,7 @@
 #include <lua5.3/lauxlib.h>
 #endif
 
+#include "../../include/audio.h"
 #include "../../include/variables.h"
 #include "../../include/render_character.h"
 #include "../../include/render_background.h"
@@ -25,11 +26,13 @@ int luaL_getTime(lua_State *L) {
 }
 int luaL_loadCharacter(lua_State *L) {
     load2Dcharacter((char*)luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), (Vector2){luaL_checknumber(L, 4), luaL_checknumber(L, 5)});
+    return 0;
 }
 
 int luaL_drawBackground(lua_State *L) {
     drawBackground = true;
     drawnBackgroundIndex = luaL_checkinteger(L, 1);
+    return 0;
 }
 
 int luaL_unloadBackground(lua_State *L) {
@@ -44,11 +47,23 @@ int luaL_unloadCharacter(lua_State *L) {
 
 int luaL_drawCharacter(lua_State *L) {
     drawCharacter = true;
+    return 0;
 }
 
 int luaL_getScreenWidth(lua_State *L) {
     lua_pushinteger(L, GetScreenWidth());
     return 1;
+}
+
+int luaL_playSfx(lua_State *L) {
+    printf("%s\n", "called playsfx from script");
+    playSfx((char*)luaL_checkstring(L, 1));
+    return 0;
+}
+
+int luaL_stopSfx(lua_State *L) {
+    stopSfx();
+    return 0;
 }
 
 int luaL_getScreenHeight(lua_State *L) {
@@ -87,7 +102,46 @@ int luaL_dialogBox(lua_State* L)
     return 0;
 }
 
+int luaL_loadScript(lua_State *L) {
+    resetAllValues();
+    char* luaExec = (char*)luaL_checkstring(L, 1);
+    printf("Executing next Lua file: %s\n", luaExec);
+    if (luaL_dofile(L, luaExec) != LUA_OK)
+    {
+        printf("lua error\n");
+        printf("%s\n", lua_tostring(L, -1));
+        return 1;
+    }
+    return 0;
+}
+
+int luaL_loadMusic(lua_State *L) {
+    loadMusic((char*)luaL_checkstring(L, 1));
+    return 0;
+}
+
+int luaL_playMusic(lua_State *L) {
+    playMusic();
+    return 0;
+}
+
+int luaL_stopMusic(lua_State *L) {
+    stopMusic();
+    return 0;
+}
+
+int luaL_unloadMusic(lua_State *L) {
+    unloadMusic();
+    return 0;
+}
+
 int luaL_registration(lua_State *L) {
+    lua_register(L, "loadMusic", &luaL_loadMusic);
+    lua_register(L, "playMusic", &luaL_playMusic);
+    lua_register(L, "playSfx", &luaL_playSfx);
+    lua_register(L, "stopSfx", &luaL_stopSfx);
+    lua_register(L, "stopMusic", &luaL_stopMusic);
+    lua_register(L, "unloadMusic", &luaL_unloadMusic);
     lua_register(L, "load2Dtexture", &luaL_loadBackground);
     lua_register(L, "dialogBox", &luaL_dialogBox);
     lua_register(L, "getScreenWidth", &luaL_getScreenWidth);
@@ -95,10 +149,12 @@ int luaL_registration(lua_State *L) {
     lua_register(L, "unload2Dcharacter", &luaL_unloadCharacter);
     lua_register(L, "getScreenHeight", &luaL_getScreenHeight);
     lua_register(L, "getTime", &luaL_getTime);
+    lua_register(L, "loadScript", &luaL_loadScript);
     lua_register(L, "load2Dcharacter", &luaL_loadCharacter);
     lua_register(L, "isDialogExecuted", &luaL_isDialogExecuted);
     lua_register(L, "draw2Dtexture", &luaL_drawBackground);
     lua_register(L, "draw2Dcharacter", &luaL_drawCharacter);
+    return 0;
 }
 
 void luaInit(char* luaExec)

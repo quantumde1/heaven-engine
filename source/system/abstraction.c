@@ -2,6 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "../../include/abstraction.h"
+
+#include <raylib.h>
+
 char* concat_strings(const char* str1, const char* str2) {
     char* result = malloc(strlen(str1) + strlen(str2) + 1);
     

@@ -6,6 +6,7 @@
 #include "../../include/render_character.h"
 #include "../../include/render_background.h"
 #include "../../include/lua_bindings.h"
+#include "../../include/audio.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,8 +26,10 @@ int main() {
     luaInit(concat_strings(PREFIX, "scripts/00_script.lua"));
     #ifdef _arch_dreamcast
     while (true) {
+        initAudioSystem();
     #else
     while (!WindowShouldClose()) {
+        UpdateMusicStream(BGM);
     #endif
         BeginDrawing();
         ClearBackground(WHITE);
@@ -42,4 +45,7 @@ int main() {
         }
         EndDrawing();
     }
+    #ifdef _arch_dreamcast
+    shutdownAudioSystem();
+    #endif
 }
