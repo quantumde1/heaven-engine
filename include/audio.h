@@ -12,5 +12,4 @@ void stopSfx();
 
 #ifdef _arch_dreamcast
 void initAudioSystem();
-void shutdownAudioSystem();
 #endif

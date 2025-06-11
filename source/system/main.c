@@ -7,6 +7,7 @@
 #include "../../include/render_background.h"
 #include "../../include/lua_bindings.h"
 #include "../../include/audio.h"
+#include "../../include/menus.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,11 +21,12 @@ int main() {
     #ifndef _arch_dreamcast
     InitAudioDevice();
     #endif
+    bool menuDraw = false;
     SetTargetFPS(60);
     Font fontDialogBox = LoadFont(concat_strings(PREFIX, "res/font_en.png"));
     #ifdef _arch_dreamcast
+    initAudioSystem();
     while (true) {
-        initAudioSystem();
     #else
     while (!WindowShouldClose()) {
         UpdateMusicStream(BGM);
@@ -32,9 +34,16 @@ int main() {
         if (luaReload == true) {
             luaInit();
         }
-        BeginDrawing();
-        ClearBackground(WHITE);
+        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) {
+            if (menuDraw == false) {
+                menuDraw = true;
+            } else {
+                menuDraw = false;
+            }
+        }
         luaEventLoop();
+        BeginDrawing();
+        ClearBackground(BLACK);
         if (drawBackground == true) {
             draw2Dbackground(drawnBackgroundIndex);
         }
@@ -44,9 +53,9 @@ int main() {
         if (showDialog == true) {
             displayDialog(pages, pagesLength, -1, fontDialogBox, &showDialog, typingSpeed);
         }
+        if (menuDraw == true) {
+            gameMenu();
+        }
         EndDrawing();
     }
-    #ifdef _arch_dreamcast
-    shutdownAudioSystem();
-    #endif
 }

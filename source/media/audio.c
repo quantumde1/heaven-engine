@@ -16,9 +16,8 @@
 #include <adx/adx.h> /* ADX Decoder Library */
 #include <adx/snddrv.h> /* Direct Access to Sound Driver */
 
-#include <stdatomic.h>  // Для атомарных операций (если доступно)
+#include <stdatomic.h>
 
-// Заменяем int на atomic_int для thread-safety
 atomic_int playbackNeeded = 0;
 atomic_int sfxNeeded = 0;
 
@@ -31,19 +30,17 @@ static uint8_t sfx_volume = 255;
 static int sfx_pan = CENTER;
 
 static void* audio_thread(void *filename) {
-    while (atomic_load(&playbackNeeded)) {  // Проверяем флаг атомарно
+    while (atomic_load(&playbackNeeded)) {
         if (adx_dec(concat_strings(PREFIX, (char*)filename), 1) < 1) {
             printf("Error: invalid ADX");
             return NULL;
         }
 
-        // Ждём инициализации драйвера
         while (snddrv.drv_status == SNDDRV_STATUS_NULL) {
             thd_pass();
-            if (!atomic_load(&playbackNeeded)) return NULL;  // Выход, если остановлено
+            if (!atomic_load(&playbackNeeded)) return NULL;
         }
 
-        // Ждём завершения воспроизведения (с проверкой флага)
         while (snddrv.drv_status != SNDDRV_STATUS_NULL) {
             thd_sleep(50);
             if (!atomic_load(&playbackNeeded)) {
@@ -62,11 +59,11 @@ void loadMusic(char* filename) {
 }
 
 void playMusic() {
-    atomic_store(&playbackNeeded, 1);  // Атомарная установка флага
+    atomic_store(&playbackNeeded, 1);
 }
 
 void stopMusic() {
-    atomic_store(&playbackNeeded, 0);  // Атомарная установка флага
+    atomic_store(&playbackNeeded, 0);
 }
 
 void unloadMusic() {
@@ -75,40 +72,24 @@ void unloadMusic() {
 
 void playSfx(char* filename) {
     printf("%s\n", "sfx called in audio.c");
-    FILE *file = fopen(concat_strings(PREFIX, filename), "r");
-    if (file != NULL) {
-        printf("%s\n", "loading sfx");
-        // Load new SFX
-        current_sfx = snd_sfx_load(concat_strings( PREFIX, filename ));
-        if(current_sfx) {
-            snd_sfx_play(current_sfx, sfx_volume, sfx_pan);
-        }
-    } else {
-        printf("%s\n", "No such file or directory");
+    printf("%s\n", "loading sfx");
+    // Load new SFX
+    current_sfx = snd_sfx_load(concat_strings( PREFIX, filename ));
+    if(current_sfx) {
+        snd_sfx_play(current_sfx, sfx_volume, sfx_pan);
     }
 }
 
 void stopSfx() {
-    if(current_sfx) {
-        snd_sfx_stop(current_sfx);
-        snd_sfx_unload(current_sfx);
-    }
+    printf("%s\n", "Stopping sfx");
+    snd_sfx_stop(current_sfx);
+    printf("%s\n", "Unloading sfx");
+    snd_sfx_unload(current_sfx);
 }
 
 void initAudioSystem() {
     // Initialize sound system
     snd_init();
-}
-
-void shutdownAudioSystem() {
-    // Cleanup SFX
-    if(current_sfx) {
-        snd_sfx_unload(current_sfx);
-        current_sfx = 0;
-    }
-    
-    // Shutdown sound system
-    snd_shutdown();
 }
 
 #else

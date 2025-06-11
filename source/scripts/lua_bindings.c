@@ -17,6 +17,9 @@
 #include <string.h>
 
 int luaL_loadBackground(lua_State *L) {
+    for (int i = 0; i < backgrounds.length; i++) {
+        UnloadTexture(backgrounds.data[i]);
+    }
     load2Dbackground((char*)luaL_checkstring(L, 1), luaL_checkinteger(L, 2));
     return 0;
 }
@@ -33,6 +36,9 @@ int luaL_unloadCharacter(lua_State *L) {
 }
 
 int luaL_drawCharacter(lua_State *L) {
+    for (int i = 0; i < characterTexture.length; i++) {
+        UnloadTexture(characterTexture.data[i].texture);
+    }
     load2Dcharacter((char*)luaL_checkstring(L, 1), luaL_checknumber(L, 5), luaL_checknumber(L, 4), (Vector2){luaL_checknumber(L, 2), luaL_checknumber(L, 3)});
     drawCharacter = true;
     return 0;
