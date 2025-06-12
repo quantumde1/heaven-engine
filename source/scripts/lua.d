@@ -35,7 +35,8 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
 {
     showDialog = true;
     luaL_checktype(L, 2, LUA_TTABLE);
-
+    choicePage = cast(int)luaL_checkinteger(L, 4);
+    
     int textTableLength = cast(int) lua_objlen(L, 2);
     messageGlobal = new string[](textTableLength); 
 
@@ -45,7 +46,6 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
         lua_pop(L, 1);
     }
 
-    pageChoice_glob = cast(int) luaL_checkinteger(L, 4);
     luaL_checktype(L, 5, LUA_TTABLE);
     int choicesLength = cast(int) lua_objlen(L, 5);
     choices = new string[choicesLength];
@@ -65,7 +65,7 @@ extern (C) nothrow int luaL_dialogBox(lua_State* L)
 
 extern (C) nothrow int luaL_getAnswerValue(lua_State* L)
 {
-    lua_pushinteger(L, answerIndex);
+    lua_pushinteger(L, selectedChoice);
     return 1;
 }
 
@@ -76,7 +76,7 @@ extern (C) nothrow int luaL_isDialogExecuted(lua_State *L) {
 
 extern (C) nothrow int luaL_dialogAnswerValue(lua_State* L)
 {
-    lua_pushinteger(L, answerIndex);
+    lua_pushinteger(L, selectedChoice);
     return 1;
 }
 
@@ -154,13 +154,6 @@ extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
 
 extern (C) nothrow int luaL_stopDraw2Dcharacter(lua_State* L)
 {
-    for (int i = 0; i < characterTextures.length; i++)
-    {
-        characterTextures[i].texture = LoadTexture("empty");
-        characterTextures[i].scale = 0.0f;
-        characterTextures[i].x = 0;
-        characterTextures[i].y = 0;
-    }
     int count = cast(int) luaL_checkinteger(L, 1);
     UnloadTexture(characterTextures[count].texture);
     neededCharacterDrawing = false;

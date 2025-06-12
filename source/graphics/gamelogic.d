@@ -86,6 +86,6 @@ void vnLogic()
     }
     playUIAnimation(framesUI);
     if (showDialog) {
-        displayDialog(messageGlobal, pageChoice_glob, textFont, &showDialog, typingSpeed);
+        displayDialog(messageGlobal, choices, selectedChoice, choicePage, textFont, &showDialog, typingSpeed);
     }
 }

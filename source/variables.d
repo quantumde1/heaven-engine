@@ -10,7 +10,7 @@ extern (C) char* get_file_data_from_archive(const char *input_file, const char *
 void resetAllScriptValues() {
     import scripts.config : debug_writeln;
     debug_writeln("Resetting all values!");
-    answerIndex = 0;
+    selectedChoice = 0;
     characterTextures = [];
     backgrounds = [];
 }
@@ -123,9 +123,7 @@ int button;
 
 int selectedChoice = 0;
 
-int pageChoice_glob;
-
-int answerIndex;
+int choicePage;
 
 int currentFrame = 0;
 

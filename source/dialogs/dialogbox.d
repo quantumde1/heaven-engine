@@ -12,7 +12,7 @@ int currentPage = 0;
 float textDisplayProgress = 0.0f;
 bool textFullyDisplayed = false;
 
-void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDialog, float textSpeed) {
+void displayDialog(string[] pages, string[] choices, ref int selectedChoice, int choicePage, Font dialogFont, bool *showDialog, float textSpeed) {
     int pagesLength = cast(int)pages.length;
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -113,7 +113,28 @@ void displayDialog(string[] pages, int choicePage, Font dialogFont, bool *showDi
             screenHeight / 3
         );
     }
+    if (currentPage == choicePage) {
+        
+        // Обработка выбора ответа (вверх/вниз)
+        if (IsKeyPressed(KeyboardKey.KEY_DOWN)) {
+            selectedChoice = cast(int)((selectedChoice + 1) % choices.length);
+        }
+        if (IsKeyPressed(KeyboardKey.KEY_UP)) {
+            selectedChoice = cast(int)((selectedChoice - 1 + choices.length) % choices.length);
+        }
     
+        for (int i = 0; i < choices.length; i++) {
+            Color color = (i == selectedChoice) ? Colors.YELLOW : Colors.WHITE; 
+            DrawTextEx(
+                dialogFont,
+                toStringz(choices[i]),
+                Vector2(marginLeft, 40 + marginTop + i * 60),
+                fontSize,
+                spacing,
+                color
+            );
+        }
+    }
     if (currentPage >= pagesLength) {
         currentPage = 0;
         textDisplayProgress = 0.0f;
