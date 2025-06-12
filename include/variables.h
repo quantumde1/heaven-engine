@@ -74,3 +74,11 @@ extern bool luaReload;
 extern char* luaExec;
 
 void resetAllValues();
+
+extern int dialogAnswerValue;
+
+extern int dialogAnswerPage;
+
+extern char** dialogAnswers;
+
+extern int dialogAnswerLength;

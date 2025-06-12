@@ -96,9 +96,15 @@ int luaL_dialogBox(lua_State* L)
     showDialog = 1;
     luaL_checktype(L, 2, LUA_TTABLE);
 
+    dialogAnswerPage = luaL_checkinteger(L, 6);
+    
     size_t textTableLength = (size_t)luaL_len(L, 2);
     pages = (char**)malloc(textTableLength * sizeof(char*));
     pagesLength = textTableLength;
+
+    size_t answersTableLength = (size_t)luaL_len(L, 5);
+    dialogAnswers = (char**)malloc(answersTableLength * sizeof(char*));
+    dialogAnswerLength = answersTableLength;
 
     for (int i = 0; i < textTableLength; i++) {
         lua_rawgeti(L, 2, i + 1);
@@ -107,14 +113,26 @@ int luaL_dialogBox(lua_State* L)
         lua_pop(L, 1);
     }
 
-    luaL_checktype(L, 5, LUA_TTABLE);
-    
+    for (int i = 0; i < answersTableLength; i++) {
+        lua_rawgeti(L, 5, i + 1);
+        const char* str = luaL_checkstring(L, -1);
+        dialogAnswers[i] = strdup(str);
+        printf("Dialog answer is %s\n", dialogAnswers[i]);
+        printf("Page is %d\n", dialogAnswerPage);
+        lua_pop(L, 1);
+    }
+
     if (lua_gettop(L) == 7)
     {
         typingSpeed = (float)luaL_checknumber(L, 7);
     }
 
     return 0;
+}
+
+int luaL_getAnswerValue(lua_State *L) {
+    lua_pushinteger(L, dialogAnswerValue);
+    return 1;
 }
 
 int luaL_loadScript(lua_State *L) {
@@ -152,6 +170,7 @@ int luaL_registration(lua_State *L) {
     lua_register(L, "stopSfx", &luaL_stopSfx);
     lua_register(L, "stopMusic", &luaL_stopMusic);
     lua_register(L, "unloadMusic", &luaL_unloadMusic);
+    lua_register(L, "getAnswerValue", &luaL_getAnswerValue);
     lua_register(L, "load2Dtexture", &luaL_loadBackground);
     lua_register(L, "dialogBox", &luaL_dialogBox);
     lua_register(L, "getScreenWidth", &luaL_getScreenWidth);

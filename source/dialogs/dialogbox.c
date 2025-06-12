@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "../../include/variables.h"
 int currentPage = 0;
 float textDisplayProgress = 0.0f;
 bool textFullyDisplayed = false;
@@ -59,13 +59,10 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
     strncpy(displayedText, currentText, charsToShow);
     displayedText[charsToShow] = '\0';
     
-    // Проверяем, помещается ли текст с текущим размером шрифта
     bool textFits = false;
     float testFontSize = fontSize;
-    int maxLines = 4; // Максимальное количество строк, которое мы хотим
-    
-    // Пытаемся найти подходящий размер шрифта
-    while (!textFits && testFontSize > 14.0f) { // Минимальный размер шрифта 15
+    int maxLines = 4;
+    while (!textFits && testFontSize > 14.0f) {
         const char* testText = displayedText;
         int testLineCount = 0;
         bool fits = true;
@@ -120,11 +117,10 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
             textFits = true;
             fontSize = testFontSize;
         } else {
-            testFontSize -= 2.0f; // Уменьшаем размер шрифта на 2 пункта
+            testFontSize -= 2.0f;
         }
     }
     
-    // Рисуем текст с выбранным размером шрифта
     const char* remainingText = displayedText;
     char** lines = NULL;
     int lineCount = 0;
@@ -172,9 +168,29 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
         remainingText += fitChars;
     }
     
-    // Ограничиваем количество отображаемых строк
     int linesToShow = lineCount > maxLines ? maxLines : lineCount;
+    if (currentPage == choicePage) {
+        
+        // Обработка выбора ответа (вверх/вниз)
+        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+            dialogAnswerValue = (dialogAnswerValue + 1) % dialogAnswerLength;
+        }
+        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+            dialogAnswerValue = (dialogAnswerValue - 1 + dialogAnswerLength) % dialogAnswerLength;
+        }
     
+        for (int i = 0; i < dialogAnswerLength; i++) {
+            Color color = (i == dialogAnswerValue) ? YELLOW : WHITE; 
+            DrawTextEx(
+                dialogFont,
+                dialogAnswers[i],
+                (Vector2){marginLeft, 40 + marginTop + i * 30},
+                fontSize,
+                spacing,
+                color
+            );
+        }
+    }
     for (int i = 0; i < linesToShow; i++) {
         DrawTextEx(
             dialogFont,
@@ -187,7 +203,6 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
         free(lines[i]);
     }
     
-    // Освобождаем память, если были дополнительные строки
     for (int i = linesToShow; i < lineCount; i++) {
         free(lines[i]);
     }

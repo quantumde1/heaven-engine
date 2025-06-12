@@ -33,12 +33,11 @@ static void* audio_thread(void *filename) {
     while (atomic_load(&playbackNeeded)) {
         if (adx_dec(concat_strings(PREFIX, (char*)filename), 1) < 1) {
             printf("Error: invalid ADX");
-            return NULL;
+            break;
         }
 
         while (snddrv.drv_status == SNDDRV_STATUS_NULL) {
             thd_pass();
-            if (!atomic_load(&playbackNeeded)) return NULL;
         }
 
         while (snddrv.drv_status != SNDDRV_STATUS_NULL) {
@@ -46,12 +45,13 @@ static void* audio_thread(void *filename) {
             if (!atomic_load(&playbackNeeded)) {
                 adx_stop();
                 printf("stopping playback");
-                return NULL;
+                break;
             }
         }
     }
     return NULL;
 }
+
 
 void loadMusic(char* filename) {
     printf("Init audio playback");

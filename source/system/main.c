@@ -51,7 +51,7 @@ int main() {
             draw2Dcharacter();
         }
         if (showDialog == true) {
-            displayDialog(pages, pagesLength, -1, fontDialogBox, &showDialog, typingSpeed);
+            displayDialog(pages, pagesLength, dialogAnswerPage, fontDialogBox, &showDialog, typingSpeed);
         }
         if (menuDraw == true) {
             gameMenu();

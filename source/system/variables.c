@@ -9,7 +9,7 @@ void resetAllValues() {
 
 CharacterTextureArray characterTexture = {0};
 Texture2DArray backgrounds = {0};
-char** pages = {};
+char** pages = { };
 bool showDialog = false;
 lua_State *L = NULL;
 
@@ -27,3 +27,11 @@ bool luaReload = true;
 
 char* luaExec = "scripts/00_script.lua";
 int pagesLength;
+
+int dialogAnswerLength;
+
+int dialogAnswerValue = 0;
+
+int dialogAnswerPage = -1;
+
+char** dialogAnswers = { };
