@@ -8,12 +8,14 @@ case "$1" in
         source /opt/toolchains/dc/kos/environ.sh
         ## if working, go next, otherwise idk
         make -f makefiles/dreamcastMakefile
-        rm heaven.cdi
-	    sh-elf-objcopy -R .stack -O binary heaven.elf output.bin
-        $KOS_BASE/utils/scramble/scramble output.bin 1ST_READ.bin
-        mkisofs -joliet-long -C 0,11702 -V "heaven_engine" -G IP.BIN -r -J -l -o ../heaven.iso ./
-        cdi4dc ../heaven.iso heaven.cdi
-        rm ../heaven.iso
+        mkdcdisc -e heaven.elf -o heaven.cdi -d res -d scripts
+        ;;
+    "dc")
+        ## lets try to source default kos toolchain placement
+        source /opt/toolchains/dc/kos/environ.sh
+        ## if working, go next, otherwise idk
+        make -f makefiles/dreamcastMakefile
+        mkdcdisc -e heaven.elf -o heaven.cdi -d res -d scripts
         ;;
     "desktop")
         ## going without anything, lmao

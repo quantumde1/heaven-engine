@@ -6,7 +6,7 @@ KOS_ROMDISK_DIR = romdisk
 
 INCLUDES := -I$(PWD)/include -I.
 
-KOS_CFLAGS += -I${KOS_PORTS}/include/stb_image -I. -lADX -llua
+KOS_CFLAGS += -I${KOS_PORTS}/include/stb_image -I. -lADX -llua -lkosutils
 
 all: rm-elf $(TARGET)
 
@@ -19,7 +19,7 @@ rm-elf:
 	-rm -f $(TARGET) romdisk.*
 
 $(TARGET): $(OBJS)
-	kos-cc -o $(TARGET) $(OBJS) -lraylib -lGL -lkosutils  $(INCLUDES) -g -lADX -llua
+	kos-cc -o $(TARGET) $(OBJS) -lraylib -lGL -lkosutils  $(INCLUDES) -g -lADX -llua 
 
 run: $(TARGET)
 	$(KOS_LOADER) $(TARGET)

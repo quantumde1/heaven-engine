@@ -26,7 +26,7 @@ atomic_int sfxNeeded = 0;
 #define CENTER 255
 #define RIGHT 255
 static sfxhnd_t current_sfx = 0;
-static uint8_t sfx_volume = 255;
+
 static int sfx_pan = CENTER;
 
 static void* audio_thread(void *filename) {

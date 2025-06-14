@@ -2,6 +2,7 @@
 #include <lua/lua.h>
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
+#include <kos.h>
 #else
 #include <lua5.3/lua.h>
 #include <lua5.3/lualib.h>
@@ -13,6 +14,7 @@
 #include "../../include/variables.h"
 #include "../../include/render_character.h"
 #include "../../include/render_background.h"
+#include "../../include/vmu.h"
 
 #include <string.h>
 
@@ -72,6 +74,9 @@ int luaL_getScreenWidth(lua_State *L) {
 
 int luaL_playSfx(lua_State *L) {
     printf("%s\n", "called playsfx from script");
+    if (lua_gettop(L) == 2) {
+        sfx_volume = luaL_checkinteger(L, 2)+155;
+    }
     playSfx((char*)luaL_checkstring(L, 1));
     return 0;
 }
@@ -96,7 +101,7 @@ int luaL_dialogBox(lua_State* L)
     showDialog = 1;
     luaL_checktype(L, 2, LUA_TTABLE);
 
-    dialogAnswerPage = luaL_checkinteger(L, 6);
+    dialogAnswerPage = luaL_checkinteger(L, 4);
     
     size_t textTableLength = (size_t)luaL_len(L, 2);
     pages = (char**)malloc(textTableLength * sizeof(char*));

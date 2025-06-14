@@ -14,6 +14,13 @@ void drawSnakeAnimation(int rectX, int rectY, int rectWidth, int rectHeight);
 void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFont, bool* showDialog, float textSpeed) {
     int screenWidth = 640;
     int screenHeight = 480;
+    if (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+        currentPage = 0;
+        textDisplayProgress = 0.0f;
+        textFullyDisplayed = false;
+        *showDialog = false;
+        return;
+    }
     DrawRectangle(
         0,
         screenHeight - screenHeight / 3,

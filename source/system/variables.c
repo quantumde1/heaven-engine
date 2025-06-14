@@ -35,3 +35,5 @@ int dialogAnswerValue = 0;
 int dialogAnswerPage = -1;
 
 char** dialogAnswers = { };
+
+uint8_t sfx_volume = 255; //default value
