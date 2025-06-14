@@ -14,7 +14,7 @@ void drawSnakeAnimation(int rectX, int rectY, int rectWidth, int rectHeight);
 void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFont, bool* showDialog, float textSpeed) {
     int screenWidth = 640;
     int screenHeight = 480;
-    if (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+    if (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || IsKeyDown(KEY_LEFT_CONTROL)) {
         currentPage = 0;
         textDisplayProgress = 0.0f;
         textFullyDisplayed = false;
@@ -179,10 +179,12 @@ void displayDialog(char** pages, int pagesLength, int choicePage, Font dialogFon
     if (currentPage == choicePage) {
         
         // Обработка выбора ответа (вверх/вниз)
-        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
+        IsKeyPressed(KEY_DOWN)) {
             dialogAnswerValue = (dialogAnswerValue + 1) % dialogAnswerLength;
         }
-        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP) ||
+        IsKeyPressed(KEY_UP)) {
             dialogAnswerValue = (dialogAnswerValue - 1 + dialogAnswerLength) % dialogAnswerLength;
         }
     

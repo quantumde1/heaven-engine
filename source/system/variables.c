@@ -25,7 +25,7 @@ Music BGM;
 
 bool luaReload = true;
 
-char* luaExec = "scripts/00_script.lua";
+char* luaExec = "scripts/save_loader.lua";
 int pagesLength;
 
 int dialogAnswerLength;
@@ -37,3 +37,5 @@ int dialogAnswerPage = -1;
 char** dialogAnswers = { };
 
 uint8_t sfx_volume = 255; //default value
+
+char* currentFile = "save_loader.lua";

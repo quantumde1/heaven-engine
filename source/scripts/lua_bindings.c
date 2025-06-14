@@ -167,9 +167,26 @@ int luaL_unloadMusic(lua_State *L) {
     return 0;
 }
 
+int luaL_setCurrentFile(lua_State *L) {
+    currentFile = luaL_checkstring(L, 1);
+    write_entry(currentFile);
+    return 0;
+}
+
+int luaL_getSavedScriptFile(lua_State *L) {
+    currentFile = read_entry();
+    if (currentFile) {
+        printf("Loaded data: %s\n", currentFile);
+    }
+    lua_pushstring(L, currentFile);
+    return 1;
+}
+
 int luaL_registration(lua_State *L) {
     lua_register(L, "loadMusic", &luaL_loadMusic);
     lua_register(L, "playVideo", &luaL_playVideo);
+    lua_register(L, "setSaveFile", &luaL_setCurrentFile);
+    lua_register(L, "getSaveFile", &luaL_getSavedScriptFile);
     lua_register(L, "playMusic", &luaL_playMusic);
     lua_register(L, "playSfx", &luaL_playSfx);
     lua_register(L, "stopSfx", &luaL_stopSfx);

@@ -84,3 +84,5 @@ extern char** dialogAnswers;
 extern int dialogAnswerLength;
 
 extern uint8_t sfx_volume;
+
+extern char* currentFile;
