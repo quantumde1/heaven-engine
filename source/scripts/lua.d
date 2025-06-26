@@ -131,18 +131,16 @@ extern (C) nothrow int luaL_unload2Dbackground(lua_State* L)
 extern (C) nothrow int luaL_load2Dcharacter(lua_State *L) {
     try
     {
-        int count = cast(int) luaL_checkinteger(L, 5);
+        int count = cast(int) luaL_checkinteger(L, 2);
 
         if (count >= characterTextures.length)
         {
             characterTextures.length = count + 1;
         }
         characterTextures[count].texture = LoadTexture(luaL_checkstring(L, 1));
-        characterTextures[count].x = cast(int) luaL_checkinteger(L, 2);
-        characterTextures[count].y = cast(int) luaL_checkinteger(L, 3);
-        characterTextures[count].scale = luaL_checknumber(L, 4);
         characterTextures[count].width = characterTextures[count].texture.width;
         characterTextures[count].height = characterTextures[count].texture.height;
+        characterTextures[count].drawTexture = false;
     }
     catch (Exception e) {
     }
@@ -151,15 +149,29 @@ extern (C) nothrow int luaL_load2Dcharacter(lua_State *L) {
 
 extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
 {
-    neededCharacterDrawing = true;
+    try {
+        int count = to!int(luaL_checkinteger(L, 4));
+        characterTextures[count].scale = luaL_checknumber(L, 3);
+        characterTextures[count].y = cast(int) luaL_checkinteger(L, 2);
+        characterTextures[count].x = cast(int) luaL_checkinteger(L, 1);
+        characterTextures[count].drawTexture = true;
+        debugWriteln("Count: ", count, " drawTexture cond: ", characterTextures[count].drawTexture);
+    } catch (Exception e) {
+        
+    }
     return 0;
 }
 
 extern (C) nothrow int luaL_stopDraw2Dcharacter(lua_State* L)
 {
     int count = cast(int) luaL_checkinteger(L, 1);
+    characterTextures[count].drawTexture = false;
+    return 0;
+}
+
+extern (C) nothrow int luaL_unload2Dcharacter(lua_State *L) {
+    int count = cast(int) luaL_checkinteger(L, 1);
     UnloadTexture(characterTextures[count].texture);
-    neededCharacterDrawing = false;
     return 0;
 }
 
@@ -405,6 +417,7 @@ extern (C) nothrow void luaL_loader(lua_State* L)
     lua_register(L, "load2Dcharacter", &luaL_load2Dcharacter);
     lua_register(L, "draw2Dcharacter", &luaL_draw2Dcharacter);
     lua_register(L, "stopDraw2Dcharacter", &luaL_stopDraw2Dcharacter);
+    lua_register(L, "unload2Dcharacter", &luaL_unload2Dcharacter);
     lua_register(L, "load2Dtexture", &luaL_load2Dbackground);
     lua_register(L, "draw2Dtexture", &luaL_draw2Dbackground);
     lua_register(L, "unload2Dtexture", &luaL_unload2Dbackground);

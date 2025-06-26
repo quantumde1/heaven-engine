@@ -47,9 +47,9 @@ void effectsLogic()
         camera.target.y += (cameraTargetY - camera.target.y) * delta;
         camera.zoom += (cameraTargetZoom - camera.zoom) * delta;
 
-        if (fabs(camera.target.x - cameraTargetX) < 0.8f &&
-            fabs(camera.target.y - cameraTargetY) < 0.8f &&
-            fabs(camera.zoom - cameraTargetZoom) < 0.09f) {
+        if (fabs(camera.target.x - cameraTargetX) < 5.0f &&
+            fabs(camera.target.y - cameraTargetY) < 5.0f &&
+            fabs(camera.zoom - cameraTargetZoom) < 0.5f) {
             isCameraMoving = false;
         }
     }
@@ -63,10 +63,9 @@ void backgroundLogic() {
                 float) backgroundTexture.height), Rectangle(0, 0, cast(float) GetScreenWidth(), cast(
                 float) GetScreenHeight()), Vector2(0, 0), 0.0, Colors.WHITE);
     }
-    if (neededCharacterDrawing)
+    for (int i = 0; i < characterTextures.length; i++)
     {
-        for (int i = 0; i < characterTextures.length; i++)
-        {
+        if (characterTextures[i].drawTexture == true) {
             float centeredX = characterTextures[i].x - (characterTextures[i].width * characterTextures[i].scale / 2);
             float centeredY = characterTextures[i].y - (characterTextures[i].height * characterTextures[i].scale / 2);
             

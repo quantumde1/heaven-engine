@@ -12,7 +12,8 @@ int currentPage = 0;
 float textDisplayProgress = 0.0f;
 bool textFullyDisplayed = false;
 
-void displayDialog(string[] pages, string[] choices, ref int selectedChoice, int choicePage, Font dialogFont, bool *showDialog, float textSpeed) {
+void displayDialog(string[] pages, string[] choices, ref int selectedChoice, int choicePage, Font dialogFont, 
+bool *showDialog, float textSpeed) {
     int pagesLength = cast(int)pages.length;
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -128,7 +129,7 @@ void displayDialog(string[] pages, string[] choices, ref int selectedChoice, int
             DrawTextEx(
                 dialogFont,
                 toStringz(choices[i]),
-                Vector2(marginLeft, 40 + marginTop + i * 60),
+                Vector2(marginLeft, 60 + marginTop + i * 40),
                 fontSize,
                 spacing,
                 color

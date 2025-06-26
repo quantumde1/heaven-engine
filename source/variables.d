@@ -34,6 +34,7 @@ struct SystemSettings {
 }
 
 struct CharacterTexture {
+    bool drawTexture;
     float width;
     float height;
     float x;
