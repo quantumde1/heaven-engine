@@ -6,7 +6,8 @@ import raylib;
 import variables;
 import graphics.effects;
 import std.conv;
-import scripts.config;
+import system.abstraction;
+import system.config;
 import std.string;
 import graphics.engine;
 import graphics.playback;
@@ -127,8 +128,7 @@ extern (C) nothrow int luaL_unload2Dbackground(lua_State* L)
 
 /* character textures */
 
-extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
-{
+extern (C) nothrow int luaL_load2Dcharacter(lua_State *L) {
     try
     {
         int count = cast(int) luaL_checkinteger(L, 5);
@@ -143,12 +143,15 @@ extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
         characterTextures[count].scale = luaL_checknumber(L, 4);
         characterTextures[count].width = characterTextures[count].texture.width;
         characterTextures[count].height = characterTextures[count].texture.height;
+    }
+    catch (Exception e) {
+    }
+    return 0;
+}
 
-        neededCharacterDrawing = true;
-    }
-    catch (Exception e)
-    {
-    }
+extern (C) nothrow int luaL_draw2Dcharacter(lua_State* L)
+{
+    neededCharacterDrawing = true;
     return 0;
 }
 
@@ -217,20 +220,42 @@ extern (C) nothrow int luaL_playVideo(lua_State* L)
 
 /* ui animations */
 
-extern (C) nothrow int luaL_loadUIAnimation(lua_State *L) {
+extern (C) nothrow int luaL_moveCamera(lua_State *L) {
     try {
-    framesUI = loadAnimationFramesUI("res/uifx/"~to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2)));
-    if (lua_gettop(L) == 3) {
-        frameDuration = luaL_checknumber(L, 3);
-        debug debug_writeln("frameDuration: ", frameDuration);
-    }
+        float targetX = cast(float) luaL_checknumber(L, 1);
+        float targetY = cast(float) luaL_checknumber(L, 2);
+        float zoom = cast(float) luaL_optnumber(L, 3, 1.0f);
+        float speed = cast(float) luaL_optnumber(L, 4, 5.0f);
+        cameraTargetX = targetX;
+        cameraTargetY = targetY;
+        cameraTargetZoom = zoom;
+        cameraMoveSpeed = speed;
+        isCameraMoving = true;
     } catch (Exception e) {
     }
     return 0;
 }
 
+extern (C) nothrow int luaL_isCameraMoving(lua_State *L) {
+    lua_pushboolean(L, isCameraMoving);
+    return 1;
+}
+
+extern (C) nothrow int luaL_loadUIAnimation(lua_State *L) {
+    try {
+        framesUI = loadAnimationFramesUI("res/uifx/"~to!string(luaL_checkstring(L, 1)), to!string(luaL_checkstring(L, 2)));
+        if (lua_gettop(L) == 3) {
+            frameDuration = luaL_checknumber(L, 3);
+            debug debugWriteln("frameDuration: ", frameDuration);
+        }
+    } catch (Exception e) {
+
+    }
+    return 0;
+}
+
 extern (C) nothrow int luaL_playUIAnimation(lua_State *L) {
-    debug debug_writeln("Animation UI start");
+    debug debugWriteln("Animation UI start");
     try {
         playAnimation = true;
     } catch (Exception e) {
@@ -241,7 +266,7 @@ extern (C) nothrow int luaL_playUIAnimation(lua_State *L) {
 
 extern (C) nothrow int luaL_stopUIAnimation(lua_State *L) {
     playAnimation = false;
-    debug debug_writeln("Animation UI stop");
+    debug debugWriteln("Animation UI stop");
     frameDuration = 0.016f;
     currentFrame = 0;
     return 0;
@@ -293,7 +318,7 @@ extern (C) nothrow int luaL_2dModeDisable(lua_State* L)
 extern (C) nothrow int luaL_setGameFont(lua_State* L)
 {
     const char* x = luaL_checkstring(L, 1);
-    debug_writeln("Setting custom font: ", x.to!string);
+    debugWriteln("Setting custom font: ", x.to!string);
     int[512] codepoints = 0;
     foreach (i; 0 .. 95)
     {
@@ -367,6 +392,8 @@ extern (C) nothrow void luaL_loader(lua_State* L)
     lua_register(L, "playAnimationUI", &luaL_playUIAnimation);
     lua_register(L, "stopAnimationUI", &luaL_stopUIAnimation);
     lua_register(L, "unloadAnimationUI", &luaL_unloadUIAnimation);
+    lua_register(L, "moveCamera", &luaL_moveCamera);
+    lua_register(L, "isCameraMoving", &luaL_isCameraMoving);
     lua_register(L, "playVideo", &luaL_playVideo);
     lua_register(L, "loadMusic", &luaL_LoadMusic);
     lua_register(L, "playMusic", &luaL_PlayMusic);
@@ -375,6 +402,7 @@ extern (C) nothrow void luaL_loader(lua_State* L)
     lua_register(L, "stopSfx", &luaL_stopSfx);
     lua_register(L, "Begin2D", &luaL_2dModeEnable);
     lua_register(L, "End2D", &luaL_2dModeDisable);
+    lua_register(L, "load2Dcharacter", &luaL_load2Dcharacter);
     lua_register(L, "draw2Dcharacter", &luaL_draw2Dcharacter);
     lua_register(L, "stopDraw2Dcharacter", &luaL_stopDraw2Dcharacter);
     lua_register(L, "load2Dtexture", &luaL_load2Dbackground);
@@ -387,4 +415,32 @@ extern (C) nothrow void luaL_loader(lua_State* L)
     lua_register(L, "getScreenWidth", &luaL_getScreenWidth);
     lua_register(L, "isKeyPressed", &luaL_isKeyPressed);
     lua_register(L, "getLanguage", &luaL_getUsedLanguage);
+}
+
+int luaInit(string luaExec)
+{
+    debugWriteln("loading Lua");
+    L = luaL_newstate();
+    luaL_openlibs(L);
+    luaL_loader(L);
+    debugWriteln("Executing next Lua file: ", luaExec);
+    if (std.file.exists(luaExec) == false) {
+        debugWriteln("Script file not found! Exiting.");
+        return EngineExitCodes.EXIT_FILE_NOT_FOUND;
+    }
+    if (luaL_dofile(L, toStringz(luaExec)) != LUA_OK) {
+        debugWriteln("Lua error: ", to!string(lua_tostring(L, -1)));
+        return EngineExitCodes.EXIT_SCRIPT_ERROR;
+    }
+    return EngineExitCodes.EXIT_OK;
+}
+
+void luaEventLoop()
+{
+    lua_getglobal(L, "EventLoop");
+    if (lua_pcall(L, 0, 0, 0) != LUA_OK)
+    {
+        debug debugWriteln("Error in EventLoop: ", to!string(lua_tostring(L, -1)));
+    }
+    lua_pop(L, 0);
 }

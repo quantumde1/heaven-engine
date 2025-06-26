@@ -10,8 +10,8 @@ import core.thread;
 import variables;
 import core.sync.mutex;
 import std.array;
-import scripts.config;
 import std.file;
+import system.abstraction;
 
 extern (C)
 {
@@ -124,7 +124,7 @@ extern (C) void end_vlc_rendering(void* data, void* id, void* p_pixels)
 extern (C) void videoEndCallback(void* data)
 {
     videoFinished = true;
-    debug debug_writeln("Video ended");
+    debug debugWriteln("Video ended");
 }
 
 Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* protocol)
@@ -132,7 +132,7 @@ Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* p
     auto video = cast(Video*) malloc(Video.sizeof);
     if (video is null)
     {
-        debug debug_writeln("Failed to allocate memory for video.");
+        debug debugWriteln("Failed to allocate memory for video.");
         return null;
     }
 
@@ -140,7 +140,7 @@ Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* p
     auto location = cast(char*) malloc(strlen(protocol) + strlen(src) + 3);
     if (location is null)
     {
-        debug debug_writeln("Failed to allocate memory for location.");
+        debug debugWriteln("Failed to allocate memory for location.");
         free(video);
         return null;
     }
@@ -151,7 +151,7 @@ Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* p
 
     if (media is null)
     {
-        debug debug_writeln("Failed to create media.");
+        debug debugWriteln("Failed to create media.");
         free(video);
         return null;
     }
@@ -161,7 +161,7 @@ Video* add_new_video(libvlc_instance_t* libvlc, const(char)* src, const(char)* p
 
     if (video.player is null)
     {
-        debug debug_writeln("Failed to create media player.");
+        debug debugWriteln("Failed to create media player.");
         free(video);
         return null;
     }
@@ -217,7 +217,7 @@ extern (C) int playVideoInternal(char* argv)
     auto libvlc = libvlc_new(cast(int) vlcArgs.length, cast(const(char)**) vlcArgs.ptr);
     if (libvlc is null)
     {
-        debug debug_writeln("Something went wrong with libvlc init. Turn on DEBUG in conf/build_type.conf at BUILD_TYPE field to get more logs.");
+        debug debugWriteln("Something went wrong with libvlc init. Turn on DEBUG in conf/build_type.conf at BUILD_TYPE field to get more logs.");
         videoFinished = true;
         return 0;
     }
@@ -232,14 +232,14 @@ extern (C) int playVideoInternal(char* argv)
 
     video_list ~= new_video;
     libvlc_media_player_play(new_video.player);
-    debug debug_writeln("Video started playing");
+    debug debugWriteln("Video started playing");
     while (!WindowShouldClose())
     {
         auto player = new_video.player;
 
         if (libvlc_media_player_get_state(player) == libvlc_state_t.libvlc_Ended)
         {
-            debug debug_writeln("Video reached end.");
+            debug debugWriteln("Video reached end.");
             videoFinished = true;
         }
 
@@ -290,7 +290,7 @@ extern (C) int playVideoInternal(char* argv)
                             video.buffer = cast(ubyte*) MemAlloc(video.texW * video.texH * 3);
                             video.needUpdate = false;
                             video.mutex.unlock();
-                            debug debug_writeln("Video texture initialized");
+                            debug debugWriteln("Video texture initialized");
                         }
                     }
                 }

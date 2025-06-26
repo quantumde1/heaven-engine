@@ -4,12 +4,12 @@ module variables;
 import std.typecons;
 import raylib;
 import bindbc.lua;
+import system.abstraction;
 
 extern (C) char* get_file_data_from_archive(const char *input_file, const char *file_name, uint *file_size_out);
 
 void resetAllScriptValues() {
-    import scripts.config : debug_writeln;
-    debug_writeln("Resetting all values!");
+    debugWriteln("Resetting all values!");
     selectedChoice = 0;
     characterTextures = [];
     backgrounds = [];
@@ -17,7 +17,14 @@ void resetAllScriptValues() {
 
 /* system */
 
-struct ControlConfig {
+enum EngineExitCodes {
+    EXIT_FILE_NOT_FOUND = 2,
+    EXIT_SCRIPT_ERROR = 3,
+    EXIT_OK = 0,
+}
+
+struct SystemSettings {
+    int sound_state;
     char right_button;
     char left_button;
     char back_button;
@@ -49,9 +56,11 @@ enum GameState {
     Exit
 }
 
+Camera2D camera;
+
 CharacterTexture[] characterTextures;
 
-ControlConfig controlConfig;
+SystemSettings systemSettings;
 
 InterfaceAudio audio;
 
@@ -80,9 +89,11 @@ bool videoFinished;
 
 bool neededDraw2D;
 
+bool isCameraMoving;
+
 bool neededCharacterDrawing;
 
-bool showDialog = false;
+bool showDialog;
 
 bool isTextFullyDisplayed;
 
@@ -103,6 +114,14 @@ char* musicPath;
 
 
 /* floats */
+
+float cameraTargetX = 0;
+
+float cameraTargetY = 0;
+
+float cameraTargetZoom = 1.0f;
+
+float cameraMoveSpeed = 5.0f;
 
 float frameDuration = 0.016f;
 

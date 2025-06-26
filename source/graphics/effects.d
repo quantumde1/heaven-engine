@@ -4,8 +4,10 @@ import raylib;
 import std.stdio;
 import variables;
 import std.string;
-import scripts.config;
+import system.abstraction;
+import system.config;
 import std.algorithm;
+import system.abstraction;
 
 int screenWidth;
 int screenHeight;
@@ -20,22 +22,22 @@ Texture2D[] loadAnimationFramesUI(const string archivePath, const string animati
     {
         string frameFileName = format("%s-%03d.png", animationName, frameIndex);
         uint image_size;
-        debug debug_writeln(frameFileName);
+        debug debugWriteln(frameFileName);
         char* image_data = get_file_data_from_archive(toStringz(archivePath),
                 toStringz(frameFileName), &image_size);
         if (image_data == null)
         {
-            debug debug_writeln("exiting from load anim UI");
+            debug debugWriteln("exiting from load anim UI");
             break;
         }
         Image image = LoadImageFromMemory(".PNG", cast(const(ubyte)*) image_data, image_size);
         Texture2D texture = LoadTextureFromImage(image);
         UnloadImage(image);
         frames ~= texture;
-        debug debug_writeln("Loaded frame for UI ", frameIndex, " - ", frameFileName);
+        debug debugWriteln("Loaded frame for UI ", frameIndex, " - ", frameFileName);
         frameIndex++;
     }
-    debug debug_writeln("Frames for ui animations length: ", frames.length);
+    debug debugWriteln("Frames for ui animations length: ", frames.length);
     return frames;
 }
 
@@ -71,7 +73,7 @@ void playUIAnimation(Texture2D[] frames)
 Sound sfx;
 
 void playSfx(string filename) {
-    debug debug_writeln("Loading & playing SFX");
+    debug debugWriteln("Loading & playing SFX");
     sfx = LoadSound(filename.toStringz());
     PlaySound(sfx);
 }

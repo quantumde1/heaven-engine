@@ -2,12 +2,12 @@
 	"authors": [
 		"quantumde1"
 	],
-	"copyright": "Copyright © 2024, quantumde1",
+	"copyright": "Copyright © 2025, quantumde1",
 	"dependencies": {
 		"bindbc-lua": "~>0.6.1",
 		"raylib-d": "~>5.5.1"
 	},
-	"description": "Engine with Raylib in D, for Sky game",
+	"description": "Engine on Dlang for visual novels",
 	"lflags-linux": [
 		"-rpath=/usr/lib",
 		"-rpath=$$ORIGIN"
@@ -40,7 +40,7 @@
 		"vlc"
 	],
 	"license": "MIT License",
-	"name": "heaven-engine",
+	"name": "himmel-engine",
 	"subConfigurations": {
 		"bindbc-lua": "static"
 	},

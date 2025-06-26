@@ -9,7 +9,8 @@ import graphics.playback;
 import variables;
 import std.file;
 import std.string;
-import scripts.config;
+import system.abstraction;
+import system.config;
 import std.conv;
 
 void main(string[] args)
@@ -23,13 +24,14 @@ void main(string[] args)
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     luaExec = "scripts/00_script.lua";
-    if (args.length > 2)
+    if (args.length > 1)
     {
+        writeln("!!!If needed, there is first argument for choosing script to execute.!!!");
         luaExec = getcwd().to!string ~ "/" ~ args[1];
-        engine_loader("made in heaven", screenWidth, screenHeight, args[2].to!bool);
+        engine_loader("tief blau", screenWidth, screenHeight);
     }
     else
     {
-        engine_loader("made in heaven", screenWidth, screenHeight, false);
+        engine_loader("tief blau", screenWidth, screenHeight);
     }
 }

@@ -3,7 +3,8 @@ module ui.menu;
 import raylib;
 import variables;
 import std.stdio;
-import scripts.config;
+import system.abstraction;
+import system.config;
 import core.time;
 import core.thread;
 import std.string;
@@ -76,35 +77,49 @@ void renderLogo(float alpha, immutable(char)* name, bool fullscreen)
 
 void helloScreen()
 {
-    fadeEffect(0.0f, true, (float alpha) {
-        renderText(alpha, "powered by\n\nHeaven Engine");
-    });
-
-    fadeEffect(2.0f, false, (float alpha) {
-        renderText(alpha, "powered by\n\nHeaven Engine");
-    });
-    /*
-    fadeEffect(0.0f, true, (float alpha) {
-        renderLogo(alpha, "atlus_logo.png".toStringz, true);
-    });
-    
-    fadeEffect(fadeAlpha, false, (float alpha) {
-        renderLogo(alpha, "atlus_logo.png".toStringz, true);
-    });
-    */
-    // Play Opening Video
-    BeginDrawing();
-    debug debug_writeln("searching for video");
-    if (std.file.exists(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"))
+    debug
     {
-        debug debug_writeln("video found, playing");
-        playVideo("/res/videos/soul_OP.moflex.mp4");
+        bool play = false;
+        debugWriteln("hello screen showing");
+        if (play == false)
+        {
+            videoFinished = true;
+            goto debug_lab;
+        }
     }
     else
-    {
-        debug debug_writeln("video not found, skipping");
-        videoFinished = true;
+        {
+        fadeEffect(0.0f, true, (float alpha) {
+            renderText(alpha, "powered by\n\nHimmel Engine");
+        });
+
+        fadeEffect(2.0f, false, (float alpha) {
+            renderText(alpha, "powered by\n\nHimmel Engine");
+        });
+        /*
+        fadeEffect(0.0f, true, (float alpha) {
+            renderLogo(alpha, "atlus_logo.png".toStringz, true);
+        });
+        
+        fadeEffect(fadeAlpha, false, (float alpha) {
+            renderLogo(alpha, "atlus_logo.png".toStringz, true);
+        });
+        */
+        // Play Opening Video
+        BeginDrawing();
+        debug debugWriteln("searching for video");
+        if (std.file.exists(getcwd() ~ "/res/videos/soul_OP.moflex.mp4"))
+        {
+            debug debugWriteln("video found, playing");
+            playVideo("/res/videos/soul_OP.moflex.mp4");
+        }
+        else
+        {
+            debug debugWriteln("video not found, skipping");
+            videoFinished = true;
+        }
     }
+    debug_lab:
 }
 
 MenuState initMenuState()
@@ -331,7 +346,7 @@ void showMainMenu(ref GameState currentGameState)
 
                 cleanupMenu(state);
                 currentGameState = GameState.InGame;
-                debug debug_writeln("getting into game...");
+                debug debugWriteln("getting into game...");
                 return;
 
             case MENU_ITEM_EXIT:
