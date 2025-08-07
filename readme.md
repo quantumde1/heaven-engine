@@ -1,3 +1,5 @@
+# :warning: Heaven is not developed anymore. Consider moving to [Himmel](https://underlevel.ddns.net/git/quantumde1/Himmel_Engine) if visual novels enough for you. :warning:
+
 # JRPG Engine, called as... meido in Hebun!
 
 ![build passing](https://github.com/quantumde1/heaven-engine/actions/workflows/main.yml/badge.svg?event=push)
